@@ -1,9 +1,9 @@
 # Timelog
 
-* PROJECT NAME
-* YOUR NAME
-* STUDENT_ID
-* SUPERVISOR NAME
+* Carbon Emissions Estimation in Edge Cloud Computing Simulations
+* James Nurdin
+* 2570809n
+* Lauritz Thamsen 
 
 ## Guidance
 
@@ -13,14 +13,11 @@
 * Follow the structure provided, grouping time by weeks.  Quantise time to the half hour.
 
 ## Week 1
+### 15 Sep 2023
+* *0.5 Hours* Inital email interaction with Lauritz confirming an inital meeting of the 28th and arranging subsequent meetings moving onwards, recieved an inital collection of material to cover prior to the meeting
 
-### 19 Oct 2019
+## Week 2 
+### 18th September 2023
+* *2 Hours* Inital reading of project guidance notes in preperation for online meeting on the 21st
+* *1 Hour* Creation of GitLab repoisitory and uploading of the project template to the repo 
 
-* *4 hours* Read the project guidance notes
-* *0.5 hour* Created GitLab repository and cloned the cookiecutter for the projects
-* *1 hour* Modified dissertation template, compiled  
-
-## 20 Oct 2019
-
-* *1 hour* meeting with supervisor
-* *2 hours* writing initial version of test harness
