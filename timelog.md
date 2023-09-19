@@ -18,6 +18,7 @@
 
 ## Week 2 
 ### 18th September 2023
-* *2 Hours* Inital reading of project guidance notes in preperation for online meeting on the 21st
+* *0.5 Hours* Inital quick reading of project guidance notes in preperation for online meeting on the 21st
 * *1 Hour* Creation of GitLab repoisitory and uploading of the project template to the repo 
+* *1 Hour* Installing and setup of necessary LaTeX files
 
