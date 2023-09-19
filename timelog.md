@@ -21,4 +21,7 @@
 * *0.5 Hours* Inital quick reading of project guidance notes in preperation for online meeting on the 21st
 * *1 Hour* Creation of GitLab repoisitory and uploading of the project template to the repo 
 * *1 Hour* Installing and setup of necessary LaTeX files
-
+### 19th September 2023
+* *0.5 Hours* Resolved issues regarding the status file and building the pdf file.
+* *1 Hour* Watched Wim Vanderbauwhede's talk on "Low carbon computing: Context, vision and challenges"
+* *1 Hour* Watched Lauritz Thamsen's talk on "Scheduling and Placement for Low-Carbon Edge/Cloud Computing"
