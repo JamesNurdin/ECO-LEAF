@@ -27,4 +27,8 @@
 * *1.5 Hours* Watched Lauritz Thamsen's talk on "Scheduling and Placement for Low-Carbon Edge/Cloud Computing"
 ### 20th September 2023
 * *1 Hour* Watched Noman Bashir's talk on Ecovisor: A Virtual Energy System for Carbon-Efficient Applications
-* *1 Hour* Read LEAF: Simulating Large Energy-Aware Fog Computing Environments
+* *1 Hour* Read and highlighted LEAF: Simulating Large Energy-Aware Fog Computing Environments
+### 21st September 2023
+* *1 Hour* Read and highlighted Cucumber: Renewable-Aware Admission Control for Delay-Tolerant Cloud and Edge Workloads 
+* *2 Hours* Attended Project Meeting for level 4 Students
+* *1 Hour*  Read and highlighted Towards a Staging Environment for the Internet of Things
