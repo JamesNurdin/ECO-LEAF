@@ -38,3 +38,5 @@
 ### 26th September 2023
 * *1.5 Hours* Gone through the CIT Servicetalk presentation
 * *1 Hour* Downloaded both versions of LEAF in preperation for tommorows intial meeting and arranged some inital questions
+### 27th September 2023
+* *1 Hour* Attended the first supervisor meeting with Laurtiz and updated the minutes log on Moodle
