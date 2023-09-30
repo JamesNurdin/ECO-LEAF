@@ -40,3 +40,5 @@
 * *1 Hour* Downloaded both versions of LEAF in preperation for tommorows intial meeting and arranged some inital questions
 ### 27th September 2023
 * *1 Hour* Attended the first supervisor meeting with Laurtiz and updated the minutes log on Moodle
+### 29h September 2023
+* *2 Hours* Explored the current version of LEAF and attempted an inital version of my own example in preperation for the meeting next Wednesday, explored using the carbon intensity API to retreive real time carbon intensities and to calcualte a carbon emission using the grid 
