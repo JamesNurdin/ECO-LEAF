@@ -45,4 +45,5 @@
 ### 30th October 2023
 * *1 Hour* Read and highlighted the email document sent from Lauritz and the relevant sections
 ### 1st October 2023
-* *2 Hours* Continued on with exploring the LEAF architecture and continued working on my own example, in particular created two linked nodes so far with power monitors between them, plan to create a custom application that uses these nodes as a source and sink.
+* *1.5 Hours* Continued on with exploring the LEAF architecture and finished working on my own example using the two provided ones for help, in particular created two linked nodes so far with power monitors between them, plan to create a custom application that uses these nodes as a source and sink.
+* *1 Hour* changed the model to reflect a more advanced infrastructure and application, also introduced error catchment when pulling national grid carbon intensities
