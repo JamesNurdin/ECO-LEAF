@@ -49,3 +49,4 @@
 * *1 Hour* changed the model to reflect a more advanced infrastructure and application, also introduced error catchment when pulling national grid carbon intensities
 ### 2nd October 2023
 * *1 Hour* Started on the presentation for Lauritz to show progress of this weeks work, also showing him my understanding of the LEAF API, in preperation I also went over the LEAF paper and API
+* *0.5 Hours* Planned a quick timeline to how the following weeks should proceed as
