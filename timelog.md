@@ -50,3 +50,5 @@
 ### 2nd October 2023
 * *1 Hour* Started on the presentation for Lauritz to show progress of this weeks work, also showing him my understanding of the LEAF API, in preperation I also went over the LEAF paper and API
 * *0.5 Hours* Planned a quick timeline to how the following weeks should proceed as
+### 3rd October 2023
+* *1.5 Hours* Finished the powerpoint presentation in preparation for the meeting tomorrow, sent it to Lauritz to review beforehand along with the custom example that was worked on.
