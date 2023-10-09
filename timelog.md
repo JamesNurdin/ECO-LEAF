@@ -55,4 +55,8 @@
 ### 4th October 2023
 * *1 Hour* Met with Lauritz and presented the PowerPoint demonstrating the work done, discussed the work to get done by next meeting and concluded that the PowerPoints aren't needed and shouldnt be prioritised but can be used during meetings to help workflow. In addition to this recorded the minutes and updated the respective moodle page.
 ### 7th October 2023
-* *3 Hours* Researched three valid data sets for the three main power sources that will be used to reference potential power models in the project, the three are the UK power grid, Ireland's offshore wind generation and a various sites of London with solar energy readings  
+* *3 Hours* Researched three valid data sets for the three main power sources that will be used to reference potential power models in the project, the three are the UK power grid, Ireland's offshore wind generation and a various sites of London with solar energy readings.  
+### 8th October 2023
+* *2 Hours* Inital research and exploring into the background for the accurate example; idea will be a smart home that has various sensors and interactions and automations, also looked into accurate running costs for these nodes and the likelyhood of various interactions i.e. automation for lighting that is wired, whilst a random and wiresless interaction with a doorbell etc.
+### 9th October 2023
+* *2 Hours* Started planning on a potential working example by choosing what will be automated and will execute at regular intervals along with what may happen at random and planned a basic house layout, plan to include various nodes that all connect to a centralised smart hub that operates as an edge node of the network
