@@ -74,4 +74,4 @@
 
 ## Week 5
 ### 17th October 2023
-* *4 Hours* Carried out work on the example in particular setting up the infrastructure of the example
+* *5 Hours* Carried out work on the example in particular setting up the infrastructure of the example and working on the application, still need to iron out a few bugs
