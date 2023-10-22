@@ -77,3 +77,7 @@
 * *5 Hours* Carried out work on the example in particular setting up the infrastructure of the example and working on the application, still need to iron out a few bugs
 ### 19th October 2023
 * *0.5 Hours* Sent off the emal updating Lauritz on the progress made this week, recieved an email back with him mentioning and to read the paper: https://www.acm.org/publications/policies/artifact-review-badging to familiarise myself with how the ACM define repeatability, reproducibility, and replicability. Besides that I will continue on with the work set out. 
+### 22nd October 2023
+* *0.5 Hours* Read the ACM document titled Artifact Review and Badging following Lauritz's suggestion for repeating experiments 
+* *1.5 Hours* Fixed a bug with the cluster power model not updating properly
+* *2 Hours* Started work on movement of clients and the application of processes 
