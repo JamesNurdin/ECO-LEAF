@@ -81,3 +81,7 @@
 * *0.5 Hours* Read the ACM document titled Artifact Review and Badging following Lauritz's suggestion for repeating experiments 
 * *1.5 Hours* Fixed a bug with the cluster power model not updating properly
 * *2 Hours* Started work on movement of clients and the application of processes 
+
+## wEEK 6
+### 23rd October 2023
+* *1.5 Hour* Continued work implementing mobility to clients
