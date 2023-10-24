@@ -85,3 +85,6 @@
 ## wEEK 6
 ### 23rd October 2023
 * *1.5 Hour* Continued work implementing mobility to clients
+### 24th October 2023
+* *2 Hours* Continued working with the mobility of clients, instead of a path for the moment clients are placed randomly on the graph and stay there for the time being, I am having issues with the application of cluster clients and placing the application after each iteration
+* *4 Hours* Took a break from the example and started work on the extended leaf application, in particular articulated how the extention of power sources could theortically work, will wait till tomorrow and get Lauritz's thoughts towards it before fully starting on it 
