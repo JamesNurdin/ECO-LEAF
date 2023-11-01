@@ -82,9 +82,20 @@
 * *1.5 Hours* Fixed a bug with the cluster power model not updating properly
 * *2 Hours* Started work on movement of clients and the application of processes 
 
-## wEEK 6
+## week 6
 ### 23rd October 2023
 * *1.5 Hour* Continued work implementing mobility to clients
 ### 24th October 2023
 * *2 Hours* Continued working with the mobility of clients, instead of a path for the moment clients are placed randomly on the graph and stay there for the time being, I am having issues with the application of cluster clients and placing the application after each iteration
 * *4 Hours* Took a break from the example and started work on the extended leaf application, in particular articulated how the extention of power sources could theortically work, will wait till tomorrow and get Lauritz's thoughts towards it before fully starting on it 
+### 25th October 2023
+* *1 Hour* Had the weekly meeting with Lauritz and updated the weekly minutes for the meeting, main goal is to focus on the extended Leaf project
+### 28th October 2023
+* *3 Hours* Continued work for Extended Leaf, fully implemented the Solarpower subclass
+
+## Week 7
+### 30th October 2023
+* *3 Hours* Started work on the implemented the Windpower subclass
+### 31st October 2023
+* *2 Hours* Imported the National grid carbon intensity data and created the grid powertype
+* *3.5 Hours* implemented the power manager subclass, this class will be used to run the power sources that will capture the carbon intensity at each time frame and will coordinate with the power meters to dervie a final estimated carbon emission
