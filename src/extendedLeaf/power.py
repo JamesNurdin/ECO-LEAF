@@ -251,7 +251,7 @@ class PowerSource(ABC):
             raise AttributeError(f"No power manager was supplied")
         self.power_domain = power_domain
 
-        self.power_data = self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
+        self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
         self.next_update_time = list(self.power_data.keys())[0]
         self.update_interval = self.power_domain.get_current_time(
             list(self.power_data.keys())[1]) - self.power_domain.get_current_time(list(self.power_data.keys())[0])
@@ -268,14 +268,22 @@ class PowerSource(ABC):
     def update_carbon_intensity(self):
         """Add a node to be powered b"""
 
-    def _retrieve_power_data(self, data_set_filename: str, start_time: str = None) -> dict:
+    def _retrieve_power_data(self, data_set_filename: str, start_time: str = None):
         if start_time is None:
             raise ValueError(f"Error no start time is provided")
+        # find the file path we want
+        current_script_path = os.path.abspath(__file__)
+        target_directory = "LEAF"
+        # Navigate upwards from the current script path until you find the target directory
+        base_directory = current_script_path
+        while not base_directory.endswith(target_directory):
+            base_directory = os.path.dirname(base_directory)
+        abs_file_path = os.path.join(base_directory + "\dataSets", data_set_filename)
+
         # this data we will capture then will add at the end
         data_before_start = {}
         start_found = False
         power_data = {}
-        abs_file_path = os.path.join(os.getcwd(), data_set_filename)
         try:
             with open(abs_file_path, mode='r', encoding='utf-8-sig') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
@@ -294,16 +302,21 @@ class PowerSource(ABC):
             print(f"Error: {data_set_filename} does not exist.")
         if not start_found:
             raise ValueError(f"Error: Start time {start_time} was not found in data")
-        return power_data
+        self.power_data = power_data
 
 
 class PowerDomain:
 
-    def __init__(self, env: Environment, start_time_str: str = "00:00:00",
-                 associated_nodes=None, update_interval=1, power_source_events: [(str, (Callable[[], None], []))] = None):
+    def __init__(self, env: Environment, name=None ,start_time_str: str = "00:00:00", associated_nodes=None, update_interval=1,
+                 power_source_events: [(str, (Callable[[], None], []))] = None, smart_node_distribution: bool = True):
         self.env = env
+        if name is None:
+           raise ValueError(f"Error: Power  Domain was not supplied a name")
+        else:
+            self.name = name
         self.power_sources = []
-        self.carbon_omitted = []
+        self.carbon_emitted = []
+        self.smart_node_distribution = smart_node_distribution
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
@@ -341,7 +354,8 @@ class PowerDomain:
             for current_power_source in [power_source for power_source in self.power_sources if power_source is not None]:
                 current_dictionary = {}
 
-                self.update_node_distribution(current_power_source)
+                if self.smart_node_distribution:
+                    self.update_node_distribution(current_power_source)
 
                 if (env.now+self.start_time_index) >= self.get_current_time(current_power_source.next_update_time):
                     current_power_source.get_next_update_time()
@@ -361,12 +375,16 @@ class PowerDomain:
 
                 current_dictionary["Total Carbon Released"] = carbon_currently_released
                 current_carbon_intensities[current_power_source.name] = current_dictionary
+                logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
+                             f"{current_power_source.name} released {carbon_currently_released} gCO2")
             self.update_carbon_intensity(current_carbon_intensities, self.update_interval)
 
             for node in self.associated_nodes:
                 if node.power_model.power_source is None:
                     raise ValueError(f"Error: no power source found for node {node} at time {self.env.now}")
 
+            logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
+                         f"{self.name} released {carbon_currently_released} gCO2")
             yield env.timeout(self.update_interval)
 
     def update_node_distribution(self, current_power_source):
@@ -381,7 +399,7 @@ class PowerDomain:
     def update_renewable_power_source(self, total_current_power, current_power_source):
         for node in self.associated_nodes:
             current_node_power_requirement = int(node.power_model.measure())
-
+            print( self.associated_nodes)
             """Check if node is currently being powered by the desired node"""
             if node.power_model.power_source == current_power_source:
                 if total_current_power < current_node_power_requirement:
@@ -458,16 +476,15 @@ class PowerDomain:
     def calculate_carbon_released(self, power_used, carbon_intensity):
         return int(power_used) * (10**-3) * float(carbon_intensity)
 
-    def update_carbon_intensity(self, increment_data, repeats):
+    def update_carbon_intensity(self, increment_data,repeats):
         increment_total_carbon_omitted = 0
         for increment in increment_data.values():
             increment_total_carbon_omitted += increment["Total Carbon Released"]
         for i in range(repeats):
-            self.carbon_omitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
-            print(f"current time:{self.convert_to_time_string(self.env.now+self.start_time_index+i)} {increment_data}")
+            self.carbon_emitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
 
-    def return_total_carbon_omissions(self) -> int:
-        return sum(self.carbon_omitted)
+    def return_total_carbon_emissions(self) -> int:
+        return sum(self.carbon_emitted)
 
     def add_node(self, node):
         if node in self.associated_nodes:
@@ -490,7 +507,7 @@ class PowerDomain:
 
 class SolarPower(PowerSource):
 
-    SOLAR_DATASET_FILENAME = "../dataSets/08-08-2020 Glasgow pv data.csv"
+    SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, data_set_filename: str = SOLAR_DATASET_FILENAME,
                  power_domain: PowerDomain = None, name: str = "Solar", priority: int = 0):
@@ -539,7 +556,7 @@ class SolarPower(PowerSource):
 
 class WindPower(PowerSource):
 
-    WIND_DATASET_FILENAME = "../dataSets/01-01-2023 Ireland wind data.csv"
+    WIND_DATASET_FILENAME = "01-01-2023 Ireland wind data.csv"
 
     def __init__(self, env: Environment, data_set_filename: str = WIND_DATASET_FILENAME,
                  power_domain: PowerDomain = None, name: str = "Wind", priority: int = 0):
@@ -581,7 +598,7 @@ class WindPower(PowerSource):
 
 class GridPower(PowerSource):
 
-    GRID_DATASET_FILENAME = "../dataSets/08-08-2023 national carbon intensity.csv"
+    GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
 
     def __init__(self, env: Environment, data_set_filename: str = GRID_DATASET_FILENAME,
                  power_domain: PowerDomain = None, name: str = "Grid", priority: int = 0):
