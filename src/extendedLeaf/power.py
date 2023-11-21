@@ -304,6 +304,7 @@ class PowerDomain:
         self.env = env
         self.power_sources = []
         self.carbon_omitted = []
+
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
         if associated_nodes is None:
@@ -336,9 +337,9 @@ class PowerDomain:
             when an update needs to occur should we carry it out, in particular we call update
             environment which will correctly ensure that nodes are updated after this has happened
             the next update period is found"""
-            current_dictionary = {}
-            current_carbon_intensities = []
+            current_carbon_intensities = {}
             for current_power_source in [power_source for power_source in self.power_sources if power_source is not None]:
+                current_dictionary = {}
 
                 self.update_node_distribution(current_power_source)
 
@@ -346,12 +347,20 @@ class PowerDomain:
                     current_power_source.get_next_update_time()
 
                 """Record respective power readings this interval"""
+                carbon_currently_released = 0
+
                 for node in current_power_source.nodes_being_powered:
-                    node_data = {"Power Used": node.power_model.measure(),
-                                 "Carbon Intensity": current_power_source.get_current_carbon_intensity(),
-                                 "Power Source": current_power_source.name}
+                    power_used = node.power_model.measure()
+                    carbon_intensity = current_power_source.get_current_carbon_intensity()
+                    carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
+                    node_data = {"Power Used": power_used,
+                                 "Carbon Intensity": carbon_intensity,
+                                 "Carbon Released": carbon_released}
+                    carbon_currently_released += carbon_released
                     current_dictionary[node.name] = node_data
-                current_carbon_intensities.append(current_dictionary)
+
+                current_dictionary["Total Carbon Released"] = carbon_currently_released
+                current_carbon_intensities[current_power_source.name] = current_dictionary
             self.update_carbon_intensity(current_carbon_intensities, self.update_interval)
 
             for node in self.associated_nodes:
@@ -446,16 +455,18 @@ class PowerDomain:
             if self.power_sources[counter] is not None:
                 self.power_sources[counter].priority = counter
 
-    def update_carbon_intensity(self, node_data, repeats):
-        increment_total_carbon_omitted = 0
-        for increment in node_data:
-            for node in increment.values():
-                current_node_carbon_omitted = int(node["Power Used"]) * (10**-3) * int(node["Carbon Intensity"])
-                increment_total_carbon_omitted += current_node_carbon_omitted
-        for _ in range(repeats):
-            self.carbon_omitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
+    def calculate_carbon_released(self, power_used, carbon_intensity):
+        return int(power_used) * (10**-3) * float(carbon_intensity)
 
-    def calculate_total_carbon_omissions(self) -> int:
+    def update_carbon_intensity(self, increment_data, repeats):
+        increment_total_carbon_omitted = 0
+        for increment in increment_data.values():
+            increment_total_carbon_omitted += increment["Total Carbon Released"]
+        for i in range(repeats):
+            self.carbon_omitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
+            print(f"current time:{self.convert_to_time_string(self.env.now+self.start_time_index+i)} {increment_data}")
+
+    def return_total_carbon_omissions(self) -> int:
         return sum(self.carbon_omitted)
 
     def add_node(self, node):
