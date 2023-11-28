@@ -32,18 +32,6 @@ class City:
         for traffic_light in self.infrastructure.nodes(type_filter=TrafficLight):
             self.orchestrator.place(traffic_light.application)
 
-    def add_taxi_and_start_v2i_app(self, taxi: Taxi):
-        """Cars are connected to all traffic light systems in range via WiFi.
-
-        Note: This initial allocation may change during simulation since taxis are mobile.
-        """
-        self.infrastructure.add_link(LinkWifiTaxiToTrafficLight(taxi, self._closest_traffic_light(taxi)))
-        self.orchestrator.place(taxi.application)
-
-    def remove_taxi_and_stop_v2i_app(self, taxi: Taxi):
-        taxi.application.deallocate()
-        self.infrastructure.remove_node(taxi)
-
     def _add_traffic_light(self, location: Location):
         """Traffic lights are connected to the cloud via WAN and to other traffic lights in range via WiFi."""
         cloud: Cloud = self.infrastructure.nodes(type_filter=Cloud)[0]

@@ -5,7 +5,7 @@ from extended_Examples.custom_federated_learning_example.mobility import Mobilit
 from extended_Examples.custom_federated_learning_example.university import City
 import simpy
 from extended_Examples.custom_federated_learning_example.settings import *
-from extendedLeaf.power import PowerMeter, GridPower, SolarPower, PowerDomain
+from extendedLeaf.power import PowerMeter, GridPower, SolarPower, PowerDomain, NodeDistributor
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -25,7 +25,7 @@ def main():
     mobility_manager.run(env, local_site)
 
     power_domain = PowerDomain(env, name="Power Domain1", associated_nodes=local_site.infrastructure.nodes(), start_time_str="11:00:00",
-                               update_interval=1, smart_node_distribution=False)
+                               update_interval=1)
     grid_power = GridPower(env, power_domain=power_domain,
                            data_set_filename="08-08-2023 national carbon intensity.csv", priority=0)
     power_domain.add_power_source(grid_power)

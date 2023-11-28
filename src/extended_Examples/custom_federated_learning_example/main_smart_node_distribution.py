@@ -5,7 +5,7 @@ from extended_Examples.custom_federated_learning_example.mobility import Mobilit
 from extended_Examples.custom_federated_learning_example.university import City
 import simpy
 from extended_Examples.custom_federated_learning_example.settings import *
-from extendedLeaf.power import PowerMeter, GridPower, SolarPower, PowerDomain
+from extendedLeaf.power import *
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -26,11 +26,11 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain1", associated_nodes=local_site.infrastructure.nodes(), start_time_str="11:00:00",
                                update_interval=1)
-    solar_power1 = SolarPower(env, power_domain=power_domain,
+    solar_power1 = SolarPower(env,name="sol1", power_domain=power_domain,
                              data_set_filename="08-08-2020 Glasgow pv data.csv", priority=0)
-    solar_power2 = SolarPower(env, power_domain=power_domain,
+    solar_power2 = SolarPower(env,name="sol2", power_domain=power_domain,
                              data_set_filename="08-08-2020 Glasgow pv data.csv", priority=1)
-    solar_power3 = SolarPower(env, power_domain=power_domain,
+    solar_power3 = SolarPower(env,name="sol3", power_domain=power_domain,
                               data_set_filename="08-08-2020 Glasgow pv data.csv", priority=2)
     grid_power = GridPower(env, power_domain=power_domain,
                            data_set_filename="08-08-2023 national carbon intensity.csv", priority=5)

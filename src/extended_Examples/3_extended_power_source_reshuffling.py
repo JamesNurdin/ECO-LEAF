@@ -27,9 +27,9 @@ def main():
     power_domain.add_power_source(wind_power)
     power_domain.add_power_source(grid1)
     events = [
-        ("19:20:00", (power_domain.remove_power_source, [wind_power])),
-        ("19:40:00", (power_domain.add_power_source, [solar_power])),
-        ("20:00:00", (power_domain.add_node, [node4]))]
+        ("19:20:00", False, (power_domain.remove_power_source, [wind_power])),
+        ("19:40:00", False, (power_domain.add_power_source, [solar_power])),
+        ("20:00:00", False, (power_domain.add_node, [node4]))]
     power_domain.power_source_events = events
 
     # three nodes 1,2,3
@@ -69,12 +69,11 @@ def main():
     # Run simulation
     env.process(application_pm.run(env))  # registering power metering process 2
     env.process(infrastructure_pm.run(env))  # registering power metering process 2
-    env.run(until=100)  # run simulation for 10 seconds
+    env.run(until=121)  # run simulation for 10 seconds
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
-
 
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:

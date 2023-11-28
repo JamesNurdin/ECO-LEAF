@@ -2,13 +2,15 @@ import logging
 
 import simpy
 
+from extendedLeaf.power import NodeDistributor
 from extended_Examples.custom_smart_city_traffic.city import City
 from extended_Examples.custom_smart_city_traffic.infrastructure import Cloud, FogNode, Taxi, LinkWanDown, LinkWanUp, \
     LinkWifiTaxiToTrafficLight, LinkWifiBetweenTrafficLights, TrafficLight
 from extended_Examples.custom_smart_city_traffic.mobility import MobilityManager
 from extended_Examples.custom_smart_city_traffic.settings import POWER_MEASUREMENT_INTERVAL
 from extendedLeaf.infrastructure import Infrastructure
-from extendedLeaf.power import PowerMeter, PowerDomain, SolarPower, GridPower
+from extended_Examples.custom_smart_city_traffic.power import PowerMeter, PowerDomain, SolarPower, GridPower, \
+    BatteryPower
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
@@ -24,8 +26,18 @@ def main(count_taxis: bool, measure_infrastructure: bool, measure_applications: 
     power_domain = PowerDomain(env, name="Traffic Light Power Domain", associated_nodes=city.infrastructure.nodes(type_filter=TrafficLight),
                                start_time_str="12:00:00",
                                update_interval=1)
+    power_domain2 = PowerDomain(env, name="Taxi Power Domain",
+                               associated_nodes=city.infrastructure.nodes(type_filter=TrafficLight),
+                               start_time_str="12:00:00",
+                               update_interval=1)
     grid_power = GridPower(env, power_domain=power_domain,
                            data_set_filename="08-08-2023 national carbon intensity.csv", priority=5)
+
+    for counter in range(len(city.infrastructure.nodes(type_filter=Taxi))):
+        taxi = city.infrastructure.nodes(type_filter=TrafficLight)[counter]
+        car_battery = BatteryPower(env, name=f"Taxi{counter} Battery", power_domain=power_domain,
+                                   priority=5, nodes_being_powered=taxi)
+        #env.process(car_battery.run(env,power_domain.update_interval))
     power_domain.add_power_source(grid_power)
 
     # ----------------- Initialize meters -----------------
