@@ -7,11 +7,11 @@ from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Union, Collection, Callable, Optional, Iterable
 
+import numpy
 import simpy
 from simpy import Environment
 from enum import auto
 
-from extended_Examples.custom_smart_city_traffic.settings import BATTERY_CAR_TOTAL, BATTERY_CAR_CHARGE_RATE
 
 logger = logging.getLogger(__name__)
 _unnamed_power_meters_created = 0
@@ -234,29 +234,53 @@ class PowerMeter:
 
 
 class PowerType(auto):
+    """Power is consumed from a source that is renewable, we assume that the carbon intensity is small and static."""
     RENEWABLE = auto()
+
+    """Power is consumed from a source that is unsustainable, we assume that that the carbon intensity is dynamic."""
     NONRENEWABLE = auto()
+
+    """Power is consumed from a source that is the combination of various sources that cant be isolated to a 
+    single source, as a result of this we assume that the carbon intensity is dynamic. """
+    MIXED = auto()
+
+    """Power is consumed from a local battery with a finite supply of power, it is charged by another power source,
+     because the source of this power is arbitrary we infer the carbon intensity from the source it recharged from."""
     BATTERY = auto()
 
-
-class PowerLocation(auto):
-    ONSITE = auto()
-    OFFSITE = auto()
-    LOCAL = auto()
+    """For simplicity sake will assume that only 1 Mixed power source will be allowed, as in reality a power domain 
+    wont retrieve power from multiple sources that are mixed i.e. Grids """
 
 
 class PowerSource(ABC):
+    """Abstract class for the power sources.
 
+            Args:
+                env: Simpy environment (for timing and correct retrieval of data read from file)
+                data_set_filename: filename for data of the power source (either power or carbon intensity)
+                power_domain: The power domain associated with the source, we require a two-way association between
+                    classes to allow for the correct starting time of the simulation as it occurs during file reading
+                priority: An integer value determining the importance of the power source, priority allows for the
+                    distribution of nodes when being executed, with 0 being the most important
+                nodes_being_powered: Optional, incase the user doesn't want to allow for the redistribution of nodes
+                    during runtime they can explicitly provide nodes they want to use for that source
+            Returns:
+                sim
+            """
     def __init__(self, env: Environment, name, data_set_filename, power_domain=None, priority: int = 0,
-                 nodes_being_powered = None):
+                 nodes_being_powered=None):
         self.name = name
         self.env = env
         self.carbon_intensity = 0
+
         if nodes_being_powered is None:
             self.nodes_being_powered = []
         else:
             self.nodes_being_powered = nodes_being_powered
+
         self.priority = priority
+
+        self.powerType = None
 
         if power_domain is None:
             raise AttributeError(f"No power manager was supplied")
@@ -334,24 +358,22 @@ class PowerSource(ABC):
 
 class NodeDistributor:
 
-    def __init__(self, node_distributor_method: Callable[[PowerSource, ["Node"]], None] = None,
+    def __init__(self, node_distributor_method: Callable[[PowerSource, ["Node"], int], None] = None,
                  smart_distribution: bool = True):
         self.node_distributor_method = node_distributor_method or self.default_update_node_distribution_method
         self.smart_distribution = smart_distribution
 
-    def default_update_node_distribution_method(self, current_power_source, associated_nodes):
+    """DEFAULT Node handler for a power source, every pass of the while loop in the simulation, have to expect
+    that the power sources may not be able to power their nodes, depending on the power sources provided to the 
+    power domain"""
+    def default_update_node_distribution_method(self, current_power_source, associated_nodes, update_interval):
         """Update renewable sources"""
-        if current_power_source.powerType == PowerType.RENEWABLE:
-            current_power = current_power_source.get_current_power()
-            self.update_renewable_power_source(current_power, current_power_source, associated_nodes)
-        else:
-            """Update NonRenewable sources"""
-            self.update_non_renewable_power_source(current_power_source, associated_nodes)
+        total_current_power = current_power_source.get_current_power()
 
-    def update_renewable_power_source(self, total_current_power, current_power_source, associated_nodes):
         for node in associated_nodes:
-            current_node_power_requirement = int(node.power_model.measure())
-            """Check if node is currently being powered by the desired node"""
+            current_node_power_requirement = float(node.power_model.measure())*update_interval/60
+
+            """Check if node is currently being powered by the desired power source"""
             if node.power_model.power_source == current_power_source:
                 if total_current_power < current_node_power_requirement:
                     node.power_model.power_source = None
@@ -369,29 +391,19 @@ class NodeDistributor:
 
             """Check if any nodes in lower priority power sources can move up if excess energy is available"""
             if self.smart_distribution:
-                if node.power_model.power_source is not None and node.power_model.power_source.priority > current_power_source.priority:
+                if node.power_model.power_source is not None \
+                        and node.power_model.power_source.priority > current_power_source.priority:
                     if current_node_power_requirement < total_current_power:
                         current_power_source.add_node(node)
                         node.power_model.power_source.remove_node(node)
                         node.power_model.power_source = current_power_source
                         total_current_power = total_current_power - current_node_power_requirement
 
-    def update_non_renewable_power_source(self, current_power_source, associated_nodes):
-        for node in associated_nodes:
-            if node.power_model.power_source is None:
-                node.power_model.power_source = current_power_source
-                current_power_source.add_node(node)
-                continue
-            if node.power_model.power_source.priority > current_power_source.priority:
-                node.power_model.power_source.remove_node(node)
-                node.power_model.power_source = current_power_source
-
-
 class PowerDomain:
 
     def __init__(self, env: Environment, name=None, start_time_str: str = "00:00:00", associated_nodes=None,
                  update_interval=1, node_distributor: NodeDistributor = None,
-                 power_source_events: [(str, (Callable[[], None], []))] = None):
+                 power_source_events: [(str, bool, (Callable[[], None], []))] = None):
 
         self.env = env
         if name is None:
@@ -420,77 +432,73 @@ class PowerDomain:
             - Associated node(s) to provide power to"""
 
     def run(self, env):
-
         if self.power_sources is None:
             raise AttributeError(f"Error: No power source was provided")
         if not self.associated_nodes:
             raise AttributeError(f"Error: No nodes are present in the power domain")
 
         while True:
+            yield env.timeout(self.update_interval)
+
             """Execute any pre-planned commands at the current moment of time"""
-            for time, (event, args) in self.power_source_events:
-                if (self.env.now + self.start_time_index) == self.get_current_time(time):
-                    event(*args)
+            for index, (time, ran, (event, args)) in enumerate(self.power_source_events):
+                if (self.env.now + self.start_time_index) >= self.get_current_time(time):
+                    if not ran:
+                        event(*args)
+                        updated_event = list(self.power_source_events[index])
+                        updated_event[1] = True
+                        self.power_source_events[index] = tuple(updated_event)
 
             self.assign_power_source_priority()
-            """Should go through every power source and check for an update, only 
-            when an update needs to occur should we carry it out, in particular we call update
-            environment which will correctly ensure that nodes are updated after this has happened
-            the next update period is found"""
+
+            """Go through every power source and:
+                - distribute nodes among power sources
+                - log the carbon released since the last update"""
             current_carbon_intensities = {}
-            current_carbon_intensity = 0
+            current_interval_released_carbon = 0
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
-                current_dictionary = {}
 
-                self.node_distributor.node_distributor_method(current_power_source, self.associated_nodes)
-
-                if (env.now + self.start_time_index) >= self.get_current_time(current_power_source.next_update_time):
-                    current_power_source.get_next_update_time()
+                """distribute nodes among power sources"""
+                self.node_distributor.node_distributor_method(current_power_source, self.associated_nodes, self.update_interval)
 
                 """Record respective power readings this interval"""
-                carbon_currently_released = 0
-
-                for node in current_power_source.nodes_being_powered:
-                    power_used = node.power_model.measure()
-                    carbon_intensity = current_power_source.get_current_carbon_intensity(0)
-                    carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
-                    node_data = {"Power Used": power_used,
-                                 "Carbon Intensity": carbon_intensity,
-                                 "Carbon Released": carbon_released}
-                    carbon_currently_released += carbon_released
-                    current_dictionary[node.name] = node_data
-
-                current_dictionary["Total Carbon Released"] = carbon_currently_released
-                current_carbon_intensities[current_power_source.name] = current_dictionary
-                logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
-                             f"{current_power_source.name} released {carbon_currently_released} gCO2")
-                current_carbon_intensity += carbon_currently_released
-            self.update_carbon_intensity(current_carbon_intensities, self.update_interval)
+                current_ps_dictionary, current_ps_carbon_released = self.record_power_source_carbon_released(current_power_source)
+                current_ps_dictionary["Total Carbon Released"] = current_ps_carbon_released
+                current_carbon_intensities[current_power_source.name] = current_ps_dictionary
+                current_interval_released_carbon += current_ps_carbon_released
 
             for node in self.associated_nodes:
                 if node.power_model.power_source is None:
                     raise ValueError(f"Error: no power source found for node {node} at time {self.env.now}")
 
+            """log the carbon released since the last update"""
+            self.update_carbon_intensity(current_carbon_intensities, self.update_interval)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
-                         f"{self.name} released {current_carbon_intensity} gCO2")
-            yield env.timeout(self.update_interval)
+                         f"{self.name} released {current_interval_released_carbon} gCO2")
+
+    def record_power_source_carbon_released(self, current_power_source):
+        current_power_source_dictionary = {}
+        current_power_source_carbon_released = 0
+        for node in current_power_source.nodes_being_powered:
+            power_used = int(node.power_model.measure()) * self.update_interval / 60
+            carbon_intensity = current_power_source.get_current_carbon_intensity(0)
+            carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
+            node_data = {"Power Used": power_used,
+                         "Carbon Intensity": carbon_intensity,
+                         "Carbon Released": carbon_released}
+            current_power_source_carbon_released += carbon_released
+            current_power_source_dictionary[node.name] = node_data
+        return current_power_source_dictionary, current_power_source_carbon_released
 
     def add_power_source(self, power_source):
         if power_source in self.power_sources:
             raise ValueError(f"Error: Power source {power_source.name} is already present at priority "
                              f"{self.power_sources.index(power_source)} ")
 
-        if (power_source.powerType == PowerType.NONRENEWABLE
-                and power_source.powerLocation == PowerLocation.OFFSITE):
-            if any(
-                    current_power_source
-                    and current_power_source.powerType == PowerType.NONRENEWABLE
-                    and current_power_source.powerLocation == PowerLocation.OFFSITE
-                    for current_power_source in self.power_sources
-            ):
-                raise ValueError(f"Error: Power domain can only accept 1 offsite nonrenewable "
-                                 f"power source")
+        if power_source.powerType == PowerType.MIXED and len([power_source for power_source in self.power_sources
+                                                              if power_source.powerType == PowerType.MIXED]) > 0:
+            raise ValueError(f"Error: Power domain can only accept 1 mixed power source")
 
         if power_source.priority >= len(self.power_sources):
             extra_nodes = power_source.priority - len(self.power_sources)
@@ -500,8 +508,8 @@ class PowerDomain:
             if self.power_sources[power_source.priority] is None:
                 self.power_sources[power_source.priority] = power_source
             else:
-                raise BufferError(
-                    f"Error: Priority {power_source.priority} is occupied with {self.power_sources[power_source.priority]}")
+                raise BufferError(f"Error: Priority {power_source.priority} "
+                                  f"is occupied with {self.power_sources[power_source.priority]}")
 
     def remove_power_source(self, power_source):
         self.power_sources[self.power_sources.index(power_source)] = None
@@ -517,16 +525,15 @@ class PowerDomain:
                 self.power_sources[counter].priority = counter
 
     def calculate_carbon_released(self, power_used, carbon_intensity):
-        return int(power_used) * (10 ** -3) * float(carbon_intensity)
+        return float(power_used) * (10 ** -3) * float(carbon_intensity)
 
     def update_carbon_intensity(self, increment_data, repeats):
         increment_total_carbon_omitted = 0
         for increment in increment_data.values():
             increment_total_carbon_omitted += increment["Total Carbon Released"]
-        for i in range(repeats):
-            self.carbon_emitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
+        self.carbon_emitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
 
-    def return_total_carbon_emissions(self) -> int:
+    def return_total_carbon_emissions(self) -> float:
         return sum(self.carbon_emitted)
 
     def add_node(self, node):
@@ -556,11 +563,6 @@ class SolarPower(PowerSource):
         super().__init__(env, name, data_set_filename, power_domain, priority)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
-        self.powerLocation = PowerLocation.OFFSITE
-
-    def get_next_update_time(self):
-        new_index = (list(self.power_data.keys()).index(self.next_update_time) + 1) % len(self.power_data)
-        self.next_update_time = list(self.power_data.keys())[new_index]
 
     def _get_start_time_index(self, start_time_str):
         if self.power_data is None:
@@ -569,9 +571,9 @@ class SolarPower(PowerSource):
         start_time = times.index(start_time_str)
         return start_time
 
-    def get_current_power(self) -> int:
+    def get_current_power(self) -> float:
         time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
-        return int(self.power_data[time])
+        return float(self.power_data[time])
 
     def update_carbon_intensity(self):
         pass
@@ -588,15 +590,11 @@ class WindPower(PowerSource):
         super().__init__(env, name, data_set_filename, power_domain, priority)
         self.inherent_carbon_intensity = 12
         self.powerType = PowerType.RENEWABLE
-        self.powerLocation = PowerLocation.ONSITE
+        self.finite_power = True
 
-    def get_next_update_time(self):
-        new_index = (list(self.power_data.keys()).index(self.next_update_time) + 1) % len(self.power_data)
-        self.next_update_time = list(self.power_data.keys())[new_index]
-
-    def get_current_power(self) -> int:
+    def get_current_power(self) -> float:
         time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
-        return int(self.power_data[time])
+        return float(self.power_data[time])
 
     def update_carbon_intensity(self):
         pass
@@ -612,12 +610,7 @@ class GridPower(PowerSource):
                  power_domain: PowerDomain = None, name: str = "Grid", priority: int = 0):
         super().__init__(env, name, data_set_filename, power_domain, priority)
         self.carbon_intensity = 0
-        self.powerType = PowerType.NONRENEWABLE
-        self.powerLocation = PowerLocation.OFFSITE
-
-    def get_next_update_time(self):
-        new_index = (list(self.power_data.keys()).index(self.next_update_time) + 1) % len(self.power_data)
-        self.next_update_time = list(self.power_data.keys())[new_index]
+        self.powerType = PowerType.MIXED
 
     def _get_start_time_index(self, start_time_str):
         if self.power_data is None:
@@ -629,12 +622,12 @@ class GridPower(PowerSource):
     def update_carbon_intensity(self):
         self.carbon_intensity = self.get_current_carbon_intensity(0)
 
-    def get_current_carbon_intensity(self, offset) -> int:
+    def get_current_carbon_intensity(self, offset) -> float:
         time = self._map_to_time(((self.env.now + offset) // self.update_interval) % len(self.power_data))
-        return int(self.power_data[time])
+        return float(self.power_data[time])
 
-    def get_current_power(self) -> int:
-        pass
+    def get_current_power(self) -> float:
+        return numpy.inf
 
 
 class BatteryPower(PowerSource):
@@ -642,29 +635,15 @@ class BatteryPower(PowerSource):
 
     def __init__(self, env: Environment, data_set_filename: str = BATTERY_DATASET_FILENAME,
                  power_domain: PowerDomain = None, name: str = "Battery", priority: int = 10,
-                 nodes_being_powered = None, chargepoint=None):
+                 nodes_being_powered=None, total_power_available=40, charge_rate=22):
         super().__init__(env, name, data_set_filename, power_domain, priority, nodes_being_powered=nodes_being_powered)
 
         self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
         self.powerType = PowerType.BATTERY
-        self.powerLocation = PowerLocation.LOCAL
-        self.total_power = BATTERY_CAR_TOTAL  # kWh
-        self.remaining_power = BATTERY_CAR_TOTAL - 30  # kWh
-        self.recharge_rate = BATTERY_CAR_CHARGE_RATE  # kw/h
+        self.total_power = total_power_available  # kWh
+        self.remaining_power = 0  # kWh
+        self.recharge_rate = charge_rate  # kw/h
         self.recharge_data = []
-        self.chargepoint = chargepoint
-
-    """def run(self, env, update_interval):
-        while True:
-            for node in self.nodes_being_powered:
-                power_required = node.measure_power()
-                if power_required < self.remaining_power:
-                    print(f"Cant process node: {node.name}, RECHARGING")
-                    time_spent_recharging = self.recharge_battery(self.chargepoint)
-                    yield env.timeout(time_spent_recharging)
-                print(f"{env.now}: {self.name}'s {node.name} used {power_required}")
-                self.update_battery(power_required)
-            yield env.timeout(update_interval)"""
 
     def recharge_battery(self, power_source):
         power_to_recharge = self.total_power - self.remaining_power
@@ -676,13 +655,13 @@ class BatteryPower(PowerSource):
         for time_offset in range(time_to_recharge):
             carbon_intensity = power_source.get_current_carbon_intensity(time_offset)
             carbon_released += self.power_domain.calculate_carbon_released(self.recharge_rate, carbon_intensity)
-        node_data = {"Power Used": power_to_recharge,
-                     "Carbon Released": carbon_released,
-                     "Power Source": power_source.name}
-        self.recharge_data.append(node_data)
+        recharge_data = {"Power Used": power_to_recharge,
+                         "Carbon Released": carbon_released,
+                         "Power Source": power_source.name}
+        self.recharge_data.append(recharge_data)
         return time_to_recharge
 
-    def update_battery(self, power_consumed):
+    def consume_battery_power(self, power_consumed):
         if power_consumed < 0:
             raise ValueError(f"Error: Power consumed cant be negative")
         if power_consumed > self.remaining_power:
@@ -690,20 +669,22 @@ class BatteryPower(PowerSource):
         else:
             self.remaining_power -= power_consumed
 
+    def get_next_update_time(self):
+        pass
+
     def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
+        pass
 
     def update_carbon_intensity(self):
-        self.carbon_intensity = self.get_current_carbon_intensity(0)
+        self.carbon_intensity = 0
 
-    def get_current_carbon_intensity(self, offset) -> int:
-        time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
-        return int(self.power_data[time])
+    def get_current_carbon_intensity(self, offset) -> float:
+        pass
 
-    def get_current_power(self) -> int:
+    def get_current_power(self) -> float:
         return self.remaining_power
 
+    def set_current_power(self, remaining_power):
+        if remaining_power < 0:
+            raise ValueError(f"Error: Battery {self.name} can't store negative power")
+        self.remaining_power = remaining_power
