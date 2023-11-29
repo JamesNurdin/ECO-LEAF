@@ -163,6 +163,7 @@
 * *1 Hour* Spent a bit of time trying to improve the power file, in particular I tried messing around with associated nodes and the nodes_being powered lists as I wanted all nodes to be handled through the power domain but hold information about their current status in a private list in each power source class, I could not get this to work due to the fact that I will need to allow users to add custom classes.
 * *1.5 Hours* I have changed the node distributor class to allow for a cleaner default method, in particular I have realised that np.inf will allow for mathematical operations and comparisons, because of this I can do away with the enumerations and just return np.inf in the get current power method of the grid, this should be okay as both me and Lauritz have allowed for the assumption that the power is infinite in the context of this framework, in addition to this I realised that the next update attribute is irrelevant now due to frequent changes made throughout development as the update interval and retrieve current power take into account the correct timings of the simulation through env.now() and the formatting to the timing of the files.
 * *0.5 Hours* Included documentation into the classes and larger methods of Power.py
+* *1.5 Hours* Now that the project is fairly expanded upon, I have relocated my own version of Extended LEAF to my project repository, had a few issues with modules not importing but all I had to do was include the src. extension to the imports and now they work without an issue.
 
 TODO:
 Main example
