@@ -9,6 +9,7 @@ from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter,
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 
+
 def main():
     env = simpy.Environment()  # creating SimPy simulation environment
     # Initializing infrastructure and workload

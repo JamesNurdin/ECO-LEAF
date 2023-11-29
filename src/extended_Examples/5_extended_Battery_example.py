@@ -4,7 +4,7 @@ from src.extendedLeaf.application import Task, Application, SourceTask, Processi
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower
+    GridPower, PowerDomain, PowerSource, NodeDistributor, BatteryPower
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -16,22 +16,32 @@ def main():
     node1 = Node("node1", cu=10, power_model=PowerModelNode(max_power=30, static_power=3))  # source
     node2 = Node("node2", cu=40, power_model=PowerModelNode(max_power=70, static_power=10))  # processing task
     node3 = Node("node3", cu=20, power_model=PowerModelNode(max_power=50, static_power=7))  # sink
+    node4 = Node("node4", cu=100, power_model=PowerModelNode(max_power=130, static_power=20))
 
     infrastructure = Infrastructure()
 
     power_domain = PowerDomain(env, name="Power Domain 1", associated_nodes=[node1, node2, node3],
-                               start_time_str="19:00:00", update_interval=1)
+                               start_time_str="19:00:00", update_interval=1, node_distributor=NodeDistributor())
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=0)
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
-    power_domain.add_power_source(solar_power)
+    wind_power = WindPower(env, power_domain=power_domain, priority=0)
+    power_domain.add_power_source(wind_power)
     power_domain.add_power_source(grid1)
+    events = [
+        ("19:20:00", False, (power_domain.remove_power_source, [wind_power])),
+        ("19:40:00", False, (power_domain.add_power_source, [solar_power])),
+        ("20:00:00", False, (power_domain.add_node, [node4]))]
+    power_domain.power_source_events = events
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
     wifi_link_from_source = Link(node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
     wifi_link_to_sink = Link(node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    wifi_link_to_node4 = Link(node2, node4, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_sink)
     infrastructure.add_link(wifi_link_from_source)
+    infrastructure.add_link(wifi_link_to_node4)
 
     # Initialise three tasks
     source_task = SourceTask(cu=0.4, bound_node=node1)
@@ -39,7 +49,8 @@ def main():
     sink_task = SinkTask(cu=1, bound_node=node3)
 
     # Initialise and allocate a separate task for Node 4
-    task = Task(cu=50)
+    task = Task(cu=100)
+    task.allocate(node4)
 
     # Build Application
     application = Application()
@@ -60,7 +71,7 @@ def main():
     # Run simulation
     env.process(application_pm.run(env))  # registering power metering process 2
     env.process(infrastructure_pm.run(env))  # registering power metering process 2
-    env.run(until=100)  # run simulation for 10 seconds
+    env.run(until=50)  # run simulation for 10 seconds
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
@@ -70,7 +81,6 @@ def main():
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
         return self.infrastructure.node("node2")
-
 
 if __name__ == '__main__':
     main()
