@@ -1,11 +1,11 @@
 import math
 from abc import ABC
 
-from extendedLeaf.application import Application, ProcessingTask
-from extended_Examples.custom_federated_learning_example.infrastructure import Server, Client, ClusteredClient
-from extended_Examples.custom_federated_learning_example.settings import *
-from extendedLeaf.infrastructure import Infrastructure, Node
-from extendedLeaf.orchestrator import Orchestrator
+from src.extendedLeaf.application import Application, ProcessingTask
+from src.extended_Examples.custom_federated_learning_example.infrastructure import Server, Client, ClusteredClient
+from src.extended_Examples.custom_federated_learning_example.settings import *
+from src.extendedLeaf.infrastructure import Infrastructure, Node
+from src.extendedLeaf.orchestrator import Orchestrator
 
 
 class UniversityOrchestrator(Orchestrator):

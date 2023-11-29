@@ -5,8 +5,8 @@ from typing import Callable, List
 
 import networkx as nx
 
-from extendedLeaf.application import ProcessingTask, Application, SourceTask, SinkTask
-from extendedLeaf.infrastructure import Infrastructure, Node
+from src.extendedLeaf.application import ProcessingTask, Application, SourceTask, SinkTask
+from src.extendedLeaf.infrastructure import Infrastructure, Node
 
 ProcessingTaskPlacement = Callable[[ProcessingTask, Application, Infrastructure], Node]
 DataFlowPath = Callable[[nx.Graph, str, str], List[str]]

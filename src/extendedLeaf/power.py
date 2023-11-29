@@ -326,12 +326,12 @@ class PowerSource(ABC):
             raise ValueError(f"Error no start time is provided")
         # find the file path we want
         current_script_path = os.path.abspath(__file__)
-        target_directory = "LEAF"
+        target_directory = "project-carbon-emissions-estimation-in-edge-cloud-computing-simulations"
         # Navigate upwards from the current script path until you find the target directory
         base_directory = current_script_path
         while not base_directory.endswith(target_directory):
             base_directory = os.path.dirname(base_directory)
-        abs_file_path = os.path.join(base_directory + "\dataSets", data_set_filename)
+        abs_file_path = os.path.join(base_directory + "\src\dataSets", data_set_filename)
 
         # this data we will capture then will add at the end
         data_before_start = {}

@@ -1,10 +1,10 @@
 import simpy
 
-from extended_Examples.custom_federated_learning_example.settings import *
-from extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask, Task
-from extendedLeaf.infrastructure import Link, Node, Infrastructure
-from extendedLeaf.mobility import Location
-from extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
+from src.extended_Examples.custom_federated_learning_example.settings import *
+from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask, Task
+from src.extendedLeaf.infrastructure import Link, Node, Infrastructure
+from src.extendedLeaf.mobility import Location
+from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
 
 """Counter for incrementally naming nodes"""
 _clients_created = 0

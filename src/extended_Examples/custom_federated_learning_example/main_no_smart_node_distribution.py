@@ -1,11 +1,11 @@
 import logging
 
-from extended_Examples.custom_federated_learning_example.infrastructure import *
-from extended_Examples.custom_federated_learning_example.mobility import MobilityManager
-from extended_Examples.custom_federated_learning_example.university import City
+from src.extended_Examples.custom_federated_learning_example.infrastructure import *
+from src.extended_Examples.custom_federated_learning_example.mobility import MobilityManager
+from src.extended_Examples.custom_federated_learning_example.university import City
 import simpy
-from extended_Examples.custom_federated_learning_example.settings import *
-from extendedLeaf.power import PowerMeter, GridPower, SolarPower, PowerDomain, NodeDistributor
+from src.extended_Examples.custom_federated_learning_example.settings import *
+from src.extendedLeaf.power import PowerMeter, GridPower, SolarPower, PowerDomain, NodeDistributor
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')

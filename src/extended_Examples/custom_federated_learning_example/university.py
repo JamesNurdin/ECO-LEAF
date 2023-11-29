@@ -2,10 +2,10 @@ from typing import Tuple, List
 
 import networkx as nx
 
-from extended_Examples.custom_federated_learning_example.infrastructure import *
-from extended_Examples.custom_federated_learning_example.settings import *
-from extended_Examples.custom_federated_learning_example.orchestrator import UniversityOrchestrator
-from extendedLeaf.infrastructure import Infrastructure
+from src.extended_Examples.custom_federated_learning_example.infrastructure import *
+from src.extended_Examples.custom_federated_learning_example.settings import *
+from src.extended_Examples.custom_federated_learning_example.orchestrator import UniversityOrchestrator
+from src.extendedLeaf.infrastructure import Infrastructure
 
 
 class City:

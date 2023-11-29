@@ -3,12 +3,12 @@ from typing import List, Tuple, Iterator
 import networkx as nx
 import simpy
 
-from extended_Examples.custom_smart_city_traffic.infrastructure import Cloud, FogNode, TrafficLight, LinkWanUp, LinkEthernet, \
+from src.extended_Examples.custom_smart_city_traffic.infrastructure import Cloud, FogNode, TrafficLight, LinkWanUp, LinkEthernet, \
     LinkWifiBetweenTrafficLights, LinkWanDown, LinkWifiTaxiToTrafficLight, Taxi
 from mobility import Location
-from extended_Examples.custom_smart_city_traffic.orchestrator import CityOrchestrator
-from extended_Examples.custom_smart_city_traffic.settings import *
-from extendedLeaf.infrastructure import Infrastructure
+from src.extended_Examples.custom_smart_city_traffic.orchestrator import CityOrchestrator
+from src.extended_Examples.custom_smart_city_traffic.settings import *
+from src.extendedLeaf.infrastructure import Infrastructure
 
 
 class City:

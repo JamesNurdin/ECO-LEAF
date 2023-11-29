@@ -3,13 +3,13 @@ from typing import List, Optional
 import networkx as nx
 import simpy
 
-from examples.practise_examples.custom_CDNcache_example.settings import UPDATE_MOBILITY_INTERVAL
-from extended_Examples.custom_federated_learning_example.infrastructure import Client, Server, LinkCellularFromServer, \
+from src.extended_Examples.custom_federated_learning_example.settings import UPDATE_MOBILITY_INTERVAL
+from src.extended_Examples.custom_federated_learning_example.infrastructure import Client, Server, LinkCellularFromServer, \
     ClusteredClient, LinkCellularToServer, LinkEthernet
-from extended_Examples.custom_federated_learning_example.settings import CLIENT_COUNT_DISTRIBUTION, CLIENT_SPEED_DISTRIBUTION, \
+from src.extended_Examples.custom_federated_learning_example.settings import CLIENT_COUNT_DISTRIBUTION, CLIENT_SPEED_DISTRIBUTION, \
     RNG, MAX_CLIENTS_PER_MINUTE, NUMBER_CLIENTS
-from extended_Examples.custom_federated_learning_example.university import City
-from extendedLeaf.mobility import Location
+from src.extended_Examples.custom_federated_learning_example.university import City
+from src.extendedLeaf.mobility import Location
 
 
 class MobilityManager:

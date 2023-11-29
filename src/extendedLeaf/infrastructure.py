@@ -3,8 +3,8 @@ from typing import List, Optional, Type, TypeVar, Iterator, Union, Tuple
 
 import networkx as nx
 
-from extendedLeaf.power import PowerAware, PowerMeasurement
-from extendedLeaf.mobility import Location
+from src.extendedLeaf.power import PowerAware, PowerMeasurement
+from src.extendedLeaf.mobility import Location
 
 
 class Node(PowerAware):

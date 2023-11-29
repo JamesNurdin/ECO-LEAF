@@ -3,10 +3,10 @@ from typing import List, Optional
 import networkx as nx
 import simpy
 
-from extended_Examples.custom_smart_city_traffic.infrastructure import TrafficLight, Taxi
-from extended_Examples.custom_smart_city_traffic.settings import UPDATE_MOBILITY_INTERVAL, MAX_CARS_PER_MINUTE, RNG, \
+from src.extended_Examples.custom_smart_city_traffic.infrastructure import TrafficLight, Taxi
+from src.extended_Examples.custom_smart_city_traffic.settings import UPDATE_MOBILITY_INTERVAL, MAX_CARS_PER_MINUTE, RNG, \
     TAXI_COUNT_DISTRIBUTION, TAXI_SPEED_DISTRIBUTION
-from extendedLeaf.mobility import Location
+from src.extendedLeaf.mobility import Location
 
 
 class MobilityManager:

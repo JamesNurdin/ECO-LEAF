@@ -1,10 +1,10 @@
 import logging
 import simpy
 
-from extendedLeaf.power import PowerDomain, SolarPower
-from extendedLeaf.application import Task
-from extendedLeaf.infrastructure import Node
-from extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter
+from src.extendedLeaf.application import Task
+from src.extendedLeaf.infrastructure import Node
+from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, SolarPower
+from src.extendedLeaf.power import PowerDomain
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')

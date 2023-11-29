@@ -11,7 +11,7 @@ import simpy
 from simpy import Environment
 from enum import auto
 
-from extended_Examples.custom_smart_city_traffic.settings import BATTERY_CAR_TOTAL, BATTERY_CAR_CHARGE_RATE
+from src.extended_Examples.custom_smart_city_traffic.settings import BATTERY_CAR_TOTAL, BATTERY_CAR_CHARGE_RATE
 
 logger = logging.getLogger(__name__)
 _unnamed_power_meters_created = 0

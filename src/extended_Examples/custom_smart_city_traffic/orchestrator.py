@@ -1,10 +1,10 @@
 import math
 
-from extendedLeaf.application import Application, ProcessingTask
-from extended_Examples.custom_smart_city_traffic.infrastructure import FogNode, Cloud
-from extended_Examples.custom_smart_city_traffic.settings import FOG_UTILIZATION_THRESHOLD, FOG_DCS, FOG_IDLE_SHUTDOWN
-from extendedLeaf.infrastructure import Infrastructure, Node
-from extendedLeaf.orchestrator import Orchestrator
+from src.extendedLeaf.application import Application, ProcessingTask
+from src.extended_Examples.custom_smart_city_traffic.infrastructure import FogNode, Cloud
+from src.extended_Examples.custom_smart_city_traffic.settings import FOG_UTILIZATION_THRESHOLD, FOG_DCS, FOG_IDLE_SHUTDOWN
+from src.extendedLeaf.infrastructure import Infrastructure, Node
+from src.extendedLeaf.orchestrator import Orchestrator
 
 
 class CityOrchestrator(Orchestrator):
