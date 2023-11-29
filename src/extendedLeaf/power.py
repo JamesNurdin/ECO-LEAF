@@ -445,6 +445,11 @@ class NodeDistributor:
                         node.power_model.power_source = current_power_source
                         total_current_power = total_current_power - current_node_power_requirement
 
+        if current_power_source.powerType == PowerType.BATTERY:
+            print(f"Updated Battery")
+            current_power_source.set_current_power(total_current_power)
+
+
 
 class PowerDomain:
     """The power domain for a collection of nodes, the main interface and point of interaction for dealing with
@@ -555,6 +560,7 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
+            print(current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
@@ -755,6 +761,7 @@ class BatteryPower(PowerSource):
         self.recharge_data = []
 
     def recharge_battery(self, power_source):
+        print(f"Power before:{self.remaining_power}")
         power_to_recharge = self.total_power - self.remaining_power
         time_to_recharge = math.ceil(power_to_recharge / self.recharge_rate)
         self.remaining_power = self.total_power
@@ -768,6 +775,7 @@ class BatteryPower(PowerSource):
                          "Carbon Released": carbon_released,
                          "Power Source": power_source.name}
         self.recharge_data.append(recharge_data)
+        logger.debug(f"{self.name} was recharged by {power_source.name}, {carbon_released} gCO2 was released")
         return time_to_recharge
 
     def consume_battery_power(self, power_consumed):
@@ -788,7 +796,7 @@ class BatteryPower(PowerSource):
         self.carbon_intensity = 0
 
     def get_current_carbon_intensity(self, offset) -> float:
-        pass
+        return 0
 
     def get_current_power(self) -> float:
         return self.remaining_power
