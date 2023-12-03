@@ -113,6 +113,8 @@ class PowerModelNode(PowerModel):
         return PowerMeasurement(dynamic=dynamic_power, static=self.static_power)
 
     def update_sensitive_measure(self, update_interval):
+        if self.node.paused:
+            return PowerMeasurement(0, 0)
         if self.max_power is not None:
             dynamic_power = (self.max_power - self.static_power) * self.node.utilization()
         elif self.power_per_cu is not None:
@@ -476,12 +478,13 @@ class NodeDistributor:
 
     def default_update_node_distribution_method_static(self, current_power_source, power_domain):
         total_current_power = current_power_source.get_current_power()
-
+        print(f"Total Power before {total_current_power}")
         """Check if node is currently running"""
+        print(f"Checking if nodes that are currently running:")
         for node in current_power_source.associated_nodes:
             current_node_power_requirement = float(node.power_model.update_sensitive_measure(
                 power_domain.update_interval))
-
+            print(f"{node.name} currently has {current_node_power_requirement}, and paused status is: {node.check_if_node_paused()} ")
             if not node.check_if_node_paused():
                 if total_current_power < current_node_power_requirement:
                     node.pause_node()
@@ -501,6 +504,7 @@ class NodeDistributor:
                     total_current_power = total_current_power - current_node_power_requirement
                     if current_power_source.powerType == PowerType.BATTERY:
                         current_power_source.set_current_power(total_current_power)
+        print(f"Total Power after{total_current_power}")
 
 
 
@@ -618,6 +622,7 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
+            print(current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
