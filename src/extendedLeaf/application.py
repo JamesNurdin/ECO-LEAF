@@ -19,6 +19,7 @@ class Task(PowerAware):
 
             Million instructions per second required to execute the task.
         """
+        self.paused = False
         self.id: Optional[int] = None
         self.cu = cu
         self.node: Optional[Node] = None
@@ -45,6 +46,18 @@ class Task(PowerAware):
             return self.node.measure_power().multiply(self.cu / self.node.used_cu)
         except ZeroDivisionError:
             return PowerMeasurement(0, 0)
+
+    def pause_task(self):
+        if self.paused:
+            raise ValueError(f"Error, task already paused")
+        else:
+            self.paused = True
+
+    def unpause_task(self):
+        if not self.paused:
+            raise ValueError(f"Error, task not paused")
+        else:
+            self.paused = False
 
 
 class SourceTask(Task):

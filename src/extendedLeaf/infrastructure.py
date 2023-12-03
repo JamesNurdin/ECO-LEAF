@@ -6,7 +6,6 @@ import networkx as nx
 from src.extendedLeaf.power import PowerAware, PowerMeasurement
 from src.extendedLeaf.mobility import Location
 
-
 class Node(PowerAware):
     def __init__(self, name: str,
                  cu: Optional[float] = None,
@@ -44,6 +43,8 @@ class Node(PowerAware):
 
         self.location = location
 
+        self.paused = False
+
     def __repr__(self):
         cu_repr = self.cu if self.cu is not None else "∞"
         return f"{self.__class__.__name__}('{self.name}', cu={self.used_cu}/{cu_repr})"
@@ -74,6 +75,8 @@ class Node(PowerAware):
 
     def measure_power(self) -> PowerMeasurement:
         try:
+            if self.paused:
+                return PowerMeasurement(0, 0)
             return self.power_model.measure()
         except AttributeError:
             return PowerMeasurement(0, 0)
@@ -89,6 +92,23 @@ class Node(PowerAware):
         if new_used_cu < 0:
             raise ValueError(f"Cannot release {cu} CU on compute node {self}.")
         self.used_cu = new_used_cu
+
+    def pause_node(self):
+        if self.paused:
+            raise ValueError(f"Error, node already paused")
+        self.paused = True
+        for task in self.tasks:
+            task.pause_task()
+
+    def unpause_node(self):
+        if not self.paused:
+            raise ValueError(f"Error, node not paused")
+        self.paused = False
+        for task in self.tasks:
+            task.unpause_task()
+
+    def check_if_node_paused(self) -> bool:
+        return self.paused
 
 
 class Link(PowerAware):

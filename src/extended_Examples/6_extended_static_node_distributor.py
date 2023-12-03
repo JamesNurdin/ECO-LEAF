@@ -20,10 +20,10 @@ def main():
 
     infrastructure = Infrastructure()
 
-    power_domain = PowerDomain(env, name="Power Domain 1", associated_nodes=[node1, node2, node3],
+    power_domain = PowerDomain(env, name="Power Domain 1",
                                start_time_str="19:00:00", update_interval=1,
-                               node_distributor=NodeDistributor(custom_distribution_method))
-    solar_power = SolarPower(env, power_domain=power_domain, priority=0)
+                               node_distributor=NodeDistributor(static_nodes=True))
+    solar_power = SolarPower(env, power_domain=power_domain, priority=0, associated_nodes=[node1, node2, node3])
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
     wind_power = WindPower(env, power_domain=power_domain, priority=0)
     power_domain.add_power_source(wind_power)
@@ -31,7 +31,7 @@ def main():
     events = [
         ("19:20:00", False, (power_domain.remove_power_source, [wind_power])),
         ("19:40:00", False, (power_domain.add_power_source, [solar_power])),
-        ("20:00:00", False, (power_domain.add_node, [node4]))]
+        ("20:00:00", False, (solar_power.add_node, [node4]))]
     power_domain.power_source_events = events
 
     # three nodes 1,2,3

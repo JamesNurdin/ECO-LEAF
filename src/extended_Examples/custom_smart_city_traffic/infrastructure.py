@@ -17,6 +17,10 @@ class Cloud(Node):
     def __init__(self):
         super().__init__("cloud", cu=CLOUD_CU, power_model=PowerModelNode(power_per_cu=CLOUD_WATT_PER_CU))
 
+    def distribute_training_model_application(self):
+        pass
+        # select the desired fog nodes to send task
+
 
 class FogNode(Node):
     def __init__(self, location: "Location"):

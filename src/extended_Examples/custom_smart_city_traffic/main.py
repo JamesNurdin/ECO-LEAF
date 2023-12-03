@@ -36,7 +36,7 @@ def main(count_taxis: bool, measure_infrastructure: bool, measure_applications: 
     for counter in range(len(city.infrastructure.nodes(type_filter=Taxi))):
         taxi = city.infrastructure.nodes(type_filter=TrafficLight)[counter]
         car_battery = BatteryPower(env, name=f"Taxi{counter} Battery", power_domain=power_domain,
-                                   priority=5, nodes_being_powered=taxi)
+                                   priority=5)
         #env.process(car_battery.run(env,power_domain.update_interval))
     power_domain.add_power_source(grid_power)
 

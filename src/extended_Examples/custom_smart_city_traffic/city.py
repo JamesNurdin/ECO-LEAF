@@ -16,7 +16,6 @@ class City:
         self.env = env
         self.street_graph, self.entry_point_locations, self.traffic_light_locations = _create_street_graph()
         self.infrastructure = Infrastructure()
-        self.orchestrator = CityOrchestrator(self.infrastructure, utilization_threshold=FOG_UTILIZATION_THRESHOLD)
 
         # Create infrastructure
         self.infrastructure.add_node(Cloud())
@@ -25,12 +24,6 @@ class City:
         for location in RNG.choice(self.traffic_light_locations, FOG_DCS):
             self._add_fog_node(location)
 
-        # Start update wifi connections process
-        self.update_wifi_connections_process = self.env.process(self._update_wifi_connections())
-
-        # Place CCTV applications
-        for traffic_light in self.infrastructure.nodes(type_filter=TrafficLight):
-            self.orchestrator.place(traffic_light.application)
 
     def _add_traffic_light(self, location: Location):
         """Traffic lights are connected to the cloud via WAN and to other traffic lights in range via WiFi."""
