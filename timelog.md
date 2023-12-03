@@ -164,7 +164,8 @@
 * *1.5 Hours* I have changed the node distributor class to allow for a cleaner default method, in particular I have realised that np.inf will allow for mathematical operations and comparisons, because of this I can do away with the enumerations and just return np.inf in the get current power method of the grid, this should be okay as both me and Lauritz have allowed for the assumption that the power is infinite in the context of this framework, in addition to this I realised that the next update attribute is irrelevant now due to frequent changes made throughout development as the update interval and retrieve current power take into account the correct timings of the simulation through env.now() and the formatting to the timing of the files.
 * *0.5 Hours* Included documentation into the classes and larger methods of Power.py
 * *1.5 Hours* Now that the project is fairly expanded upon, I have relocated my own version of Extended LEAF to my project repository, had a few issues with modules not importing but all I had to do was include the src. extension to the imports and now they work without an issue.
-
+### 29th November 
+* *2 Hours* Introduced the ability to pause and unpause nodes for the user, in particular the proces works by considering the node distributor as static or dynamic, if the user wants a dynamic node distribution system all they need to do is pass the nodes through the power domain to allow for auto handling, if they want static nodes (nodes dont move) then they have to pass the nodes through the power sources, I have also created a default pause node distributor method which will just pause and unpause nodes based on power availability.
 TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
