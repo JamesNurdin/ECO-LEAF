@@ -12,7 +12,6 @@ import simpy
 from simpy import Environment
 from enum import auto
 
-
 logger = logging.getLogger(__name__)
 _unnamed_power_meters_created = 0
 
@@ -292,6 +291,8 @@ class PowerSource(ABC):
                 self.associated_nodes = []
             else:
                 self.associated_nodes = associated_nodes
+                for node in self.associated_nodes:
+                    node.power_model.power_source = self
         else:
             self.associated_nodes = []
             if associated_nodes is not None:
