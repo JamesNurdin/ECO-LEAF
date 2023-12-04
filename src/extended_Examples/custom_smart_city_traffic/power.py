@@ -292,6 +292,8 @@ class PowerSource(ABC):
                 self.associated_nodes = []
             else:
                 self.associated_nodes = associated_nodes
+                for node in self.associated_nodes:
+                    node.power_model.power_source = self
         else:
             self.associated_nodes = []
             if associated_nodes is not None:
@@ -319,6 +321,7 @@ class PowerSource(ABC):
     def remove_node(self, node):
         if node not in self.associated_nodes:
             raise ValueError(f"Error: {node.id} not present in list")
+        node.power_model.power_source = None
         self.associated_nodes.remove(node)
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str = None):
@@ -379,6 +382,7 @@ class PowerSource(ABC):
     def add_node(self, node):
         if node in self.associated_nodes:
             raise ValueError(f"Error: {node.id} already present in list")
+        node.power_model.power_source = self
         self.associated_nodes.append(node)
 
 
