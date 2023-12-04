@@ -166,6 +166,8 @@
 * *1.5 Hours* Now that the project is fairly expanded upon, I have relocated my own version of Extended LEAF to my project repository, had a few issues with modules not importing but all I had to do was include the src. extension to the imports and now they work without an issue.
 ### 29th November 
 * *2 Hours* Introduced the ability to pause and unpause nodes for the user, in particular the proces works by considering the node distributor as static or dynamic, if the user wants a dynamic node distribution system all they need to do is pass the nodes through the power domain to allow for auto handling, if they want static nodes (nodes dont move) then they have to pass the nodes through the power sources, I have also created a default pause node distributor method which will just pause and unpause nodes based on power availability.
+### 30th November
+* *2.5 Hours* Properly started on the main example, after exchanges between Lauritz a few weeks back the main work on the example has been undertaken, currently the initial graph and power domains for the recharge points have been created, as previously stated the focus will be to avoid too much detail on the path and calculations of power on smart cars (this will be for the potential users of Extended LEAF) and more on showing the capabilities of the framework.
 TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
