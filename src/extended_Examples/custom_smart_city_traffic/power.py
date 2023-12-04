@@ -113,6 +113,8 @@ class PowerModelNode(PowerModel):
         return PowerMeasurement(dynamic=dynamic_power, static=self.static_power)
 
     def update_sensitive_measure(self, update_interval):
+        if self.node.paused:
+            return PowerMeasurement(0, 0)
         if self.max_power is not None:
             dynamic_power = (self.max_power - self.static_power) * self.node.utilization()
         elif self.power_per_cu is not None:
@@ -271,12 +273,11 @@ class PowerSource(ABC):
                 priority: An integer value determining the importance of the power source, priority allows for the
                     distribution of nodes when being executed, with 0 being the most important
     """
-    def __init__(self, env: Environment, name, data_set_filename, power_domain=None, priority: int = 0):
+    def __init__(self, env: Environment, name, data_set_filename, power_domain=None, priority: int = 0,
+                 associated_nodes: ["Node"] = None):
         self.name = name
         self.env = env
         self.carbon_intensity = 0
-
-        self.nodes_being_powered = []
 
         self.priority = priority
 
@@ -285,6 +286,18 @@ class PowerSource(ABC):
         if power_domain is None:
             raise AttributeError(f"No power manager was supplied")
         self.power_domain = power_domain
+
+        if self.power_domain.node_distributor.static_nodes:
+            if associated_nodes is None:
+                self.associated_nodes = []
+            else:
+                self.associated_nodes = associated_nodes
+        else:
+            self.associated_nodes = []
+            if associated_nodes is not None:
+                raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have dynamic"
+                                     f"nodes for the power sources but nodes for power source {self.name} have been "
+                                     f"provided")
 
         self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
         self.next_update_time = list(self.power_data.keys())[0]
@@ -304,9 +317,9 @@ class PowerSource(ABC):
         """Update a power sources carbon intensity"""
 
     def remove_node(self, node):
-        if node not in self.nodes_being_powered:
+        if node not in self.associated_nodes:
             raise ValueError(f"Error: {node.id} not present in list")
-        self.nodes_being_powered.remove(node)
+        self.associated_nodes.remove(node)
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str = None):
         """Reads the data concerning the power source from file, and formats it according to the start time
@@ -364,9 +377,9 @@ class PowerSource(ABC):
         return times[current_increment]
 
     def add_node(self, node):
-        if node in self.nodes_being_powered:
+        if node in self.associated_nodes:
             raise ValueError(f"Error: {node.id} already present in list")
-        self.nodes_being_powered.append(node)
+        self.associated_nodes.append(node)
 
 
 class NodeDistributor:
@@ -386,15 +399,20 @@ class NodeDistributor:
                     smart_distribution: A boolean value used to determine whether to allow a power source with
                         excess energy to take nodes from lower priority if the available power is there.
     """
-    def __init__(self, node_distributor_method: Callable[[PowerSource, ["Node"], int], None] = None,
-                 smart_distribution: bool = True):
-        self.node_distributor_method = node_distributor_method or self.default_update_node_distribution_method
+    def __init__(self, node_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
+                 smart_distribution: bool = True, static_nodes: bool = False):
+        self.static_nodes = static_nodes
+        if not static_nodes:
+            self.node_distributor_method = node_distributor_method or self.default_update_node_distribution_method_dynamic
+        else:
+            self.node_distributor_method = node_distributor_method or self.default_update_node_distribution_method_static
+
         self.smart_distribution = smart_distribution
 
     """DEFAULT Node handler for a power source, every pass of the while loop in the simulation, have to expect
     that the power sources may not be able to power their nodes, depending on the power sources provided to the 
     power domain"""
-    def default_update_node_distribution_method(self, current_power_source, associated_nodes, update_interval):
+    def default_update_node_distribution_method_dynamic(self, current_power_source, power_domain):
         """The standard node distribution method if the user does not provide a method. The method works based on the
             knowledge that the order of execution of the method is based on priority, if power source i is passed into
             the method then all power sources prior in list powerDomain.power_sources (sources with a higher priority)
@@ -408,34 +426,44 @@ class NodeDistributor:
 
                 Args:
                     current_power_source: the current power source being considered
-                    associated_nodes: All nodes associated with the power domain
-                    update_interval: the update period, this is needed inorder to find out power requirements of nodes
+                    power_domain: the power domain to retrieve the associated nodes(for dynamic distributions) and the
+                        update interval
                     in a time conscious context
         """
 
-        """Update renewable sources"""
         total_current_power = current_power_source.get_current_power()
 
-        for node in associated_nodes:
-            current_node_power_requirement = float(node.power_model.update_sensitive_measure(update_interval))
+        """Check if node is currently being powered by the desired power source"""
+        for node in power_domain.associated_nodes:
+            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+                power_domain.update_interval))
 
-            """Check if node is currently being powered by the desired power source"""
             if node.power_model.power_source == current_power_source:
                 if total_current_power < current_node_power_requirement:
                     node.power_model.power_source = None
                     current_power_source.remove_node(node)
                 else:
                     total_current_power = total_current_power - current_node_power_requirement
-                continue
+                    if current_power_source.powerType == PowerType.BATTERY:
+                        current_power_source.set_current_power(total_current_power)
 
-            """Check if node is currently unpowered"""
+        """Check if node is currently unpowered"""
+        for node in power_domain.associated_nodes:
+            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+                power_domain.update_interval))
+
             if node.power_model.power_source is None and current_node_power_requirement < total_current_power:
                 current_power_source.add_node(node)
                 node.power_model.power_source = current_power_source
                 total_current_power = total_current_power - current_node_power_requirement
-                continue
+                if current_power_source.powerType == PowerType.BATTERY:
+                    current_power_source.set_current_power(total_current_power)
 
-            """Check if any nodes in lower priority power sources can move up if excess energy is available"""
+        """Check if any nodes in lower priority power sources can move up if excess energy is available"""
+        for node in power_domain.associated_nodes:
+            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+                power_domain.update_interval))
+
             if self.smart_distribution:
                 if node.power_model.power_source is not None \
                         and node.power_model.power_source.priority > current_power_source.priority:
@@ -444,11 +472,34 @@ class NodeDistributor:
                         node.power_model.power_source.remove_node(node)
                         node.power_model.power_source = current_power_source
                         total_current_power = total_current_power - current_node_power_requirement
+                        if current_power_source.powerType == PowerType.BATTERY:
+                            current_power_source.set_current_power(total_current_power)
 
-        if current_power_source.powerType == PowerType.BATTERY:
-            print(f"Updated Battery")
-            current_power_source.set_current_power(total_current_power)
+    def default_update_node_distribution_method_static(self, current_power_source, power_domain):
+        total_current_power = current_power_source.get_current_power()
+        """Check if node is currently running"""
+        for node in current_power_source.associated_nodes:
+            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+                power_domain.update_interval))
+            if not node.check_if_node_paused():
+                if total_current_power < current_node_power_requirement:
+                    node.pause_node()
+                else:
+                    total_current_power = total_current_power - current_node_power_requirement
+                    if current_power_source.powerType == PowerType.BATTERY:
+                        current_power_source.set_current_power(total_current_power)
 
+        """Check if node is currently paused"""
+        for node in current_power_source.associated_nodes:
+            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+                power_domain.update_interval))
+
+            if node.check_if_node_paused():
+                if current_node_power_requirement < total_current_power:
+                    node.unpause_node()
+                    total_current_power = total_current_power - current_node_power_requirement
+                    if current_power_source.powerType == PowerType.BATTERY:
+                        current_power_source.set_current_power(total_current_power)
 
 
 class PowerDomain:
@@ -493,10 +544,15 @@ class PowerDomain:
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
-        if associated_nodes is None:
-            self.associated_nodes = []
+        if not self.node_distributor.static_nodes:
+            if associated_nodes is None:
+                self.associated_nodes = []
+            else:
+                self.associated_nodes = associated_nodes
         else:
-            self.associated_nodes = associated_nodes
+            if associated_nodes is not None:
+                raise AttributeError(f"Error: Node Distributor has been configured to handle static nodes, but the "
+                                     f"power domain has been provided nodes to dynamically distribute.")
         if update_interval < 1:
             raise ValueError(f"Error update interval should be positive.")
         self.update_interval = update_interval
@@ -518,7 +574,7 @@ class PowerDomain:
         """
         if self.power_sources is None:
             raise AttributeError(f"Error: No power source was provided")
-        if not self.associated_nodes:
+        if not self.node_distributor.static_nodes and not self.associated_nodes:
             raise AttributeError(f"Error: No nodes are present in the power domain")
 
         while True:
@@ -544,8 +600,7 @@ class PowerDomain:
                                          power_source is not None]:
 
                 """distribute nodes among power sources"""
-                self.node_distributor.node_distributor_method(current_power_source,
-                                                              self.associated_nodes, self.update_interval)
+                self.node_distributor.node_distributor_method(current_power_source, self)
 
                 """Record respective power readings this interval"""
                 current_ps_dictionary, current_ps_carbon_released = \
@@ -554,20 +609,20 @@ class PowerDomain:
                 current_carbon_intensities[current_power_source.name] = current_ps_dictionary
                 current_interval_released_carbon += current_ps_carbon_released
 
-            for node in self.associated_nodes:
-                if node.power_model.power_source is None:
-                    raise ValueError(f"Error: no power source found for node {node} at time {self.env.now}")
+            if not self.node_distributor.static_nodes:
+                for node in self.associated_nodes:
+                    if node.power_model.power_source is None:
+                        raise ValueError(f"Error: no power source found for node {node} at time {self.env.now}")
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
-            print(current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
     def record_power_source_carbon_released(self, current_power_source):
         current_power_source_dictionary = {}
         current_power_source_carbon_released = 0
-        for node in current_power_source.nodes_being_powered:
+        for node in current_power_source.associated_nodes:
             power_used = float(node.power_model.update_sensitive_measure(self.update_interval))
             carbon_intensity = current_power_source.get_current_carbon_intensity(0)
             carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
@@ -602,9 +657,9 @@ class PowerDomain:
         self.power_sources[self.power_sources.index(power_source)] = None
         power_source.power_domain = None
         power_source.priority = None
-        for node in power_source.nodes_being_powered:
+        for node in power_source.associated_nodes:
             node.power_model.power_source = None
-        power_source.nodes_being_powered = []
+        power_source.associated_nodes = []
 
     def assign_power_source_priority(self):
         for counter in range(len(self.power_sources)):
@@ -625,14 +680,20 @@ class PowerDomain:
         return sum(self.carbon_emitted)
 
     def add_node(self, node):
-        if node in self.associated_nodes:
-            raise ValueError(f"Error: {node.id} already present in list")
-        self.associated_nodes.append(node)
+        if not self.node_distributor.static_nodes:
+            if node in self.associated_nodes:
+                raise ValueError(f"Error: {node.id} already present in list")
+            self.associated_nodes.append(node)
+        else:
+            raise ValueError(f"Error: unable to append nodes when nodes are static")
 
     def remove_node(self, node):
-        if node not in self.associated_nodes:
-            raise ValueError(f"Error: {node.id} not present in list")
-        self.associated_nodes.remove(node)
+        if not self.node_distributor.static_nodes:
+            if node not in self.associated_nodes:
+                raise ValueError(f"Error: {node.id} not present in list")
+            self.associated_nodes.remove(node)
+        else:
+            raise ValueError(f"Error: unable to append nodes when nodes are static")
 
     @classmethod
     def get_current_time(cls, time):
@@ -655,8 +716,8 @@ class SolarPower(PowerSource):
     SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar",data_set_filename: str = SOLAR_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0):
-        super().__init__(env, name, data_set_filename, power_domain, priority)
+                 power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
 
@@ -688,8 +749,8 @@ class WindPower(PowerSource):
     WIND_DATASET_FILENAME = "01-01-2023 Ireland wind data.csv"
 
     def __init__(self, env: Environment, name: str = "Wind", data_set_filename: str = WIND_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0):
-        super().__init__(env, name, data_set_filename, power_domain, priority)
+                 power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
         self.inherent_carbon_intensity = 12
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
@@ -715,8 +776,8 @@ class GridPower(PowerSource):
     GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
 
     def __init__(self, env: Environment, name: str = "Grid",data_set_filename: str = GRID_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0):
-        super().__init__(env, name, data_set_filename, power_domain, priority)
+                 power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
         self.carbon_intensity = 0
         self.powerType = PowerType.MIXED
 
@@ -750,8 +811,8 @@ class BatteryPower(PowerSource):
 
     def __init__(self, env: Environment, data_set_filename: str = BATTERY_DATASET_FILENAME,
                  power_domain: PowerDomain = None, name: str = "Battery", priority: int = 10,
-                 total_power_available=40, charge_rate=22):
-        super().__init__(env, name, data_set_filename, power_domain, priority)
+                 total_power_available=40, charge_rate=22, associated_nodes=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
 
         self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
         self.powerType = PowerType.BATTERY
@@ -761,7 +822,6 @@ class BatteryPower(PowerSource):
         self.recharge_data = []
 
     def recharge_battery(self, power_source):
-        print(f"Power before:{self.remaining_power}")
         power_to_recharge = self.total_power - self.remaining_power
         time_to_recharge = math.ceil(power_to_recharge / self.recharge_rate)
         self.remaining_power = self.total_power

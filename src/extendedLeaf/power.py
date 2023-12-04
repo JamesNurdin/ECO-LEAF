@@ -478,13 +478,10 @@ class NodeDistributor:
 
     def default_update_node_distribution_method_static(self, current_power_source, power_domain):
         total_current_power = current_power_source.get_current_power()
-        print(f"Total Power before {total_current_power}")
         """Check if node is currently running"""
-        print(f"Checking if nodes that are currently running:")
         for node in current_power_source.associated_nodes:
             current_node_power_requirement = float(node.power_model.update_sensitive_measure(
                 power_domain.update_interval))
-            print(f"{node.name} currently has {current_node_power_requirement}, and paused status is: {node.check_if_node_paused()} ")
             if not node.check_if_node_paused():
                 if total_current_power < current_node_power_requirement:
                     node.pause_node()
@@ -504,8 +501,6 @@ class NodeDistributor:
                     total_current_power = total_current_power - current_node_power_requirement
                     if current_power_source.powerType == PowerType.BATTERY:
                         current_power_source.set_current_power(total_current_power)
-        print(f"Total Power after{total_current_power}")
-
 
 
 class PowerDomain:

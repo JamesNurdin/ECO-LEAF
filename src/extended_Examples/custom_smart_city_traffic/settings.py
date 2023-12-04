@@ -21,6 +21,7 @@ BLOCK_SIZE_WIDTH = 274  # Manhattan
 BLOCK_SIZE_HEIGHT = 80  # Manhattan
 CITY_WIDTH = (STREETS_PER_AXIS + 1) * BLOCK_SIZE_WIDTH
 CITY_HEIGHT = (STREETS_PER_AXIS + 1) * BLOCK_SIZE_HEIGHT
+NUMBER_RECHARGE_POINTS = 4
 
 """Taxi generation rate and speed distribution according to 2015 DEBS Grand Challenge dataset"""
 MAX_CARS_PER_MINUTE = 75  # This parameter can be adapted to scale the simulation

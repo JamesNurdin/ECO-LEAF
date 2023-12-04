@@ -1,5 +1,4 @@
 from typing import List, Tuple, Iterator
-
 import networkx as nx
 import simpy
 
@@ -7,6 +6,7 @@ from src.extended_Examples.custom_smart_city_traffic.infrastructure import Cloud
     LinkWifiBetweenTrafficLights, LinkWanDown, LinkWifiTaxiToTrafficLight, Taxi
 from mobility import Location
 from src.extended_Examples.custom_smart_city_traffic.orchestrator import CityOrchestrator
+from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, SolarPower, GridPower
 from src.extended_Examples.custom_smart_city_traffic.settings import *
 from src.extendedLeaf.infrastructure import Infrastructure
 
@@ -14,26 +14,32 @@ from src.extendedLeaf.infrastructure import Infrastructure
 class City:
     def __init__(self, env: simpy.Environment):
         self.env = env
-        self.street_graph, self.entry_point_locations, self.traffic_light_locations = _create_street_graph()
+        self.street_graph, self.entry_point_locations, self.recharge_locations = _create_street_graph()
+
         self.infrastructure = Infrastructure()
 
         # Create infrastructure
         self.infrastructure.add_node(Cloud())
-        for location in self.traffic_light_locations:
-            self._add_traffic_light(location)
-        for location in RNG.choice(self.traffic_light_locations, FOG_DCS):
-            self._add_fog_node(location)
+        recharge_station_counter = 0
+        for location in self.entry_point_locations:
+            self._add_recharge_station(self.env, location, recharge_station_counter)
+            recharge_station_counter += 1
 
-
-    def _add_traffic_light(self, location: Location):
-        """Traffic lights are connected to the cloud via WAN and to other traffic lights in range via WiFi."""
+    def _add_recharge_station(self, env: simpy.Environment,location: Location,recharge_station_counter):
+        """Recharge Points are connected to the cloud via WAN, they are powered by solar panels and the National Grid"""
         cloud: Cloud = self.infrastructure.nodes(type_filter=Cloud)[0]
-        traffic_light = TrafficLight(location, application_sink=cloud)
-        self.infrastructure.add_link(LinkWanUp(traffic_light, cloud))
-        self.infrastructure.add_link(LinkWanDown(cloud, traffic_light))
-        for traffic_light_ in self._traffic_lights_in_range(traffic_light):
-            self.infrastructure.add_link(LinkWifiBetweenTrafficLights(traffic_light, traffic_light_))
-            self.infrastructure.add_link(LinkWifiBetweenTrafficLights(traffic_light_, traffic_light))
+        power_domain = PowerDomain(env, name=f"Power Domain {recharge_station_counter}",
+                                   start_time_str="19:00:00", update_interval=1)
+        print(power_domain)
+        solar_power = SolarPower(env, power_domain=power_domain, priority=0)
+        grid1 = GridPower(env, power_domain=power_domain, priority=5)
+        power_domain.add_power_source(grid1)
+        power_domain.add_power_source(solar_power)
+        env.process(power_domain.run(env))  # registering power metering process 2
+
+        #traffic_light = TrafficLight(location, application_sink=cloud)
+        #self.infrastructure.add_link(LinkWanUp(traffic_light, cloud))
+        #self.infrastructure.add_link(LinkWanDown(cloud, traffic_light))
 
     def _add_fog_node(self, location: Location):
         """Fog nodes are connected to a traffic lights via Ethernet (no power usage)"""
@@ -66,20 +72,18 @@ class City:
 
 def _create_street_graph() -> Tuple[nx.Graph, List[Location], List[Location]]:
     graph = nx.Graph()
-    n_points = STREETS_PER_AXIS + 2  # crossings + entry points
+    """Need to consider, charge points, smart cameras and entry points"""
+    n_points = STREETS_PER_AXIS + 2  # plus two accounting for removal of corners
     step_size_x = CITY_WIDTH / (n_points - 1)
     step_size_y = CITY_HEIGHT / (n_points - 1)
 
     entry_point_locations = []
-    traffic_light_locations = []
     locations = [[None for _ in range(n_points)] for _ in range(n_points)]
     for x in range(n_points):
         for y in range(n_points):
             location = Location(x * step_size_x, y * step_size_y)
-            if x == 0 or x == n_points - 1 or y == 0 or y == n_points - 1:
+            if x == 0 or x == (n_points - 1) or y == 0 or y == (n_points - 1):
                 entry_point_locations.append(location)
-            else:
-                traffic_light_locations.append(location)
             locations[x][y] = location
             graph.add_node(location)
             if x > 0 and y > 0:
@@ -95,4 +99,13 @@ def _create_street_graph() -> Tuple[nx.Graph, List[Location], List[Location]]:
         graph.remove_node(corner_location)
         entry_point_locations.remove(corner_location)
 
-    return graph, entry_point_locations, traffic_light_locations
+    potential_charging_points = []
+    for x in range(n_points):
+        for y in range(n_points):
+            location = locations[x][y]
+            if location not in entry_point_locations:
+                potential_charging_points.append(location)
+
+    charging_points = RNG.choice(potential_charging_points, size=NUMBER_RECHARGE_POINTS, replace=False)
+
+    return graph, entry_point_locations, charging_points
