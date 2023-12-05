@@ -12,7 +12,6 @@ import simpy
 from simpy import Environment
 from enum import auto
 
-
 logger = logging.getLogger(__name__)
 _unnamed_power_meters_created = 0
 
@@ -125,7 +124,6 @@ class PowerModelNode(PowerModel):
 
     def set_parent(self, parent):
         self.node = parent
-
 
 class PowerModelLink(PowerModel):
     def __init__(self, energy_per_bit: float):
@@ -320,7 +318,7 @@ class PowerSource(ABC):
 
     def remove_node(self, node):
         if node not in self.associated_nodes:
-            raise ValueError(f"Error: {node.id} not present in list")
+            raise ValueError(f"Error: {node.name} not present in list")
         node.power_model.power_source = None
         self.associated_nodes.remove(node)
 
@@ -381,7 +379,7 @@ class PowerSource(ABC):
 
     def add_node(self, node):
         if node in self.associated_nodes:
-            raise ValueError(f"Error: {node.id} already present in list")
+            raise ValueError(f"Error: {node.name} already present in list")
         node.power_model.power_source = self
         self.associated_nodes.append(node)
 
@@ -444,7 +442,6 @@ class NodeDistributor:
 
             if node.power_model.power_source == current_power_source:
                 if total_current_power < current_node_power_requirement:
-                    node.power_model.power_source = None
                     current_power_source.remove_node(node)
                 else:
                     total_current_power = total_current_power - current_node_power_requirement
@@ -458,7 +455,6 @@ class NodeDistributor:
 
             if node.power_model.power_source is None and current_node_power_requirement < total_current_power:
                 current_power_source.add_node(node)
-                node.power_model.power_source = current_power_source
                 total_current_power = total_current_power - current_node_power_requirement
                 if current_power_source.powerType == PowerType.BATTERY:
                     current_power_source.set_current_power(total_current_power)
@@ -472,9 +468,8 @@ class NodeDistributor:
                 if node.power_model.power_source is not None \
                         and node.power_model.power_source.priority > current_power_source.priority:
                     if current_node_power_requirement < total_current_power:
-                        current_power_source.add_node(node)
                         node.power_model.power_source.remove_node(node)
-                        node.power_model.power_source = current_power_source
+                        current_power_source.add_node(node)
                         total_current_power = total_current_power - current_node_power_requirement
                         if current_power_source.powerType == PowerType.BATTERY:
                             current_power_source.set_current_power(total_current_power)
@@ -620,6 +615,7 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
+            print(current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
@@ -826,6 +822,7 @@ class BatteryPower(PowerSource):
         self.recharge_data = []
 
     def recharge_battery(self, power_source):
+        print(f"Power before:{self.remaining_power}")
         power_to_recharge = self.total_power - self.remaining_power
         time_to_recharge = math.ceil(power_to_recharge / self.recharge_rate)
         self.remaining_power = self.total_power

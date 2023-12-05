@@ -319,7 +319,8 @@ class PowerSource(ABC):
 
     def remove_node(self, node):
         if node not in self.associated_nodes:
-            raise ValueError(f"Error: {node.id} not present in list")
+            raise ValueError(f"Error: {node.name} not present in list")
+        node.power_model.power_source = None
         self.associated_nodes.remove(node)
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str = None):
@@ -379,7 +380,8 @@ class PowerSource(ABC):
 
     def add_node(self, node):
         if node in self.associated_nodes:
-            raise ValueError(f"Error: {node.id} already present in list")
+            raise ValueError(f"Error: {node.name} already present in list")
+        node.power_model.power_source = self
         self.associated_nodes.append(node)
 
 
@@ -442,7 +444,6 @@ class NodeDistributor:
 
             if node.power_model.power_source == current_power_source:
                 if total_current_power < current_node_power_requirement:
-                    node.power_model.power_source = None
                     current_power_source.remove_node(node)
                 else:
                     total_current_power = total_current_power - current_node_power_requirement
@@ -456,7 +457,6 @@ class NodeDistributor:
 
             if node.power_model.power_source is None and current_node_power_requirement < total_current_power:
                 current_power_source.add_node(node)
-                node.power_model.power_source = current_power_source
                 total_current_power = total_current_power - current_node_power_requirement
                 if current_power_source.powerType == PowerType.BATTERY:
                     current_power_source.set_current_power(total_current_power)
@@ -470,9 +470,8 @@ class NodeDistributor:
                 if node.power_model.power_source is not None \
                         and node.power_model.power_source.priority > current_power_source.priority:
                     if current_node_power_requirement < total_current_power:
-                        current_power_source.add_node(node)
                         node.power_model.power_source.remove_node(node)
-                        node.power_model.power_source = current_power_source
+                        current_power_source.add_node(node)
                         total_current_power = total_current_power - current_node_power_requirement
                         if current_power_source.powerType == PowerType.BATTERY:
                             current_power_source.set_current_power(total_current_power)

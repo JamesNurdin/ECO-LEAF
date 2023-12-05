@@ -37,7 +37,7 @@ FOG_UTILIZATION_THRESHOLD = 0.85
 CLOUD_CU = np.inf
 CLOUD_WATT_PER_CU = 700e-6
 
-TRAFFIC_LIGHT_STATIC_POWER = 100
+RECHARGE_STATION_STATIC_POWER = 300
 
 """Network (Latency is only used for determining shortest paths in the routing)"""
 WAN_BANDWIDTH = np.inf

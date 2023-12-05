@@ -48,6 +48,15 @@ class FogNode(Node):
         if FOG_IDLE_SHUTDOWN and self.used_cu == 0:
             self.shutdown = True
 
+class RechargeStation(Node):
+    def __init__(self, location: "Location", application_sink: Node, _recharge_station_counter):
+        super().__init__(name=f"Recharge Station {_recharge_station_counter}", location=location,
+                         power_model=PowerModelNode(power_per_cu=0, static_power=RECHARGE_STATION_STATIC_POWER))
+        self.application = self._create_recharge_station_application(application_sink)
+
+    def _create_recharge_station_application(self, application_sink):
+        pass
+
 
 class TrafficLight(Node):
     def __init__(self, location: "Location", application_sink: Node):
