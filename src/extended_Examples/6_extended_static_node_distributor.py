@@ -16,7 +16,6 @@ def main():
     node1 = Node("node1", cu=10, power_model=PowerModelNode(max_power=30, static_power=3))  # source
     node2 = Node("node2", cu=40, power_model=PowerModelNode(max_power=70, static_power=10))  # processing task
     node3 = Node("node3", cu=20, power_model=PowerModelNode(max_power=50, static_power=7))  # sink
-    node4 = Node("node4", cu=100, power_model=PowerModelNode(max_power=130, static_power=20))
 
     infrastructure = Infrastructure()
 
@@ -30,19 +29,13 @@ def main():
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
     wifi_link_from_source = Link(node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
     wifi_link_to_sink = Link(node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
-    wifi_link_to_node4 = Link(node2, node4, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_sink)
     infrastructure.add_link(wifi_link_from_source)
-    infrastructure.add_link(wifi_link_to_node4)
 
     # Initialise three tasks
     source_task = SourceTask(cu=0.4, bound_node=node1)
     processing_task = ProcessingTask(cu=5)
     sink_task = SinkTask(cu=1, bound_node=node3)
-
-    # Initialise and allocate a separate task for Node 4
-    task = Task(cu=100)
-    task.allocate(node4)
 
     # Build Application
     application = Application()
@@ -70,32 +63,10 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
 
-def custom_distribution_method(current_power_source: PowerSource, power_domain):
-    """Update renewable sources"""
-    total_current_power = current_power_source.get_current_power()
-
-    for node in power_domain.associated_nodes:
-        current_node_power_requirement = float(node.power_model.update_sensitive_measure(power_domain.update_interval))
-
-        """Check if node is currently being powered by the desired power source"""
-        if node.power_model.power_source == current_power_source:
-            if total_current_power < current_node_power_requirement:
-                node.power_model.power_source = None
-                current_power_source.remove_node(node)
-            else:
-                total_current_power = total_current_power - current_node_power_requirement
-            continue
-
-        """Check if node is currently unpowered"""
-        if node.power_model.power_source is None and current_node_power_requirement < total_current_power:
-            current_power_source.add_node(node)
-            node.power_model.power_source = current_power_source
-            total_current_power = total_current_power - current_node_power_requirement
-            continue
-
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
         return self.infrastructure.node("node2")
+
 
 if __name__ == '__main__':
     main()

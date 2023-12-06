@@ -120,7 +120,7 @@ class PowerModelNode(PowerModel):
             dynamic_power = self.power_per_cu * self.node.used_cu * update_interval/60
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
-        return PowerMeasurement(dynamic=dynamic_power* update_interval/60, static=self.static_power* update_interval/60)
+        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power* update_interval/60)
 
     def set_parent(self, parent):
         self.node = parent
@@ -241,6 +241,7 @@ class PowerMeter:
                 self.callback(measurement)
             logger.debug(f"{env.now}: {self.name}: {measurement}")
             yield env.timeout(self.measurement_interval)
+
 
 class PowerType(auto):
     """Power is consumed from a source that is renewable, we assume that the carbon intensity is small and static."""
@@ -407,9 +408,11 @@ class NodeDistributor:
         print(static_nodes)
         self.static_nodes = static_nodes
         if not static_nodes:
-            self.node_distributor_method = node_distributor_method or self.default_update_node_distribution_method_dynamic
+            self.node_distributor_method = node_distributor_method or \
+                                           self.default_update_node_distribution_method_dynamic
         else:
-            self.node_distributor_method = node_distributor_method or self.default_update_node_distribution_method_static
+            self.node_distributor_method = node_distributor_method or \
+                                           self.default_update_node_distribution_method_static
 
         self.smart_distribution = smart_distribution
 
@@ -717,7 +720,7 @@ class SolarPower(PowerSource):
     """
     SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
-    def __init__(self, env: Environment, name: str = "Solar",data_set_filename: str = SOLAR_DATASET_FILENAME,
+    def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
         super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
         self.inherent_carbon_intensity = 46
@@ -777,7 +780,7 @@ class GridPower(PowerSource):
     """
     GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
 
-    def __init__(self, env: Environment, name: str = "Grid",data_set_filename: str = GRID_DATASET_FILENAME,
+    def __init__(self, env: Environment, name: str = "Grid", data_set_filename: str = GRID_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
         super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
         self.carbon_intensity = 0
