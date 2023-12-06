@@ -3,9 +3,9 @@ from typing import List, Optional
 import networkx as nx
 import simpy
 
-from src.extended_Examples.custom_smart_city_traffic.infrastructure import TrafficLight, Taxi
+from src.extended_Examples.custom_smart_city_traffic.infrastructure import TrafficLight, Taxi, RechargeStation
 from src.extended_Examples.custom_smart_city_traffic.settings import UPDATE_MOBILITY_INTERVAL, MAX_CARS_PER_MINUTE, RNG, \
-    TAXI_COUNT_DISTRIBUTION, TAXI_SPEED_DISTRIBUTION
+    TAXI_COUNT_DISTRIBUTION, TAXI_SPEED_DISTRIBUTION, TAXI_BATTERY_SIZE
 from src.extendedLeaf.mobility import Location
 
 
@@ -17,13 +17,11 @@ class MobilityManager:
     def run(self, env: simpy.Environment):
         while True:
             for taxi in self._create_taxis(env):
-                self.city.add_taxi_and_start_v2i_app(taxi)
                 env.process(self._remove_taxi_process(env, taxi))
             yield env.timeout(UPDATE_MOBILITY_INTERVAL)
 
     def _remove_taxi_process(self, env: simpy.Environment, taxi: "Taxi"):
         yield env.timeout(taxi.mobility_model.life_time)
-        self.city.remove_taxi_and_stop_v2i_app(taxi)
 
     def _create_taxis(self, env: simpy.Environment) -> List["Taxi"]:
         avg_taxi_speed = _avg_taxi_speed(env.now)
@@ -32,19 +30,43 @@ class MobilityManager:
         return [self._create_taxi(env=env, speed=avg_taxi_speed) for _ in range(taxi_count)]
 
     def _create_taxi(self, env: simpy.Environment, speed: float) -> "Taxi":
-        start = self._random_gate_location()
-        dst = self._random_gate_location()
-        while not start.distance(dst) > 0.5:
+        battery_size = int(RNG.beta(30, 6)*TAXI_BATTERY_SIZE)
+        print(battery_size)
+        recharge_stations = []
+        if battery_size < 0.7*TAXI_BATTERY_SIZE: # guarantee that a recharge station is passed through
+            print("++++++++++++++++++")
+            start = self._random_gate_location()
             dst = self._random_gate_location()
-        path = nx.shortest_path(self.city.street_graph, source=start, target=dst)
+            while not start.distance(dst) > 0.5:
+                dst = self._random_gate_location()
+            recharge_station_location = self._random_recharge_location()
+            recharge_station = self.get_recharge_Station(recharge_station_location)
+            recharge_stations.append(recharge_station)
+            print(f"Recharge station at {recharge_station}")
+            path = nx.shortest_path(self.city.street_graph, source=start, target=recharge_station_location) + \
+                nx.shortest_path(self.city.street_graph, source=recharge_station_location, target=dst)
+        else:
+            start = self._random_gate_location()
+            dst = self._random_gate_location()
+            while not start.distance(dst) > 0.5:
+                dst = self._random_gate_location()
+            path = nx.shortest_path(self.city.street_graph, source=start, target=dst)
         mobility_model = TaxiMobilityModel(path, speed=speed, start_time=env.now)
-        return Taxi(env, mobility_model, application_sinks=self._traffic_lights_on_taxi_path(path))
+        return Taxi(env, mobility_model, application_sinks=recharge_stations, battery_size=battery_size)
 
     def _random_gate_location(self) -> Location:
         return RNG.choice(self.city.entry_point_locations)
 
+    def _random_recharge_location(self) -> Location:
+        return RNG.choice(self.city.recharge_locations)
+
+    def get_recharge_Station(self, location) -> RechargeStation:
+        for rs in self.city.infrastructure.nodes(type_filter=RechargeStation):
+            if rs.location == location:
+                return rs
+        raise ValueError(f"Error: No recharge station at ({location.x},{location.y})")
     def _traffic_lights_on_taxi_path(self, path: List) -> List[TrafficLight]:
-        return [tl for tl in self.city.infrastructure.nodes(type_filter=TrafficLight) if tl.location in path]
+        return [tl for tl in self.city.infrastructure.nodes(type_filter=RechargeStation) if tl.location in path]
 
 
 class TaxiMobilityModel:

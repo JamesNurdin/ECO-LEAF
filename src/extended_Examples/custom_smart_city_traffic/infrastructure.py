@@ -3,6 +3,7 @@ from typing import List
 import simpy
 
 from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask
+from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, NodeDistributor, BatteryPower
 from src.extended_Examples.custom_smart_city_traffic.settings import *
 from src.extendedLeaf.infrastructure import Link, Node
 from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
@@ -77,13 +78,21 @@ class TrafficLight(Node):
 
 
 class Taxi(Node):
-    def __init__(self, env: simpy.Environment, mobility_model: "TaxiMobilityModel", application_sinks: List[Node]):
+    def __init__(self, env: simpy.Environment, mobility_model: "TaxiMobilityModel", application_sinks: List[Node],battery_size):
         global _taxis_created
         super().__init__(f"taxi_{_taxis_created}")
         _taxis_created += 1
         self.env = env
-        self.application = self._create_v2i_application(application_sinks)
+        # self.application = self._create_v2i_application(application_sinks)
         self.mobility_model = mobility_model
+        self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
+        self.power_domain = PowerDomain(env, name="Power Domain 1", associated_nodes=[self],
+                                   start_time_str="19:00:00", update_interval=1, node_distributor=NodeDistributor())
+        battery_power = BatteryPower(env, power_domain=self.power_domain, priority=0, total_power_available=TAXI_BATTERY_SIZE)
+        self.power_domain.add_power_source(battery_power)
+
+    def power_used(self, distance_traveled, elapsed_time): # distance in meters, time in baseline units of time
+        return self.power_per_unit_traveled * distance_traveled * elapsed_time
 
     @property
     def location(self) -> "Location":

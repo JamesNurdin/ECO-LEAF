@@ -12,6 +12,7 @@ from src.extendedLeaf.infrastructure import Infrastructure
 from src.extended_Examples.custom_smart_city_traffic.power import PowerMeter, PowerDomain, SolarPower, GridPower, \
     BatteryPower
 
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
 
@@ -21,11 +22,10 @@ def main():
     env = simpy.Environment()
     city = City(env)
     for power_domain in city.power_domains:
-        print(f"Recharge station name: {power_domain.name}")
-        print(f"{power_domain.associated_nodes}")
         env.process(power_domain.run(env))
+    mobility_manager = MobilityManager(city)
+    env.process(mobility_manager.run(env))
     env.run(until=360)
-
 
 if __name__ == '__main__':
     main()

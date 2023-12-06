@@ -35,7 +35,7 @@ class City:
         recharge_station = RechargeStation(location=location, application_sink=cloud,
                                            _recharge_station_counter=_recharge_station_counter)
         power_domain = PowerDomain(env, name=f"Power Domain Recharge Station {_recharge_station_counter}", node_distributor=NodeDistributor(static_nodes=False),
-                                   start_time_str="19:00:00", update_interval=1, associated_nodes=[recharge_station])
+                                   start_time_str=START_TIME, update_interval=1, associated_nodes=[recharge_station])
         solar_power = SolarPower(env, name=f"Solar Panel Recharge Station {_recharge_station_counter}",
                                  power_domain=power_domain, priority=0)
         grid1 = GridPower(env, power_domain=power_domain, priority=5)
@@ -47,6 +47,12 @@ class City:
         _recharge_station_counter += 1
         return power_domain
 
+    def find_power_domain_containing_node(self, node_name):
+        for power_domain in self.power_domains:
+            for node in power_domain.associated_nodes:
+                if node.name == node_name:
+                    return power_domain
+        return None
     def _add_fog_node(self, location: Location):
         """Fog nodes are connected to a traffic lights via Ethernet (no power usage)"""
         fog_node = FogNode(location)

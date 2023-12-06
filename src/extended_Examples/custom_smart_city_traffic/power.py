@@ -615,7 +615,6 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
-            print(current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
