@@ -165,15 +165,17 @@
 * *0.5 Hours* Included documentation into the classes and larger methods of Power.py
 * *1.5 Hours* Now that the project is fairly expanded upon, I have relocated my own version of Extended LEAF to my project repository, had a few issues with modules not importing but all I had to do was include the src. extension to the imports and now they work without an issue.
 ### 29th November 
-* *2 Hours* Introduced the ability to pause and unpause nodes for the user, in particular the proces works by considering the node distributor as static or dynamic, if the user wants a dynamic node distribution system all they need to do is pass the nodes through the power domain to allow for auto handling, if they want static nodes (nodes dont move) then they have to pass the nodes through the power sources, I have also created a default pause node distributor method which will just pause and unpause nodes based on power availability.
+* *2 Hours* Introduced the ability to pause and unpause nodes for the user, in particular the proces works by considering the node distributor as static or dynamic, if the user wants a dynamic node distribution system all they need to do is pass the nodes through the power domain to allow for auto handling, if they want static nodes (nodes don't move) then they have to pass the nodes through the power sources, I have also created a default pause node distributor method which will just pause and unpause nodes based on power availability.
 ### 30th November
 * *2.5 Hours* Properly started on the main example, after exchanges between Lauritz a few weeks back the main work on the example has been undertaken, currently the initial graph and power domains for the recharge points have been created, as previously stated the focus will be to avoid too much detail on the path and calculations of power on smart cars (this will be for the potential users of Extended LEAF) and more on showing the capabilities of the framework.
 
 ## Week 12
 ### 1st December
-* *1.5 Hours* After initially testing the recharge points, I have noticed that with the static nodes the reference to the power nodes was missing during initalisation, so when nodes are passed through to the power source rather than the power domain, a link is created from the start rather than during the node distribution. After testing, I fixed an issue regarding this.
-###
+* *1.5 Hours* After initially testing the recharge points, I have noticed that with the static nodes the reference to the power nodes was missing during initialisation, so when nodes are passed through to the power source rather than the power domain, a link is created from the start rather than during the node distribution. After testing, I fixed an issue regarding this.
+### 2nd December
 * *2 Hours* Now that the locations of the nodes had been introduced last week, I have created a class for the RechargeStation (subclass of node), one aspect that took some time to fully realise was that the as a result of the main focus of extended leaf has been the power source and power domain managers the association has been one way between these and the nodes, as a result some time to find the optimal way to keep the focus towards the nodes for the example. The best approach found was to keep a reference to all power domains in the city class. An initial test running power domain run shows this is viable
+### 3rd December
+* *3.5 Hours* Started work on the powered Taxi, based on the logic of the original Taxi, this utilises power and needs to be considered, so far they have their initial battery power weighted towards being full, if below a threshold they will drive to a recharge station (source application), if not they just pass through, this is to avoid all taxis being used and can be reconfigured so a good amount stop to recharge.
 * TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
