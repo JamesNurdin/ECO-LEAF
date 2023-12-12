@@ -168,14 +168,24 @@
 * *2 Hours* Introduced the ability to pause and unpause nodes for the user, in particular the proces works by considering the node distributor as static or dynamic, if the user wants a dynamic node distribution system all they need to do is pass the nodes through the power domain to allow for auto handling, if they want static nodes (nodes don't move) then they have to pass the nodes through the power sources, I have also created a default pause node distributor method which will just pause and unpause nodes based on power availability.
 ### 30th November
 * *2.5 Hours* Properly started on the main example, after exchanges between Lauritz a few weeks back the main work on the example has been undertaken, currently the initial graph and power domains for the recharge points have been created, as previously stated the focus will be to avoid too much detail on the path and calculations of power on smart cars (this will be for the potential users of Extended LEAF) and more on showing the capabilities of the framework.
-
-## Week 12
 ### 1st December
 * *1.5 Hours* After initially testing the recharge points, I have noticed that with the static nodes the reference to the power nodes was missing during initialisation, so when nodes are passed through to the power source rather than the power domain, a link is created from the start rather than during the node distribution. After testing, I fixed an issue regarding this.
 ### 2nd December
 * *2 Hours* Now that the locations of the nodes had been introduced last week, I have created a class for the RechargeStation (subclass of node), one aspect that took some time to fully realise was that the as a result of the main focus of extended leaf has been the power source and power domain managers the association has been one way between these and the nodes, as a result some time to find the optimal way to keep the focus towards the nodes for the example. The best approach found was to keep a reference to all power domains in the city class. An initial test running power domain run shows this is viable
 ### 3rd December
 * *3.5 Hours* Started work on the powered Taxi, based on the logic of the original Taxi, this utilises power and needs to be considered, so far they have their initial battery power weighted towards being full, if below a threshold they will drive to a recharge station (source application), if not they just pass through, this is to avoid all taxis being used and can be reconfigured so a good amount stop to recharge.
+
+## Week 12
+### 4th December 
+* *1.5 Hours* Continued work on the example in order to get the example to start calculating the expected carbon intensity in preparation before the meeting with Lauritz.
+### 6th December 
+* *1 Hour* Had the meeting with Lauritz and discussed the progress made this week along with what work was intended to be completed over the two-week meeting gap, in addition I informed him that I was going to take the 7th and 8th off to focus on an upcoming exam, but would continue afterwards. Also updated weekly meeting minutes.
+### 9th December 
+* *2 Hours* Started work on the test suite to ensure that the framework is correctly functioning now that all the core features are finished. Researched options and chose to go with unittest.
+### 10th December 
+* *3.5 Hours* Started the status report, to ensure that the project has a clear aim I, revisited the paper for LEAF to understand the initial motivations for that project then using the initial project description set out to write the first two parts of the project.
+### 11th December
+* *4 Hours* Finished off the status report ready for it to be submitted for tomorrow. In particular for the plan I thought carefully about the work I needed to get done and have decided to use the time over the holidays to heavily invest in the project ensuring that the framework is nearly finished by the start of semester 2.
 * TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])

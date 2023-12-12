@@ -17,32 +17,32 @@ class MobilityManager:
     def run(self, env: simpy.Environment):
         while True:
             for taxi in self._create_taxis(env):
+                # TODO Implement logic to add Process when Taxi is recharging
                 env.process(self._remove_taxi_process(env, taxi))
             yield env.timeout(UPDATE_MOBILITY_INTERVAL)
 
     def _remove_taxi_process(self, env: simpy.Environment, taxi: "Taxi"):
+        # TODO Implement removal
         yield env.timeout(taxi.mobility_model.life_time)
 
     def _create_taxis(self, env: simpy.Environment) -> List["Taxi"]:
         avg_taxi_speed = _avg_taxi_speed(env.now)
         avg_taxi_count = _avg_taxi_count(env.now)
         taxi_count = RNG.poisson(avg_taxi_count)
-        return [self._create_taxi(env=env, speed=avg_taxi_speed) for _ in range(taxi_count)]
+        return [self._create_taxi(env=env, speed=avg_taxi_speed, counter=counter) for counter in range(taxi_count)]
 
-    def _create_taxi(self, env: simpy.Environment, speed: float) -> "Taxi":
+    def _create_taxi(self, env: simpy.Environment, speed: float, counter) -> "Taxi":
         battery_size = int(RNG.beta(30, 6)*TAXI_BATTERY_SIZE)
-        print(battery_size)
+        print(f"Battery size for taxi_{counter} at {env.now}: {battery_size}Wh")
         recharge_stations = []
-        if battery_size < 0.7*TAXI_BATTERY_SIZE: # guarantee that a recharge station is passed through
-            print("++++++++++++++++++")
+        if battery_size < 0.7*TAXI_BATTERY_SIZE:  # guarantee that a recharge station is passed through
             start = self._random_gate_location()
             dst = self._random_gate_location()
             while not start.distance(dst) > 0.5:
                 dst = self._random_gate_location()
             recharge_station_location = self._random_recharge_location()
-            recharge_station = self.get_recharge_Station(recharge_station_location)
+            recharge_station = self.get_recharge_station(recharge_station_location)
             recharge_stations.append(recharge_station)
-            print(f"Recharge station at {recharge_station}")
             path = nx.shortest_path(self.city.street_graph, source=start, target=recharge_station_location) + \
                 nx.shortest_path(self.city.street_graph, source=recharge_station_location, target=dst)
         else:
@@ -60,11 +60,12 @@ class MobilityManager:
     def _random_recharge_location(self) -> Location:
         return RNG.choice(self.city.recharge_locations)
 
-    def get_recharge_Station(self, location) -> RechargeStation:
+    def get_recharge_station(self, location) -> RechargeStation:
         for rs in self.city.infrastructure.nodes(type_filter=RechargeStation):
             if rs.location == location:
                 return rs
         raise ValueError(f"Error: No recharge station at ({location.x},{location.y})")
+
     def _traffic_lights_on_taxi_path(self, path: List) -> List[TrafficLight]:
         return [tl for tl in self.city.infrastructure.nodes(type_filter=RechargeStation) if tl.location in path]
 

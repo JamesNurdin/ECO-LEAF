@@ -2,6 +2,7 @@
 \documentclass[11pt]{article}
 \usepackage{times}
     \usepackage{fullpage}
+\usepackage{enumitem}
     
     \title{Carbon Emissions Estimation in Edge Cloud Computing Simulations Status Report}
     \author{James Nurdin 2570809n}
@@ -9,9 +10,7 @@
     \begin{document}
 
     \maketitle
-    
-    
-     
+
 
 \section{Status report}
 
@@ -19,52 +18,124 @@
 
 \subsubsection{Motivation}\label{motivation}
 
-\emph{{{}Clearly motivate the purpose of your project; why someone would
-care about what you are doing{}}}
+As the information and communications industry is increasingly consuming larger quantities of the global energy demand,
+a possible solution to the problem exists in the form of a distributed computing process called fog computing.
+A simulation tool called LEAF was previously developed in order to provide a graph based approach to model Large Energy-Aware Fog
+computing environments in order to facilitate research and industrial applications of the technique.
+With sustainable computing becoming a major subfield within the discipline of computer science the ability to augment the
+framework to allow for simulations to be carbon aware could provide further research and industrial opportunities to utilise fog computing.
+By allowing the model to have a carbon awareness during the runtime of the simulation, the framework allows the user to
+exploit periods of low carbon intensity or potential onsite excess power to optimise the execution of tasks for
+compute nodes to minimise the models carbon footprint.
 
 \subsubsection{Aims}\label{aims}
 
-\emph{{{}Clearly state what the project is intended to do. This should
-be something which is measurable; it should be possible to tell if you
-succeeded{}}}
+This project aims to extend the capabilities of LEAF in order to provide users with the ability to estimate potential environmental footprints
+of simulations through the quantity of carbon being released.
+In particular the extension aims to provide a suite of features to allow users to curate custom power sources and the ability to control
+how they are distributed amongst a defined infrastructure.
+The framework will also provide the ability to explicitly define conditions relating to the nature of the simulation
+such as the environment and restrictions of the infrastructure to allow for the accurate capture of carbon emissions.
+The result of this will generate a realistic report of how carbon is released during the simulation.
+The effectiveness of the project will be evaluating various scenarios to:
+First demonstrate the accuracy of estimated carbon footprints of
+smaller scenarios.
+Then investigate and analyse realistic examples to demonstrate how the distribution of computational nodes amongst
+aggregated power sources and environmental conditions can have adverse affects on the total carbon emission, and how
+exploiting opportunities can reduce the carbon footprint.
+
+\newpage
 
 \subsection{Progress}\label{progress}
 
-\emph{{{}Briefly state your progress so far, as a bulleted list{}}}
+\begin{itemize}[itemsep=0pt]
+  \item Initial reading material and research carried out, along with other relevant literature.
+  \item Using the existing framework chose and pulled the repository chosen to base extended version upon.
+  \item Learned the existing framework's inner workings and creating small examples to demonstrate understanding.
+  \item Extracted relevant files to build upon and created the initial version of the extended framework.
+  \item Implemented the core features of the framework to enable carbon emissions to be generated.
+  \item Researched and incorporated relevant online datasets to allow for accurate demonstrations.
+  \item Created small examples to demonstrate the core aspects of the new framework by including default implementations.
+  \item Started research and development of main example to be used in dissertation to evaluate the effectiveness of the framework.
+\end{itemize}
 
 \subsection{Problems and risks}\label{problems-and-risks}
 
 \subsubsection{Problems}\label{problems}
 
-\emph{{{}What problems have you had so far, that have held up the
-project?{}}}
+\begin{itemize}[itemsep=0pt]
+\item Assumptions concerning power sources limiting the scope of realistic scenarios.
+\item Choosing initial data sets to base default power sources from that were appropriate and available to use.
+\item Deciding on an appropriate final example to demonstrate the framework that is realistic but can be developed using the framework.
+\item Ensuring that carbon emissions were correct and accurate.
+\item Various refactors to the framework to improve usability.
+\item Utilising time based calculations whilst working within a discrete event space.
+\end{itemize}
 
 \subsubsection{Risks}\label{risks}
 
-\emph{{{}What problems do you foresee in the future and how will you
-mitigate them?{}}}
+\begin{itemize}[itemsep=0pt]
+    \item Core features of the framework are either finished or are close, however a collection of smaller features are still available to be included but the main example is currently taking priority.
+        \textbf{Mitigation}: Concurrently work on the core example while introducing features along side development prioritising worthwhile features first and omitting smaller features if unable to incorporate them.
+    \item The main example will require realistic data and a strong understanding of the scenario and context respectively.
+        \textbf{Mitigation}: Research the context of the scenario and ensure that accurate data is used and the example is capable of demonstrating the extended framework.
+    \item While carbon emissions are calculated currently no approach to permanently capture them outside of simulations is being used.
+        \textbf{Mitigation}: Capture and record all quantities generated as raw data and proceed to allow for optional processing into figures as an option.
+\end{itemize}
+
+\newpage
 
 \subsection{Plan}\label{plan}
-
-\emph{{{}Time plan, in roughly weekly to monthly blocks, up until
-submission week{}}}
-
-    
+\subsubsection{Semester 1 and December period:}\label{Semester 1}
+    For the remaining weeks before the start of semester 2 the time will be spent working on the agreed aspects discussed during the meeting on the 6th of December 2023.
+    In particular this will cover reworking the main example's context, exploring potential figures that will be used
+    during the evaluation of the product and incorporating the remaining core features and introducing a testing suite into the project to ensure the framework's correctness during development.
+\subsubsection{Semester 2:}\label{Semester 2}
+\begin{description}
+  \item[Week 1:] Ensure that all core features of the framework are completed along with accompanying test suites.
+    \begin{itemize}
+      \item Deliverable: A complete framework along with a test suite to validate functionality of extended features.
+    \end{itemize}
+\end{description}
+\begin{description}
+  \item[Week 2:] Ensure that all supplementary examples are finished and clearly demonstrate the framework's capabilities.
+    \begin{itemize}
+      \item Deliverable: A directory of executable examples demonstrating functionality and is capable of teaching the framework to new users.
+    \end{itemize}
+\end{description}
+\begin{description}
+  \item[Week 3-4:] Ensure the code for the main example is finalised in preparation for the evaluation.
+    \begin{itemize}
+      \item Deliverable: In a separate directory to the main project, an isolated example exists capable of various states to evaluate along with the ability to generate results and figures.
+    \end{itemize}
+\end{description}
+\begin{description}
+  \item[Week 5:] Draft and plan the dissertation and include roughly what each core section will include.
+    \begin{itemize}
+      \item Deliverable: A short document to be presented during the weekly meeting showing the approach and potential updated plan for the dissertation.
+    \end{itemize}
+\end{description}
+\begin{description}
+  \item[Week 6:] Conduct the evaluation of the project.
+    \begin{itemize}
+      \item Deliverable: Quantitative and qualitative results showing how different configurations and techniques of the framework can be used to adjust the carbon footprint of the system.
+    \end{itemize}
+\end{description}
+    \begin{description}
+  \item[Week 7-8:] Carry out the first write up of the dissertation.
+    \begin{itemize}
+      \item Deliverable: A first draft submitted to supervisor to get initial feedback before the deadline.
+    \end{itemize}
+\end{description}
+    \begin{description}
+  \item[Week 9-10:] Carry out necessary changes and prepare for final submission.
+    \begin{itemize}
+      \item Deliverable: A polished and refined source code, along with necessary files and changes of the dissertation ready to be submitted on time.
+    \end{itemize}
+\end{description}
 \subsection{Ethics and data}\label{ethics}
-\emph{Specify what ethical approval you need to do your evaluation and how you are approaching it. This is mandatory. 
-Specify what data you expect to collect in your evaluation. Explain how this data will help you evaluate your project.
-}
 
-Options for ethics:
-\begin{itemize}
-
-\item This project does not involve human subjects or data. No approval required.
-\item I have verified that the ethics checklist will apply to any evaluation I need to do. I will sign and complete the checklist.
-\item I have sought ethical guidance from the School's ethics convener and I will:
-    \item Proceed under specific instructions from the Ethics convener (e.g.modified checklist).
-    \item Apply for College Ethics Board approval.
-    \item Other procedure (give details)
-\end{itemize}    
-
+After reading the checklist for ethics, this project does not involve human subjects or data.
+Therefore no approval is required for me to request.
 
 \end{document}

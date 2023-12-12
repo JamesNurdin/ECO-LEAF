@@ -4,7 +4,7 @@ import simpy
 
 from src.extendedLeaf.power import NodeDistributor
 from src.extended_Examples.custom_smart_city_traffic.city import City
-from src.extended_Examples.custom_smart_city_traffic.infrastructure import Cloud, FogNode, Taxi, LinkWanDown, LinkWanUp, \
+from src.extended_Examples.custom_smart_city_traffic.infrastructure import Cloud, Taxi, LinkWanDown, LinkWanUp, \
     LinkWifiTaxiToTrafficLight, LinkWifiBetweenTrafficLights, TrafficLight, RechargeStation
 from src.extended_Examples.custom_smart_city_traffic.mobility import MobilityManager
 from src.extended_Examples.custom_smart_city_traffic.settings import POWER_MEASUREMENT_INTERVAL
