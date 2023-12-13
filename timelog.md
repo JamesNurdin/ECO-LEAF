@@ -187,7 +187,8 @@
 ### 11th December
 * *4 Hours* Finished off the status report ready for it to be submitted for tomorrow. In particular for the plan I thought carefully about the work I needed to get done and have decided to use the time over the holidays to heavily invest in the project ensuring that the framework is nearly finished by the start of semester 2.
 ### 12th December
-* *2.5 Hours* Continued on with the unit tests, started implementing tests for the Solar power class
+* *2.5 Hours* Continued on with the unit tests, started implementing tests for the Solar power class.
+* * 5 Hours* Finished off unit tests for all the power sources.
 TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
