@@ -11,6 +11,7 @@ import numpy
 import simpy
 from simpy import Environment
 from enum import auto
+import re
 
 logger = logging.getLogger(__name__)
 _unnamed_power_meters_created = 0
@@ -273,7 +274,7 @@ class PowerSource(ABC):
                 priority: An integer value determining the importance of the power source, priority allows for the
                     distribution of nodes when being executed, with 0 being the most important
     """
-    def __init__(self, env: Environment, name, data_set_filename, power_domain=None, priority: int = 0,
+    def __init__(self, env: Environment, name, data_set_filename=None, power_domain=None, priority: int = 0,
                  associated_nodes: ["Node"] = None):
         self.name = name
         self.env = env
@@ -284,7 +285,7 @@ class PowerSource(ABC):
         self.powerType = None
 
         if power_domain is None:
-            raise AttributeError(f"No power manager was supplied")
+            raise AttributeError(f"No power domain was supplied")
         self.power_domain = power_domain
 
         if self.power_domain.node_distributor.static_nodes:
@@ -301,10 +302,11 @@ class PowerSource(ABC):
                                      f"nodes for the power sources but nodes for power source {self.name} have been "
                                      f"provided")
 
-        self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
-        self.next_update_time = list(self.power_data.keys())[0]
-        self.update_interval = self.power_domain.get_current_time(
-            list(self.power_data.keys())[1]) - self.power_domain.get_current_time(list(self.power_data.keys())[0])
+        if data_set_filename is not None:
+            self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
+            self.next_update_time = list(self.power_data.keys())[0]
+            self.update_interval = self.power_domain.get_current_time(
+                list(self.power_data.keys())[1]) - self.power_domain.get_current_time(list(self.power_data.keys())[0])
 
     @abstractmethod
     def get_current_power(self) -> PowerMeasurement:
@@ -324,7 +326,13 @@ class PowerSource(ABC):
         node.power_model.power_source = None
         self.associated_nodes.remove(node)
 
-    def _retrieve_power_data(self, data_set_filename: str, start_time: str = None):
+    def add_node(self, node):
+        if node in self.associated_nodes:
+            raise ValueError(f"Error: {node.name} already present in list")
+        node.power_model.power_source = self
+        self.associated_nodes.append(node)
+
+    def _retrieve_power_data(self, data_set_filename: str, start_time: str):
         """Reads the data concerning the power source from file, and formats it according to the start time
 
                 Args:
@@ -338,8 +346,7 @@ class PowerSource(ABC):
                     start_time: Must exist in the file
 
         """
-        if start_time is None:
-            raise ValueError(f"Error no start time is provided")
+        validate_str_time(start_time)
         # find the file path we want
         current_script_path = os.path.abspath(__file__)
         target_directory = "project-carbon-emissions-estimation-in-edge-cloud-computing-simulations"
@@ -368,22 +375,17 @@ class PowerSource(ABC):
                     line_count += 1
                 power_data |= data_before_start
         except FileNotFoundError:
-            print(f"Error: {data_set_filename} does not exist.")
+            raise ValueError(f"Error: {data_set_filename} does not exist.")
         if not start_found:
-            raise ValueError(f"Error: Start time {start_time} was not found in data")
+            raise AttributeError(f"Error: Start time {start_time} was not found in data")
         self.power_data = power_data
+        return power_data
 
     def _map_to_time(self, current_increment: int = 0) -> str:
         if self.power_data is None:
             raise ValueError(f"Error: no data set has been provided")
         times = list(self.power_data.keys())
         return times[current_increment]
-
-    def add_node(self, node):
-        if node in self.associated_nodes:
-            raise ValueError(f"Error: {node.name} already present in list")
-        node.power_model.power_source = self
-        self.associated_nodes.append(node)
 
 
 class NodeDistributor:
@@ -405,7 +407,6 @@ class NodeDistributor:
     """
     def __init__(self, node_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
                  smart_distribution: bool = True, static_nodes: bool = False):
-        print(static_nodes)
         self.static_nodes = static_nodes
         if not static_nodes:
             self.node_distributor_method = node_distributor_method or \
@@ -620,7 +621,6 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
-            print(current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
@@ -760,6 +760,13 @@ class WindPower(PowerSource):
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
 
+    def _get_start_time_index(self, start_time_str):
+        if self.power_data is None:
+            raise ValueError(f"Error: no data set has been provided")
+        times = list(self.power_data.keys())
+        start_time = times.index(start_time_str)
+        return start_time
+
     def get_current_power(self) -> float:
         time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
@@ -812,12 +819,10 @@ class BatteryPower(PowerSource):
                             charge_rate: The rate at which (Watts/Hour) the battery can be recharged at
 
     """
-    BATTERY_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
-
-    def __init__(self, env: Environment, data_set_filename: str = BATTERY_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, name: str = "Battery", priority: int = 10,
+    def __init__(self, env: Environment, name: str = "Battery",
+                 power_domain: PowerDomain = None, priority: int = 10,
                  total_power_available=40, charge_rate=22, associated_nodes=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
+        super().__init__(env, name, None, power_domain, priority, associated_nodes)
 
         self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
         self.powerType = PowerType.BATTERY
@@ -826,8 +831,15 @@ class BatteryPower(PowerSource):
         self.recharge_rate = charge_rate  # kw/h
         self.recharge_data = []
 
+    def get_current_power(self) -> float:
+        return self.remaining_power
+
+    def set_current_power(self, remaining_power):
+        if remaining_power < 0:
+            raise ValueError(f"Error: Battery {self.name} can't store negative power")
+        self.remaining_power = remaining_power
+
     def recharge_battery(self, power_source):
-        print(f"Power before:{self.remaining_power}")
         power_to_recharge = self.total_power - self.remaining_power
         time_to_recharge = math.ceil(power_to_recharge / self.recharge_rate)
         self.remaining_power = self.total_power
@@ -852,22 +864,15 @@ class BatteryPower(PowerSource):
         else:
             self.remaining_power -= power_consumed
 
-    def get_next_update_time(self):
-        pass
-
-    def _get_start_time_index(self, start_time_str):
-        pass
-
     def update_carbon_intensity(self):
-        self.carbon_intensity = 0
+        pass
 
     def get_current_carbon_intensity(self, offset) -> float:
         return 0
 
-    def get_current_power(self) -> float:
-        return self.remaining_power
 
-    def set_current_power(self, remaining_power):
-        if remaining_power < 0:
-            raise ValueError(f"Error: Battery {self.name} can't store negative power")
-        self.remaining_power = remaining_power
+def validate_str_time(time_string: str):
+    pattern = re.compile(r'^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$')
+    # Check if the time_string matches the pattern
+    if not pattern.match(time_string):
+        raise ValueError(f"Error: {time_string} does not format to structure hh:mm:ss.")

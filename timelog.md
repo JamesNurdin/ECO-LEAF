@@ -186,6 +186,8 @@
 * *3.5 Hours* Started the status report, to ensure that the project has a clear aim I, revisited the paper for LEAF to understand the initial motivations for that project then using the initial project description set out to write the first two parts of the project.
 ### 11th December
 * *4 Hours* Finished off the status report ready for it to be submitted for tomorrow. In particular for the plan I thought carefully about the work I needed to get done and have decided to use the time over the holidays to heavily invest in the project ensuring that the framework is nearly finished by the start of semester 2.
-* TODO:
+### 12th December
+* *2.5 Hours* Continued on with the unit tests, started implementing tests for the Solar power class
+TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
