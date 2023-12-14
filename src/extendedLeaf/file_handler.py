@@ -1,10 +1,63 @@
 import json
 import os
 import re
+from datetime import datetime
+from typing import Dict, Tuple
+
+import pandas as pd
+# Figure generation libraries
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 
 from src.extendedLeaf.power import PowerDomain
-from datetime import datetime
 
+ExperimentResults = Dict[str, Tuple[pd.DataFrame, pd.DataFrame]]
+
+
+def base_figure(fig: go.Figure = None) -> go.Figure:
+    if not fig:
+        fig = go.Figure()
+    fig.update_layout(template="plotly_white",
+                      legend_orientation="h",
+                      legend=dict(x=0, y=1.1),
+                      xaxis=dict(mirror=True, linewidth=1, linecolor='black', ticks='', showline=True),
+                      yaxis=dict(mirror=True, linewidth=1, linecolor='black', ticks='', showline=True))
+    return fig
+
+
+def timeline_figure(fig: go.Figure = None, y_axes_title: str = "Power Usage (Watt)") -> go.Figure:
+    fig = base_figure(fig)
+    fig.update_xaxes(
+        title=dict(text="Time", standoff=0),
+        ticktext=[" ", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"],
+        tickvals=[h * 120 * 60 * 2 for h in range(13)],
+    )
+    fig.update_yaxes(
+        title=dict(text=y_axes_title, standoff=0),
+        rangemode="nonnegative",
+    )
+    fig.update_layout(
+        height=370,
+        width=500,
+        font=dict(size=9),
+        legend=dict(x=0, y=1.16),
+    )
+    return fig
+
+def subplot_figure():
+    fig = make_subplots(rows=1, cols=3, shared_yaxes=True, horizontal_spacing=0.01)
+    fig.update_layout(
+        height=320,
+        width=1000,
+        font=dict(size=9),
+        legend=dict(x=0, y=1.215),
+    )
+    fig.update_yaxes(title_text=None)
+    fig.update_yaxes(title=dict(text="Power Usage (Watt)", standoff=0), row=1, col=1)
+
+    fig.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+    fig.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+    return fig
 
 class FileHandler:
 
@@ -56,4 +109,14 @@ class FileHandler:
     def is_valid_filename(self, filename):
         pattern = re.compile(r'^[a-zA-Z0-9_-]+\.json$')
         return bool(pattern.match(filename))
+
+    def test(self):
+        print(10)
+        keys = self.power_domain.captured_data.keys()
+        print(self.power_domain.get_current_time(list(keys)[0]))
+        start_time_index = self.power_domain.get_current_time(list(keys)[0])
+        x = [1,2,3]
+        y = [1,2,3]
+        fig = subplot_figure()
+        fig.write_image("fig1.pdf")
 

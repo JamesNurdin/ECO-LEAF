@@ -79,7 +79,7 @@ def main():
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
-    file_handler = FileHandler(power_domain)
+
 
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
