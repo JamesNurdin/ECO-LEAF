@@ -195,6 +195,7 @@
 * *7 Hours* Implemented remaining unit tests for the power domain and node distributor classes, some tests have been omitted based on the fact that they only carry out side effects and should be considered for the integration testing.
 ### 15th December
 * *2 Hours* Reworked the framework to account for the inclusion of power consumed by data links.
+* *0.5 Hours* Updated unit tests to reflect changes made to framework
 TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])

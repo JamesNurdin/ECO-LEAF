@@ -15,37 +15,37 @@ class TestSolarPower(unittest.TestCase):
         # Create a mock power domain for testing
         self.mock_power_domain = MagicMock()
         self.mock_power_domain.start_time_string = "00:00:00"
-        # Create a mock associated node for testing
-        self.mock_node = MagicMock()
-        self.mock_node.power_model = MagicMock()
+        # Create a mock associated entity for testing
+        self.mock_entity = MagicMock()
+        self.mock_entity.power_model = MagicMock()
         self.power_source = SolarPower(self.mock_env, "Test Solar Power Source", "test_data.csv",
                                        self.mock_power_domain, priority=1)
 
-    def test_remove_node(self):
-        """ Abstract Test: Test that when nodes are removed from the power source they are done so correctly. """
+    def test_remove_entity(self):
+        """ Abstract Test: Test that when entities are removed from the power source they are done so correctly. """
 
-        self.mock_node.power_source = self.power_source
-        self.power_source.associated_nodes = [self.mock_node]
+        self.mock_entity.power_source = self.power_source
+        self.power_source.powered_entities = [self.mock_entity]
 
-        self.power_source.remove_node(self.mock_node)
+        self.power_source.remove_entity(self.mock_entity)
 
-        self.assertEqual(self.power_source.associated_nodes, [])
-        self.assertIsNone(self.mock_node.power_model.power_source)
+        self.assertEqual(self.power_source.powered_entities, [])
+        self.assertIsNone(self.mock_entity.power_model.power_source)
         with self.assertRaises(ValueError):
-            self.power_source.remove_node(self.mock_node)
+            self.power_source.remove_entity(self.mock_entity)
 
-    def test_add_node(self):
-        """ Abstract Test: Test that when nodes are added to the power source they are done so correctly. """
+    def test_add_entity(self):
+        """ Abstract Test: Test that when entities are added to the power source they are done so correctly. """
 
-        self.mock_node.power_source = None
-        self.power_source.associated_nodes = []
+        self.mock_entity.power_source = None
+        self.power_source.powered_entities = []
 
-        self.power_source.add_node(self.mock_node)
+        self.power_source.add_entity(self.mock_entity)
 
-        self.assertEqual(self.power_source.associated_nodes, [self.mock_node])
-        self.assertEqual(self.mock_node.power_model.power_source, self.power_source)
+        self.assertEqual(self.power_source.powered_entities, [self.mock_entity])
+        self.assertEqual(self.mock_entity.power_model.power_source, self.power_source)
         with self.assertRaises(ValueError):
-            self.power_source.add_node(self.mock_node)
+            self.power_source.add_entity(self.mock_entity)
 
     def test_validate_str_time(self):
         """ Test the ability to validate times as strings.
@@ -99,7 +99,7 @@ class TestSolarPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Solar Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.associated_nodes, [])
+        self.assertEqual(self.power_source.powered_entities, [])
 
         self.assertEqual(self.power_source.inherent_carbon_intensity, 46)
         self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
@@ -158,9 +158,9 @@ class TestWindPower(unittest.TestCase):
         # Create a mock power domain for testing
         self.mock_power_domain = MagicMock()
         self.mock_power_domain.start_time_string = "00:00:00"
-        # Create a mock associated node for testing
-        self.mock_node = MagicMock()
-        self.mock_node.power_model = MagicMock()
+        # Create a mock associated entity for testing
+        self.mock_entity = MagicMock()
+        self.mock_entity.power_model = MagicMock()
 
         self.power_source = WindPower(self.mock_env, "Test Wind Power Source", "test_data.csv",
                                       self.mock_power_domain, priority=1)
@@ -172,7 +172,7 @@ class TestWindPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Wind Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.associated_nodes, [])
+        self.assertEqual(self.power_source.powered_entities, [])
 
         self.assertEqual(self.power_source.inherent_carbon_intensity, 12)
         self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
@@ -231,9 +231,9 @@ class TestWindPower(unittest.TestCase):
             # Create a mock power domain for testing
             self.mock_power_domain = MagicMock()
             self.mock_power_domain.start_time_string = "00:00:00"
-            # Create a mock associated node for testing
-            self.mock_node = MagicMock()
-            self.mock_node.power_model = MagicMock()
+            # Create a mock associated entity for testing
+            self.mock_entity = MagicMock()
+            self.mock_entity.power_model = MagicMock()
 
             self.power_source = WindPower(self.mock_env, "Test Wind Power Source", "test_data.csv",
                                           self.mock_power_domain, priority=1)
@@ -245,7 +245,7 @@ class TestWindPower(unittest.TestCase):
             self.assertEqual(self.power_source.name, "Test Wind Power Source")
             self.assertEqual(self.power_source.priority, 1)
             self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-            self.assertEqual(self.power_source.associated_nodes, [])
+            self.assertEqual(self.power_source.powered_entities, [])
 
             self.assertEqual(self.power_source.inherent_carbon_intensity, 12)
             self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
@@ -299,9 +299,9 @@ class TestGridPower(unittest.TestCase):
         # Create a mock power domain for testing
         self.mock_power_domain = MagicMock()
         self.mock_power_domain.start_time_string = "00:00:00"
-        # Create a mock associated node for testing
-        self.mock_node = MagicMock()
-        self.mock_node.power_model = MagicMock()
+        # Create a mock associated entity for testing
+        self.mock_entity = MagicMock()
+        self.mock_entity.power_model = MagicMock()
         self.power_source = GridPower(self.mock_env, "Test Grid Power Source", "test_data.csv",
                                       self.mock_power_domain, priority=1)
 
@@ -312,7 +312,7 @@ class TestGridPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Grid Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.associated_nodes, [])
+        self.assertEqual(self.power_source.powered_entities, [])
 
         self.assertEqual(self.power_source.powerType, PowerType.MIXED)
         self.assertEqual(self.power_source.carbon_intensity, 0)
@@ -371,9 +371,9 @@ class TestBatteryPower(unittest.TestCase):
         self.mock_env = MagicMock()
         # Create a mock power domain for testing
         self.mock_power_domain = MagicMock()
-        # Create a mock associated node for testing
-        self.mock_node = MagicMock()
-        self.mock_node.power_model = MagicMock()
+        # Create a mock associated entity for testing
+        self.mock_entity = MagicMock()
+        self.mock_entity.power_model = MagicMock()
         self.power_source = BatteryPower(self.mock_env, "Test Battery Power Source", self.mock_power_domain, priority=1,
                                          total_power_available=100, charge_rate=20)
 
@@ -384,7 +384,7 @@ class TestBatteryPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Battery Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.associated_nodes, [])
+        self.assertEqual(self.power_source.powered_entities, [])
 
         self.assertEqual(self.power_source.powerType, PowerType.BATTERY)
         self.assertEqual(self.power_source.carbon_intensity, 0)

@@ -13,37 +13,37 @@ class TestPowerDomain(unittest.TestCase):
     def setUp(self):
         # Create a mock environment for testing
         self.mock_env = MagicMock()
-        # Create a mock node distributor
-        self.mock_node_distributor = MagicMock()
-        self.mock_node_distributor.static_nodes = False
+        # Create a mock entity distributor
+        self.mock_entity_distributor = MagicMock()
+        self.mock_entity_distributor.static_entities = False
         # Create a mock power domain for testing
         self.mock_power_domain = MagicMock()
         self.mock_power_domain.start_time_string = "00:00:00"
-        # Create a mock associated node for testing
-        self.mock_node = MagicMock()
-        self.mock_node.power_model = MagicMock()
+        # Create a mock associated entity for testing
+        self.mock_entity = MagicMock()
+        self.mock_entity.power_model = MagicMock()
 
         # Provided valid entry data
-        self.power_domain = PowerDomain(self.mock_env, "Test power domain", self.mock_node_distributor, "12:00:00",
-                                        [self.mock_node], 15,
-                                        [("19:40:00", False, (self.mock_power_domain.remove_node, [self.mock_node]))])
+        self.power_domain = PowerDomain(self.mock_env, "Test power domain", self.mock_entity_distributor, "12:00:00",
+                                        [self.mock_entity], 15,
+                                        [("19:40:00", False, (self.mock_power_domain.remove_entity, [self.mock_entity]))])
 
     def test_constructor(self):
         """ Test that the power domain class can be correctly created. """
         name = "Test power domain"
         string_start_time = "12:00:00"
-        associated_nodes = [self.mock_node]
+        powered_entities = [self.mock_entity]
         update_interval = 15
-        events = [("19:40:00", False, (self.mock_power_domain.remove_node, [self.mock_node]))]
+        events = [("19:40:00", False, (self.mock_power_domain.remove_entity, [self.mock_entity]))]
 
         # Provided valid entry data
-        power_domain = PowerDomain(self.mock_env, name, self.mock_node_distributor, string_start_time,
-                                   associated_nodes, update_interval, events)
+        power_domain = PowerDomain(self.mock_env, name, self.mock_entity_distributor, string_start_time,
+                                   powered_entities, update_interval, events)
         self.assertEqual(power_domain.env, self.mock_env)
         self.assertEqual(power_domain.name, name)
-        self.assertEqual(power_domain.node_distributor, self.mock_node_distributor)
+        self.assertEqual(power_domain.entity_distributor, self.mock_entity_distributor)
         self.assertEqual(power_domain.start_time_string, string_start_time)
-        self.assertEqual(power_domain.associated_nodes, associated_nodes)
+        self.assertEqual(power_domain.powered_entities, powered_entities)
         self.assertEqual(power_domain.update_interval, update_interval)
         self.assertEqual(power_domain.power_source_events, events)
 
@@ -54,17 +54,17 @@ class TestPowerDomain(unittest.TestCase):
         # Provide invalid data
         with self.assertRaises(ValueError):
             # invalid env
-            PowerDomain(None, name, self.mock_node_distributor, string_start_time,
-                        associated_nodes, update_interval, events)
+            PowerDomain(None, name, self.mock_entity_distributor, string_start_time,
+                        powered_entities, update_interval, events)
             # invalid name
-            PowerDomain(self.mock_env, None, self.mock_node_distributor, string_start_time,
-                        associated_nodes, update_interval, events)
+            PowerDomain(self.mock_env, None, self.mock_entity_distributor, string_start_time,
+                        powered_entities, update_interval, events)
             # invalid start time
-            PowerDomain(self.mock_env, None, self.mock_node_distributor, "Invalid start time",
-                        associated_nodes, update_interval, events)
+            PowerDomain(self.mock_env, None, self.mock_entity_distributor, "Invalid start time",
+                        powered_entities, update_interval, events)
             # invalid update interval
-            PowerDomain(self.mock_env, None, self.mock_node_distributor, "Invalid start time",
-                        associated_nodes, -15, events)
+            PowerDomain(self.mock_env, None, self.mock_entity_distributor, "Invalid start time",
+                        powered_entities, -15, events)
 
     def test_run(self):
         """ PowerDomain.run() is the main driver for the carbon capture process, side effects will be explored in
@@ -74,15 +74,15 @@ class TestPowerDomain(unittest.TestCase):
     def test_record_power_source_carbon_released(self):
         """ Test that the relevant power information can be recorded properly. """
         mock_current_power_source = MagicMock()
-        mock_node_1 = MagicMock(name='mock_node_1_name')
-        mock_node_2 = MagicMock(name='mock_node_2_name')
-        mock_current_power_source.associated_nodes = [mock_node_1, mock_node_2]
-        mock_node_1.power_model.update_sensitive_measure.return_value = 50.0
+        mock_entity_1 = MagicMock(name='mock_entity_1_name')
+        mock_entity_2 = MagicMock(name='mock_entity_2_name')
+        mock_current_power_source.powered_entities = [mock_entity_1, mock_entity_2]
+        mock_entity_1.power_model.update_sensitive_measure.return_value = 50.0
         mock_current_power_source.get_current_carbon_intensity.return_value = 0.5
-        mock_node_2.power_model.update_sensitive_measure.return_value = 75.0
+        mock_entity_2.power_model.update_sensitive_measure.return_value = 75.0
         expected_dict = {
-            mock_node_1.name: {'Power Used': 50.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.025},
-            mock_node_2.name: {'Power Used': 75.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.0375}
+            mock_entity_1.name: {'Power Used': 50.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.025},
+            mock_entity_2.name: {'Power Used': 75.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.0375}
         }
         expected_carbon_released = 0.025 + 0.0375
 
@@ -209,32 +209,32 @@ class TestPowerDomain(unittest.TestCase):
             self.power_domain.carbon_emitted = None
             self.power_domain.return_total_carbon_emissions()
 
-    def test_add_node(self):
-        """ Test to ensure that nodes are correctly added to the power domain. """
+    def test_add_entity(self):
+        """ Test to ensure that entities are correctly added to the power domain. """
 
-        self.power_domain.associated_nodes = []
+        self.power_domain.powered_entities = []
 
-        self.power_domain.add_node(self.mock_node)
+        self.power_domain.add_entity(self.mock_entity)
 
-        self.assertEqual(self.power_domain.associated_nodes, [self.mock_node])
+        self.assertEqual(self.power_domain.powered_entities, [self.mock_entity])
         with self.assertRaises(ValueError):
-            # attempt to add a node already present
-            self.power_domain.add_node(self.mock_node)
-            # attempt to add a node when nodes should only be added to power sources
-            self.power_domain.node_distributor.static_nodes = True
-            self.power_domain.add_node(self.mock_node)
+            # attempt to add an entity already present
+            self.power_domain.add_entity(self.mock_entity)
+            # attempt to add an entity when entities should only be added to power sources
+            self.power_domain.entity_distributor.static_entities = True
+            self.power_domain.add_entity(self.mock_entity)
 
-    def test_remove_node(self):
-        """ Test to ensure that nodes are correctly removed from the power domain. """
+    def test_remove_entity(self):
+        """ Test to ensure that entities are correctly removed from the power domain. """
 
-        self.power_domain.associated_nodes = [self.mock_node]
+        self.power_domain.associated_entities = [self.mock_entity]
 
-        self.power_domain.remove_node(self.mock_node)
+        self.power_domain.remove_entity(self.mock_entity)
 
-        self.assertEqual(self.power_domain.associated_nodes, [])
+        self.assertEqual(self.power_domain.powered_entities, [])
         with self.assertRaises(ValueError):
-            # attempt to add a node already present
-            self.power_domain.remove_node(self.mock_node)
+            # attempt to add an entity already present
+            self.power_domain.remove_entity(self.mock_entity)
 
     def test_get_current_time(self):
         result_1 = self.power_domain.get_current_time("01:30:00")
