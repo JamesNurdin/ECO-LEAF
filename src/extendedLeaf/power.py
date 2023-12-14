@@ -121,7 +121,7 @@ class PowerModelNode(PowerModel):
             dynamic_power = self.power_per_cu * self.node.used_cu * update_interval/60
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
-        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power* update_interval/60)
+        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power * update_interval/60)
 
     def set_parent(self, parent):
         self.node = parent
@@ -440,7 +440,6 @@ class NodeDistributor:
         """
 
         total_current_power = current_power_source.get_current_power()
-
         """Check if node is currently being powered by the desired power source"""
         for node in power_domain.associated_nodes:
             current_node_power_requirement = float(node.power_model.update_sensitive_measure(
@@ -469,7 +468,6 @@ class NodeDistributor:
         for node in power_domain.associated_nodes:
             current_node_power_requirement = float(node.power_model.update_sensitive_measure(
                 power_domain.update_interval))
-
             if self.smart_distribution:
                 if node.power_model.power_source is not None \
                         and node.power_model.power_source.priority > current_power_source.priority:
@@ -533,13 +531,15 @@ class PowerDomain:
                     start_time_str: must appear in all initial power source files, power sources added during execution
                         of the simulation can be ignored
     """
-    def __init__(self, env: Environment, name=None, node_distributor: NodeDistributor = None,
+    def __init__(self, env: Environment = None, name: str = None, node_distributor: NodeDistributor = None,
                  start_time_str: str = "00:00:00", associated_nodes=None, update_interval: int = 1,
                  power_source_events: [(str, bool, (Callable[[], None], []))] = None):
-
-        self.env = env
+        if env is None:
+            raise ValueError(f"Error: Power  Domain was not supplied an environment. ")
+        else:
+            self.env = env
         if name is None:
-            raise ValueError(f"Error: Power  Domain was not supplied a name")
+            raise ValueError(f"Error: Power  Domain was not supplied a name. ")
         else:
             self.name = name
         self.power_sources = []
@@ -625,6 +625,8 @@ class PowerDomain:
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
     def record_power_source_carbon_released(self, current_power_source):
+        if current_power_source is None:
+            raise ValueError(f"Error: No power source was supplied.")
         current_power_source_dictionary = {}
         current_power_source_carbon_released = 0
         for node in current_power_source.associated_nodes:
@@ -659,7 +661,11 @@ class PowerDomain:
                                   f"is occupied with {self.power_sources[power_source.priority]}")
 
     def remove_power_source(self, power_source):
-        self.power_sources[self.power_sources.index(power_source)] = None
+        try:
+            index_of_power_source = self.power_sources.index(power_source)
+        except ValueError:
+            raise ValueError(f"Error: Power source {power_source.name} is not present in the power domain")
+        self.power_sources[index_of_power_source] = None
         power_source.power_domain = None
         power_source.priority = None
         for node in power_source.associated_nodes:
@@ -673,18 +679,28 @@ class PowerDomain:
 
     @classmethod
     def calculate_carbon_released(cls, power_used, carbon_intensity):
+        """ While carbon intensity is measured in gCO2/kWH the call to time sensitive power measurements accounts
+            for the amount of time that has occurred by instead of just reading the watts, it finds the kilowatts
+            and the duration of time elapsed."""
         return float(power_used) * (10 ** -3) * float(carbon_intensity)
 
     def update_carbon_intensity(self, increment_data):
+        """ Using the data of the current time interval i.e.
+            {PowerSource: {Node: {Power used, Carbon intensity, Carbon Released}}...{Total Carbon Released}}
+            we calculate the total power released during the interval."""
+
         increment_total_carbon_omitted = 0
         for increment in increment_data.values():
             increment_total_carbon_omitted += increment["Total Carbon Released"]
         self.carbon_emitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
 
     def return_total_carbon_emissions(self) -> float:
+        if self.carbon_emitted is None:
+            raise ValueError(f"Error Carbon emitted is none.")
         return sum(self.carbon_emitted)
 
     def add_node(self, node):
+        """ Only used to add nodes into scope, should not be called for node distribution reasons. """
         if not self.node_distributor.static_nodes:
             if node in self.associated_nodes:
                 raise ValueError(f"Error: {node.id} already present in list")
@@ -693,6 +709,7 @@ class PowerDomain:
             raise ValueError(f"Error: unable to append nodes when nodes are static")
 
     def remove_node(self, node):
+        """ Only used to remove nodes from scope, should not be called for node distribution reasons. """
         if not self.node_distributor.static_nodes:
             if node not in self.associated_nodes:
                 raise ValueError(f"Error: {node.id} not present in list")
@@ -702,11 +719,16 @@ class PowerDomain:
 
     @classmethod
     def get_current_time(cls, time):
+        validate_str_time(time)
         hh, mm, ss = map(int, time.split(':'))
         return mm + (60 * hh)
 
     @classmethod
     def convert_to_time_string(cls, time):
+        if not isinstance(time, int):
+            raise ValueError("Error: Invalid input. Please provide an integer.")
+        if time < 0:
+            raise ValueError("Error: Invalid input. Please provide a non-negative integer.")
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
 
