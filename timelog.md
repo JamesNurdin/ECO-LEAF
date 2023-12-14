@@ -184,11 +184,15 @@
 * *2 Hours* Started work on the test suite to ensure that the framework is correctly functioning now that all the core features are finished. Researched options and chose to go with unittest.
 ### 10th December 
 * *3.5 Hours* Started the status report, to ensure that the project has a clear aim I, revisited the paper for LEAF to understand the initial motivations for that project then using the initial project description set out to write the first two parts of the project.
+
+## Week 13
 ### 11th December
 * *4 Hours* Finished off the status report ready for it to be submitted for tomorrow. In particular for the plan I thought carefully about the work I needed to get done and have decided to use the time over the holidays to heavily invest in the project ensuring that the framework is nearly finished by the start of semester 2.
 ### 12th December
 * *2.5 Hours* Continued on with the unit tests, started implementing tests for the Solar power class.
 * * 5 Hours* Finished off unit tests for all the power sources.
+### 14th December
+* *7 Hours* Implemented remaining unit tests for the power domain and node distributor classes, some tests have been omitted based on the fact that they only carry out side effects and should be considered for the integration testing.
 TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
