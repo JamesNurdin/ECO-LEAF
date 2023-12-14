@@ -77,6 +77,11 @@ class PowerModel(ABC):
         Should be called in the parent's `__init__()`.
         """
 
+    @abstractmethod
+    def update_sensitive_measure(self, update_interval):
+        """ return the current power usage, relative to the time elapsed
+            units are KWH."""
+
 
 class PowerModelNode(PowerModel):
     def __init__(self, max_power: float = None, power_per_cu: float = None, static_power: float = 0):
@@ -136,6 +141,8 @@ class PowerModelLink(PowerModel):
         """
         self.energy_per_bit = energy_per_bit
         self.link = None
+        self.power_source = None
+
 
     def measure(self) -> PowerMeasurement:
         dynamic_power = self.energy_per_bit * self.link.used_bandwidth
@@ -143,6 +150,15 @@ class PowerModelLink(PowerModel):
 
     def set_parent(self, parent):
         self.link = parent
+
+    def update_sensitive_measure(self, update_interval):
+        if self.link is None:
+            raise ValueError(f"Error: No link supplied")
+        # Account for no transmission of data
+        if self.link.src.paused or self.link.src.tasks == []:
+            return PowerMeasurement(0, 0)
+        dynamic_power = self.energy_per_bit * self.link.used_bandwidth
+        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=0)
 
 
 class PowerModelLinkWirelessTx(PowerModel):
@@ -162,12 +178,25 @@ class PowerModelLinkWirelessTx(PowerModel):
         self.energy_per_bit = energy_per_bit
         self.amplifier_dissipation = amplifier_dissipation
         self.link = None
+        self.power_source = None
+
 
     def measure(self) -> PowerMeasurement:
         distance = self.link.src.distance(self.link.dst)
         dissipation_energy_per_bit = self.amplifier_dissipation * distance ** 2
         dynamic_power = (self.energy_per_bit + dissipation_energy_per_bit) * self.link.used_bandwidth
         return PowerMeasurement(dynamic=dynamic_power, static=0)
+
+    def update_sensitive_measure(self, update_interval):
+        if self.link is None:
+            raise ValueError(f"Error: No link supplied")
+        # Account for no transmission of data
+        if self.link.src.paused or self.link.src.tasks == []:
+            return PowerMeasurement(0, 0)
+        distance = self.link.src.distance(self.link.dst)
+        dissipation_energy_per_bit = self.amplifier_dissipation * distance ** 2
+        dynamic_power = (self.energy_per_bit + dissipation_energy_per_bit) * self.link.used_bandwidth
+        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=0)
 
     def set_parent(self, parent):
         self.link = parent
@@ -272,10 +301,10 @@ class PowerSource(ABC):
                 power_domain: The power domain associated with the source, we require a two-way association between
                     classes to allow for the correct starting time of the simulation as it occurs during file reading
                 priority: An integer value determining the importance of the power source, priority allows for the
-                    distribution of nodes when being executed, with 0 being the most important
+                    distribution of powered entities when being executed, with 0 being the most important
     """
     def __init__(self, env: Environment, name, data_set_filename=None, power_domain=None, priority: int = 0,
-                 associated_nodes: ["Node"] = None):
+                 powered_entities: ["PowerModel"] = None):
         self.name = name
         self.env = env
         self.carbon_intensity = 0
@@ -288,19 +317,19 @@ class PowerSource(ABC):
             raise AttributeError(f"No power domain was supplied")
         self.power_domain = power_domain
 
-        if self.power_domain.node_distributor.static_nodes:
-            if associated_nodes is None:
-                self.associated_nodes = []
+        if self.power_domain.entity_distributor.static_entities:
+            if powered_entities is None:
+                self.powered_entities = []
             else:
-                self.associated_nodes = associated_nodes
-                for node in self.associated_nodes:
-                    node.power_model.power_source = self
+                self.powered_entities = powered_entities
+                for entity in self.powered_entities:
+                    entity.power_model.power_source = self
         else:
-            self.associated_nodes = []
-            if associated_nodes is not None:
+            self.powered_entities = []
+            if powered_entities is not None:
                 raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have dynamic"
-                                     f"nodes for the power sources but nodes for power source {self.name} have been "
-                                     f"provided")
+                                     f"powered entities for the power sources but power entities for power source "
+                                     f"{self.name} have been provided")
 
         if data_set_filename is not None:
             self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
@@ -320,17 +349,17 @@ class PowerSource(ABC):
     def update_carbon_intensity(self):
         """Update a power sources carbon intensity"""
 
-    def remove_node(self, node):
-        if node not in self.associated_nodes:
-            raise ValueError(f"Error: {node.name} not present in list")
-        node.power_model.power_source = None
-        self.associated_nodes.remove(node)
+    def remove_entity(self, entity):
+        if entity not in self.powered_entities:
+            raise ValueError(f"Error: {entity.name} not present in list")
+        entity.power_model.power_source = None
+        self.powered_entities.remove(entity)
 
-    def add_node(self, node):
-        if node in self.associated_nodes:
-            raise ValueError(f"Error: {node.name} already present in list")
-        node.power_model.power_source = self
-        self.associated_nodes.append(node)
+    def add_entity(self, entity):
+        if entity in self.powered_entities:
+            raise ValueError(f"Error: {entity.name} already present in list")
+        entity.power_model.power_source = self
+        self.powered_entities.append(entity)
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str):
         """Reads the data concerning the power source from file, and formats it according to the start time
@@ -388,133 +417,135 @@ class PowerSource(ABC):
         return times[current_increment]
 
 
-class NodeDistributor:
-    """Class for the distribution of nodes between power sources during runtime.
+class EntityDistributor:
+    """Class for the distribution of entities between power sources during runtime.
 
                 Args:
-                    node_distributor_method: An optional user defined custom method that allows the user to exactly
-                        specify how nodes are distributed between power sources during runtime, the arguments are:
+                    entity_distributor_method: An optional user defined custom method that allows the user to exactly
+                        specify how entities are distributed between power sources during runtime, the arguments are:
                         - The current power source being considered
-                        - The power domains list of nodes (this can be filtered to only consider the subset for the
-                            power source's nodes, NOTE: need to ensure at the end of an iteration all nodes of the
+                        - The power domains list of entities (this can be filtered to only consider the subset for the
+                            power source's entities, NOTE: need to ensure at the end of an iteration all entities of the
                             power domain have been provided a power source
                         - The update interval, as the power measurements are in Watts and the amount of power used
                             is subjective to the amount of time since the last update (the update interval) when
                            retrieving power measurements as we are in a time sensitive context we need to call
                            update_sensitive_measure(update_interval)
                     smart_distribution: A boolean value used to determine whether to allow a power source with
-                        excess energy to take nodes from lower priority if the available power is there.
+                        excess energy to take entities from lower priority if the available power is there.
     """
-    def __init__(self, node_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
-                 smart_distribution: bool = True, static_nodes: bool = False):
-        self.static_nodes = static_nodes
-        if not static_nodes:
-            self.node_distributor_method = node_distributor_method or \
-                                           self.default_update_node_distribution_method_dynamic
+    def __init__(self, entity_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
+                 smart_distribution: bool = True, static_entities: bool = False):
+        self.static_entities = static_entities
+        if not static_entities:
+            self.entity_distributor_method = entity_distributor_method or \
+                                           self.default_update_entity_distribution_method_dynamic
         else:
-            self.node_distributor_method = node_distributor_method or \
-                                           self.default_update_node_distribution_method_static
+            self.entity_distributor_method = entity_distributor_method or \
+                                           self.default_update_entity_distribution_method_static
 
         self.smart_distribution = smart_distribution
 
-    """DEFAULT Node handler for a power source, every pass of the while loop in the simulation, have to expect
-    that the power sources may not be able to power their nodes, depending on the power sources provided to the 
+    """DEFAULT entity handler for a power source, every pass of the while loop in the simulation, have to expect
+    that the power sources may not be able to power their entities, depending on the power sources provided to the 
     power domain"""
-    def default_update_node_distribution_method_dynamic(self, current_power_source, power_domain):
-        """The standard node distribution method if the user does not provide a method. The method works based on the
+    def default_update_entity_distribution_method_dynamic(self, current_power_source, power_domain):
+        """The standard entity distribution method if the user does not provide a method. The method works based on the
             knowledge that the order of execution of the method is based on priority, if power source i is passed into
             the method then all power sources prior in list powerDomain.power_sources (sources with a higher priority)
-            have already been sorted so power source i should acquire as many nodes as possible. The inner working logic
-            goes as:
-                1. Check if all existing nodes can be powered, if not release excess nodes
-                2. if remaining power is available try and add unpowered nodes to source
-                3. if there is still excess power, try and add nodes being powered by less preferable power sources
+            have already been sorted so power source i should acquire as many entities as possible. The inner working
+            logic goes as:
+                1. Check if all existing entities can be powered, if not release excess entities
+                2. if remaining power is available try and add unpowered entities to source
+                3. if there is still excess power, try and add entities being powered by less preferable power sources
             Finally there is an expectation in the default method that the last power source adds all remaining
-            unpowered nodes, in order to avoid a raised exception.
+            unpowered entities, in order to avoid a raised exception.
 
                 Args:
                     current_power_source: the current power source being considered
-                    power_domain: the power domain to retrieve the associated nodes(for dynamic distributions) and the
+                    power_domain: the power domain to retrieve the associated entities(for dynamic distributions) and the
                         update interval
                     in a time conscious context
         """
 
         total_current_power = current_power_source.get_current_power()
-        """Check if node is currently being powered by the desired power source"""
-        for node in power_domain.associated_nodes:
-            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+        """Check if entity is currently being powered by the desired power source"""
+        for entity in power_domain.powered_entities:
+            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
 
-            if node.power_model.power_source == current_power_source:
-                if total_current_power < current_node_power_requirement:
-                    current_power_source.remove_node(node)
+            if entity.power_model.power_source == current_power_source:
+                if total_current_power < current_entity_power_requirement:
+                    current_power_source.remove_entity(entity)
                 else:
-                    total_current_power = total_current_power - current_node_power_requirement
+                    total_current_power = total_current_power - current_entity_power_requirement
                     if current_power_source.powerType == PowerType.BATTERY:
                         current_power_source.set_current_power(total_current_power)
 
-        """Check if node is currently unpowered"""
-        for node in power_domain.associated_nodes:
-            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+        """Check if entity is currently unpowered"""
+        for entity in power_domain.powered_entities:
+            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
 
-            if node.power_model.power_source is None and current_node_power_requirement < total_current_power:
-                current_power_source.add_node(node)
-                total_current_power = total_current_power - current_node_power_requirement
+            if entity.power_model.power_source is None and current_entity_power_requirement < total_current_power:
+                current_power_source.add_entity(entity)
+                total_current_power = total_current_power - current_entity_power_requirement
                 if current_power_source.powerType == PowerType.BATTERY:
                     current_power_source.set_current_power(total_current_power)
 
-        """Check if any nodes in lower priority power sources can move up if excess energy is available"""
-        for node in power_domain.associated_nodes:
-            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+        """Check if any entities in lower priority power sources can move up if excess energy is available"""
+        for entity in power_domain.powered_entities:
+            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
             if self.smart_distribution:
-                if node.power_model.power_source is not None \
-                        and node.power_model.power_source.priority > current_power_source.priority:
-                    if current_node_power_requirement < total_current_power:
-                        node.power_model.power_source.remove_node(node)
-                        current_power_source.add_node(node)
-                        total_current_power = total_current_power - current_node_power_requirement
+                if entity.power_model.power_source is not None \
+                        and entity.power_model.power_source.priority > current_power_source.priority:
+                    if current_entity_power_requirement < total_current_power:
+                        entity.power_model.power_source.remove_entity(entity)
+                        current_power_source.add_entity(entity)
+                        total_current_power = total_current_power - current_entity_power_requirement
                         if current_power_source.powerType == PowerType.BATTERY:
                             current_power_source.set_current_power(total_current_power)
 
-    def default_update_node_distribution_method_static(self, current_power_source, power_domain):
+    def default_update_entity_distribution_method_static(self, current_power_source, power_domain):
         total_current_power = current_power_source.get_current_power()
-        """Check if node is currently running"""
-        for node in current_power_source.associated_nodes:
-            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
+        """Check if the entity is currently running"""
+        for entity in current_power_source.powered_entities:
+            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
-            if not node.check_if_node_paused():
-                if total_current_power < current_node_power_requirement:
-                    node.pause_node()
-                else:
-                    total_current_power = total_current_power - current_node_power_requirement
-                    if current_power_source.powerType == PowerType.BATTERY:
-                        current_power_source.set_current_power(total_current_power)
+            if type(entity) == "<Class 'Node'>":
+                if not entity.check_if_node_paused():
+                    if total_current_power < current_entity_power_requirement:
+                        entity.pause_node()
+                    else:
+                        total_current_power = total_current_power - current_entity_power_requirement
+                        if current_power_source.powerType == PowerType.BATTERY:
+                            current_power_source.set_current_power(total_current_power)
 
-        """Check if node is currently paused"""
-        for node in current_power_source.associated_nodes:
-            current_node_power_requirement = float(node.power_model.update_sensitive_measure(
-                power_domain.update_interval))
+        """Check if entity is currently paused"""
+        for entity in current_power_source.powered_entities:
+            if type(entity) == "<Class 'Node'>":
+                current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
+                    power_domain.update_interval))
 
-            if node.check_if_node_paused():
-                if current_node_power_requirement < total_current_power:
-                    node.unpause_node()
-                    total_current_power = total_current_power - current_node_power_requirement
-                    if current_power_source.powerType == PowerType.BATTERY:
-                        current_power_source.set_current_power(total_current_power)
+                if entity.check_if_node_paused():
+                    if current_entity_power_requirement < total_current_power:
+                        entity.unpause_node()
+                        total_current_power = total_current_power - current_entity_power_requirement
+                        if current_power_source.powerType == PowerType.BATTERY:
+                            current_power_source.set_current_power(total_current_power)
 
 
 class PowerDomain:
-    """The power domain for a collection of nodes, the main interface and point of interaction for dealing with
+    """The power domain for a collection of entities, the main interface and point of interaction for dealing with
         Extended LEAF power classes
 
                 Args:
                     env: Simpy environment (for timing and to allow running during the simulation)
                     name: Name of the power domain
-                    node_distributor: The node distributor class to distribute nodes between power sources
+                    entity_distributor: The entity distributor class to distribute entities between power sources
                     start_time_str: A string denoting the start time of the simulation
-                    associated_nodes: All nodes that want to be associated with the power domain
+                    powered_entities: All entities that want to be associated with the power domain
                     update_interval: The number of units of time between measurements of the carbon released.
                     power_source_events: a list of events the user wants to occur during runtime, the structure follows:
                         - time of event, in the format hh:mm:ss
@@ -531,8 +562,8 @@ class PowerDomain:
                     start_time_str: must appear in all initial power source files, power sources added during execution
                         of the simulation can be ignored
     """
-    def __init__(self, env: Environment = None, name: str = None, node_distributor: NodeDistributor = None,
-                 start_time_str: str = "00:00:00", associated_nodes=None, update_interval: int = 1,
+    def __init__(self, env: Environment = None, name: str = None, entity_distributor: EntityDistributor = None,
+                 start_time_str: str = "00:00:00", powered_entities=None, update_interval: int = 1,
                  power_source_events: [(str, bool, (Callable[[], None], []))] = None):
         if env is None:
             raise ValueError(f"Error: Power  Domain was not supplied an environment. ")
@@ -545,19 +576,19 @@ class PowerDomain:
         self.power_sources = []
         self.carbon_emitted = []
 
-        self.node_distributor = node_distributor or NodeDistributor()
+        self.entity_distributor = entity_distributor or EntityDistributor()
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
-        if not self.node_distributor.static_nodes:
-            if associated_nodes is None:
-                self.associated_nodes = []
+        if not self.entity_distributor.static_entities:
+            if powered_entities is None:
+                self.powered_entities = []
             else:
-                self.associated_nodes = associated_nodes
+                self.powered_entities = powered_entities
         else:
-            if associated_nodes is not None:
-                raise AttributeError(f"Error: Node Distributor has been configured to handle static nodes, but the "
-                                     f"power domain has been provided nodes to dynamically distribute.")
+            if powered_entities is not None:
+                raise AttributeError(f"Error: Entity Distributor has been configured to handle static entities, but the "
+                                     f"power domain has been provided entities to dynamically distribute.")
         if update_interval < 1:
             raise ValueError(f"Error update interval should be positive.")
         self.update_interval = update_interval
@@ -574,13 +605,13 @@ class PowerDomain:
 
                 Requirements:
                     -A power domain is provided with:
-                        - Power source(s) to provide power to nodes
-                        - Associated node(s) to provide power to
+                        - Power source(s) to provide power to entities
+                        - Powered entitiess to provide power to
         """
         if self.power_sources is None:
             raise AttributeError(f"Error: No power source was provided")
-        if not self.node_distributor.static_nodes and not self.associated_nodes:
-            raise AttributeError(f"Error: No nodes are present in the power domain")
+        if not self.entity_distributor.static_entities and not self.powered_entities:
+            raise AttributeError(f"Error: No entity are present in the power domain")
 
         while True:
             yield env.timeout(self.update_interval)
@@ -597,15 +628,15 @@ class PowerDomain:
             self.assign_power_source_priority()
 
             """Go through every power source and:
-                - distribute nodes among power sources
+                - distribute entities among power sources
                 - log the carbon released since the last update"""
             current_carbon_intensities = {}
             current_interval_released_carbon = 0
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
 
-                """distribute nodes among power sources"""
-                self.node_distributor.node_distributor_method(current_power_source, self)
+                """distribute entities among power sources"""
+                self.entity_distributor.entity_distributor_method(current_power_source, self)
 
                 """Record respective power readings this interval"""
                 current_ps_dictionary, current_ps_carbon_released = \
@@ -614,10 +645,10 @@ class PowerDomain:
                 current_carbon_intensities[current_power_source.name] = current_ps_dictionary
                 current_interval_released_carbon += current_ps_carbon_released
 
-            if not self.node_distributor.static_nodes:
-                for node in self.associated_nodes:
-                    if node.power_model.power_source is None:
-                        raise ValueError(f"Error: no power source found for node {node} at time {self.env.now}")
+            if not self.entity_distributor.static_entities:
+                for entity in self.powered_entities:
+                    if entity.power_model.power_source is None:
+                        raise ValueError(f"Error: no power source found for entity {entity} at time {self.env.now}")
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
@@ -629,15 +660,15 @@ class PowerDomain:
             raise ValueError(f"Error: No power source was supplied.")
         current_power_source_dictionary = {}
         current_power_source_carbon_released = 0
-        for node in current_power_source.associated_nodes:
-            power_used = float(node.power_model.update_sensitive_measure(self.update_interval))
+        for entity in current_power_source.powered_entities:
+            power_used = float(entity.power_model.update_sensitive_measure(self.update_interval))
             carbon_intensity = current_power_source.get_current_carbon_intensity(0)
             carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
-            node_data = {"Power Used": power_used,
+            entity_data = {"Power Used": power_used,
                          "Carbon Intensity": carbon_intensity,
                          "Carbon Released": carbon_released}
             current_power_source_carbon_released += carbon_released
-            current_power_source_dictionary[node.name] = node_data
+            current_power_source_dictionary[entity.name] = entity_data
         return current_power_source_dictionary, current_power_source_carbon_released
 
     def add_power_source(self, power_source):
@@ -650,8 +681,8 @@ class PowerDomain:
             raise ValueError(f"Error: Power domain can only accept 1 mixed power source")
 
         if power_source.priority >= len(self.power_sources):
-            extra_nodes = power_source.priority - len(self.power_sources)
-            self.power_sources.extend([None] * extra_nodes)
+            extra_entities = power_source.priority - len(self.power_sources)
+            self.power_sources.extend([None] * extra_entities)
             self.power_sources.append(power_source)
         else:
             if self.power_sources[power_source.priority] is None:
@@ -668,9 +699,9 @@ class PowerDomain:
         self.power_sources[index_of_power_source] = None
         power_source.power_domain = None
         power_source.priority = None
-        for node in power_source.associated_nodes:
-            node.power_model.power_source = None
-        power_source.associated_nodes = []
+        for entity in power_source.powered_entities:
+            entity.power_model.power_source = None
+        power_source.powered_entities = []
 
     def assign_power_source_priority(self):
         for counter in range(len(self.power_sources)):
@@ -686,7 +717,7 @@ class PowerDomain:
 
     def update_carbon_intensity(self, increment_data):
         """ Using the data of the current time interval i.e.
-            {PowerSource: {Node: {Power used, Carbon intensity, Carbon Released}}...{Total Carbon Released}}
+            {PowerSource: {Entity: {Power used, Carbon intensity, Carbon Released}}...{Total Carbon Released}}
             we calculate the total power released during the interval."""
 
         increment_total_carbon_omitted = 0
@@ -699,23 +730,23 @@ class PowerDomain:
             raise ValueError(f"Error Carbon emitted is none.")
         return sum(self.carbon_emitted)
 
-    def add_node(self, node):
-        """ Only used to add nodes into scope, should not be called for node distribution reasons. """
-        if not self.node_distributor.static_nodes:
-            if node in self.associated_nodes:
-                raise ValueError(f"Error: {node.id} already present in list")
-            self.associated_nodes.append(node)
+    def add_entity(self, entity):
+        """ Only used to add entities into scope, should not be called for entity distribution reasons. """
+        if not self.entity_distributor.static_entities:
+            if entity in self.powered_entities:
+                raise ValueError(f"Error: {entity.name} already present in list")
+            self.powered_entities.append(entity)
         else:
-            raise ValueError(f"Error: unable to append nodes when nodes are static")
+            raise ValueError(f"Error: unable to append entities when entities are static")
 
-    def remove_node(self, node):
-        """ Only used to remove nodes from scope, should not be called for node distribution reasons. """
-        if not self.node_distributor.static_nodes:
-            if node not in self.associated_nodes:
-                raise ValueError(f"Error: {node.id} not present in list")
-            self.associated_nodes.remove(node)
+    def remove_entity(self, entity):
+        """ Only used to remove entities from scope, should not be called for entity distribution reasons. """
+        if not self.entity_distributor.static_entities:
+            if entity not in self.powered_entities:
+                raise ValueError(f"Error: {entity.name} not present in list")
+            self.powered_entities.remove(entity)
         else:
-            raise ValueError(f"Error: unable to append nodes when nodes are static")
+            raise ValueError(f"Error: unable to append entities when entities are static")
 
     @classmethod
     def get_current_time(cls, time):
@@ -743,8 +774,8 @@ class SolarPower(PowerSource):
     SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
 
@@ -776,8 +807,8 @@ class WindPower(PowerSource):
     WIND_DATASET_FILENAME = "01-01-2023 Ireland wind data.csv"
 
     def __init__(self, env: Environment, name: str = "Wind", data_set_filename: str = WIND_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
         self.inherent_carbon_intensity = 12
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
@@ -810,8 +841,8 @@ class GridPower(PowerSource):
     GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
 
     def __init__(self, env: Environment, name: str = "Grid", data_set_filename: str = GRID_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, associated_nodes=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, associated_nodes)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
         self.carbon_intensity = 0
         self.powerType = PowerType.MIXED
 
@@ -843,8 +874,8 @@ class BatteryPower(PowerSource):
     """
     def __init__(self, env: Environment, name: str = "Battery",
                  power_domain: PowerDomain = None, priority: int = 10,
-                 total_power_available=40, charge_rate=22, associated_nodes=None):
-        super().__init__(env, name, None, power_domain, priority, associated_nodes)
+                 total_power_available=40, charge_rate=22, powered_entities=None):
+        super().__init__(env, name, None, power_domain, priority, powered_entities)
 
         self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
         self.powerType = PowerType.BATTERY

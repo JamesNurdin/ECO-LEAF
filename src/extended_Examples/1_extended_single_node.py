@@ -36,7 +36,7 @@ def main():
 
     env = simpy.Environment()  # creating SimPy simulation environment
 
-    power_domain = PowerDomain(env, name="Power Domain 1", associated_nodes=[node], start_time_str="19:00:00",
+    power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=[node], start_time_str="19:00:00",
                                update_interval=1)  # Creating Power domain to run at 7pm
     solar_power = SolarPower(env, name="Solar", power_domain=power_domain, priority=0)  # Solar power with the highest priority
     power_domain.add_power_source(solar_power)  # Attaching solar power to power domain

@@ -3,8 +3,8 @@ import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
-from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower
+from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, \
+    GridPower, PowerDomain
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -12,26 +12,26 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 
 def main():
     env = simpy.Environment()  # creating SimPy simulation environment
+
+    infrastructure = Infrastructure()
     # Initializing infrastructure and workload
     node1 = Node("node1", cu=10, power_model=PowerModelNode(max_power=30, static_power=3))  # source
     node2 = Node("node2", cu=40, power_model=PowerModelNode(max_power=70, static_power=10))  # processing task
     node3 = Node("node3", cu=20, power_model=PowerModelNode(max_power=50, static_power=7))  # sink
+    # three nodes 1,2,3
+    # #two Wi-Fi links between 1 -> 2 and 2 -> 3
+    wifi_link_from_source = Link("Link1", node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
+    wifi_link_to_sink = Link("Link2", node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    infrastructure.add_link(wifi_link_to_sink)
+    infrastructure.add_link(wifi_link_from_source)
+    entities = infrastructure.nodes()+infrastructure.links()
 
-    infrastructure = Infrastructure()
-
-    power_domain = PowerDomain(env, name="Power Domain 1", associated_nodes=[node1, node2, node3],
+    power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=entities,
                                start_time_str="19:00:00", update_interval=1)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
     power_domain.add_power_source(solar_power)
     power_domain.add_power_source(grid1)
-
-    # three nodes 1,2,3
-    # #two Wi-Fi links between 1 -> 2 and 2 -> 3
-    wifi_link_from_source = Link(node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
-    wifi_link_to_sink = Link(node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
-    infrastructure.add_link(wifi_link_to_sink)
-    infrastructure.add_link(wifi_link_from_source)
 
     # Initialise three tasks
     source_task = SourceTask(cu=0.4, bound_node=node1)
