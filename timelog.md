@@ -196,6 +196,8 @@
 ### 15th December
 * *2 Hours* Reworked the framework to account for the inclusion of power consumed by data links.
 * *0.5 Hours* Updated unit tests to reflect changes made to framework
+* *2 Hours* Implemented the file writer along with the necessary validation and unit tests respectively.  
+*  1.5 Hours* Reshuffled the work done recently, created a new file to handle file details along with creating a new directory for results every time the fileHandler class is created.
 TODO:
 Main example
 Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])

@@ -1,6 +1,9 @@
+import json
+import os
 import unittest
 from unittest.mock import MagicMock
 
+from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.power import PowerDomain, SolarPower
 
 
@@ -181,7 +184,8 @@ class TestPowerDomain(unittest.TestCase):
         self.assertAlmostEqual(result_2, 0.05625, places=3)  # Adjust the expected value based on your calculation
 
     def test_update_carbon_intensity(self):
-        """ Test to check that when an update interval occurs the total amount of carbon released is calculated correctly. """
+        """ Test to check that when an update interval occurs the total amount of carbon released is calculated
+            correctly. """
         self.power_domain.carbon_emitted = []
         update_interval_data = {'Solar': {'node2': {'Power Used': 0.1,
                                                     'Carbon Intensity': 1,
@@ -261,6 +265,32 @@ class TestPowerDomain(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.power_domain.convert_to_time_string(-5)
+
+    def test_write_out_results(self):
+        file_handler = FileHandler(self.power_domain)
+        """ Test the write out function to ensure that side effect is a json file. """
+        filename = "test_output.json"
+        current_script_path = os.path.abspath(__file__)
+        parent_directory = os.path.dirname(os.path.dirname(os.path.dirname(current_script_path)))
+        expected_filepath = os.path.join(parent_directory, "results", f"{file_handler.creation_time}_results", filename)
+        mocked_data = {"01:00:00": {'Wind': {'node2': {'Power Used': 0.1,
+                                                       'Carbon Intensity': 1,
+                                                       'Carbon Released': 0.1},
+                                             'Total Carbon Released': 0.1},
+                                    'Grid': {'node1': {'Power Used': 0.06,
+                                                       'Carbon Intensity': 2,
+                                                       'Carbon Released': 0.12},
+                                             'node3': {'Power Used': 0.15,
+                                                       'Carbon Intensity': 1,
+                                                       'Carbon Released': 0.15},
+                                             'Total Carbon Released': 0.27}}}
+        expected_data = json.dumps(mocked_data, indent=2)
+
+        self.power_domain.captured_data = mocked_data
+        filepath_written_to, data_written = file_handler.write_out_results(filename=filename)
+
+        self.assertEqual(expected_data, data_written)
+        self.assertEqual(expected_filepath, filepath_written_to)
 
 
 if __name__ == '__main__':

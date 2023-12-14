@@ -1,8 +1,9 @@
 import csv
 import logging
 import math
-
 import os
+import re
+
 from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Union, Collection, Callable, Optional, Iterable
@@ -11,7 +12,6 @@ import numpy
 import simpy
 from simpy import Environment
 from enum import auto
-import re
 
 logger = logging.getLogger(__name__)
 _unnamed_power_meters_created = 0
@@ -575,6 +575,7 @@ class PowerDomain:
             self.name = name
         self.power_sources = []
         self.carbon_emitted = []
+        self.captured_data = {}
 
         self.entity_distributor = entity_distributor or EntityDistributor()
 
@@ -652,6 +653,7 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
+            self.update_recorded_data(self.convert_to_time_string(self.env.now + self.start_time_index), current_carbon_intensities)
             logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
@@ -719,7 +721,6 @@ class PowerDomain:
         """ Using the data of the current time interval i.e.
             {PowerSource: {Entity: {Power used, Carbon intensity, Carbon Released}}...{Total Carbon Released}}
             we calculate the total power released during the interval."""
-
         increment_total_carbon_omitted = 0
         for increment in increment_data.values():
             increment_total_carbon_omitted += increment["Total Carbon Released"]
@@ -762,6 +763,10 @@ class PowerDomain:
             raise ValueError("Error: Invalid input. Please provide a non-negative integer.")
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
+
+    def update_recorded_data(self, time, data):
+        self.captured_data[time] = data
+
 
 
 class SolarPower(PowerSource):
