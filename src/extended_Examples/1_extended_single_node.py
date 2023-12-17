@@ -54,7 +54,6 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
     file_handler = FileHandler(power_domain)
-
     file_handler.test()
 
 
