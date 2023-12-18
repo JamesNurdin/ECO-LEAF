@@ -20,9 +20,9 @@ def main():
     node2 = Node("node2", cu=40, power_model=PowerModelNode(max_power=70, static_power=10))  # processing task
     node3 = Node("node3", cu=20, power_model=PowerModelNode(max_power=50, static_power=7))  # sink
     node4 = Node("node4", cu=100, power_model=PowerModelNode(max_power=130, static_power=20))
-    wifi_link_from_source = Link("Link 1", node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
-    wifi_link_to_sink = Link("Link 2", node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
-    wifi_link_to_node4 = Link("Link 3", node2, node4, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    wifi_link_from_source = Link(name="Link 1", src=node1, dst=node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
+    wifi_link_to_sink = Link(name="Link 2", src=node2, dst=node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    wifi_link_to_node4 = Link(name="Link 3", src=node2, dst=node4, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_sink)
     infrastructure.add_link(wifi_link_from_source)
     infrastructure.add_link(wifi_link_to_node4)
@@ -81,8 +81,14 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
     file_handler = FileHandler(power_domain)
-    file_handler.time_series_entities("Carbon Released", events=events, entities=power_domain.powered_entities)
-    file_handler.time_series_power_sources("Power Available", events=events, power_sources=[solar_power,grid1,wind_power])
+    fig1 = file_handler.subplot_time_series_entities("Carbon Released", events=events, entities=power_domain.powered_entities)
+    fig2 = file_handler.subplot_time_series_power_sources("Power Used", events=events, power_sources=[solar_power, grid1, wind_power])
+    fig3 = file_handler.subplot_time_series_power_sources("Power Available", events=events, power_sources=[solar_power, grid1, wind_power])
+    figure_data = fig2.to_dict()
+    print(figure_data["layout"].keys())
+    main_fig = file_handler.aggregate_subplots([fig1, fig2,fig3])
+    main_fig.show()
+
 
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:

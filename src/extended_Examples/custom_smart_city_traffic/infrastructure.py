@@ -4,7 +4,7 @@ import simpy
 
 from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.mobility import Location
-from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, NodeDistributor, BatteryPower
+from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, EntityDistributor, BatteryPower
 from src.extended_Examples.custom_smart_city_traffic.settings import *
 from src.extendedLeaf.infrastructure import Link, Node
 from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
@@ -61,8 +61,8 @@ class Taxi(Node):
         # self.application = self._create_v2i_application(application_sinks)
         self.mobility_model = mobility_model
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
-        self.power_domain = PowerDomain(env, name="Power Domain 1", associated_nodes=[self],
-                                        start_time_str="19:00:00", update_interval=1, node_distributor=NodeDistributor())
+        self.power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=[self],
+                                        start_time_str="19:00:00", update_interval=1, entity_distributor=EntityDistributor())
         battery_power = BatteryPower(env, power_domain=self.power_domain, priority=0,
                                      total_power_available=TAXI_BATTERY_SIZE)
         self.power_domain.add_power_source(battery_power)
@@ -99,32 +99,40 @@ class LinkEthernet(Link):
 
 
 class LinkWanUp(Link):
-    def __init__(self, src: Node, dst: Node):
-        super().__init__(src, dst,
+    def __init__(self, src: Node, dst: Node, name: str):
+        super().__init__(src=src,
+                         dst=dst,
                          bandwidth=WAN_BANDWIDTH,
                          latency=WAN_LATENCY,
-                         power_model=PowerModelLink(WAN_WATT_PER_BIT_UP))
+                         power_model=PowerModelLink(WAN_WATT_PER_BIT_UP),
+                         name=name)
 
 
 class LinkWanDown(Link):
-    def __init__(self, src: Node, dst: Node):
-        super().__init__(src, dst,
+    def __init__(self, src: Node, dst: Node, name: str):
+        super().__init__(src=src,
+                         dst=dst,
                          bandwidth=WAN_BANDWIDTH,
                          latency=WAN_LATENCY,
-                         power_model=PowerModelLink(WAN_WATT_PER_BIT_DOWN))
+                         power_model=PowerModelLink(WAN_WATT_PER_BIT_DOWN),
+                         name=name)
 
 
 class LinkWifiBetweenTrafficLights(Link):
-    def __init__(self, src: Node, dst: Node):
-        super().__init__(src, dst,
+    def __init__(self, src: Node, dst: Node, name: str):
+        super().__init__(src=src,
+                         dst=dst,
                          bandwidth=WIFI_BANDWIDTH,
                          latency=WIFI_LATENCY,
-                         power_model=PowerModelLink(WIFI_TL_TO_TL_WATT_PER_BIT))
+                         power_model=PowerModelLink(WIFI_TL_TO_TL_WATT_PER_BIT),
+                         name=name)
 
 
 class LinkWifiTaxiToTrafficLight(Link):
-    def __init__(self, src: Node, dst: Node):
-        super().__init__(src, dst,
+    def __init__(self, src: Node, dst: Node, name: str):
+        super().__init__(src=src,
+                         dst=dst,
                          bandwidth=WIFI_BANDWIDTH,
                          latency=WIFI_LATENCY,
-                         power_model=PowerModelLink(WIFI_TAXI_TO_TL_WATT_PER_BIT))
+                         power_model=PowerModelLink(WIFI_TAXI_TO_TL_WATT_PER_BIT),
+                         name=name)

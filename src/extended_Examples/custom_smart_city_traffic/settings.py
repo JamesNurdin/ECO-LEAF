@@ -42,7 +42,7 @@ CLOUD_CU = np.inf
 CLOUD_WATT_PER_CU = 700e-6
 
 RECHARGE_STATION_STATIC_POWER = 300
-
+TRAFFIC_LIGHT_STATIC_POWER = 20
 """Network (Latency is only used for determining shortest paths in the routing)"""
 WAN_BANDWIDTH = np.inf
 WAN_LATENCY = 100

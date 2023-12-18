@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 # Figure generation libraries
 import plotly.graph_objs as go
+from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 from src.extendedLeaf.power import PowerDomain
 
@@ -104,7 +105,39 @@ class FileHandler:
         pattern = re.compile(r'^[a-zA-Z0-9_-]+\.json$')
         return bool(pattern.match(filename))
 
-    def time_series_entities(self, captured_attribute="Carbon Released", events=None, entities=None, write: bool = False, show: bool = True ):
+    def write_to_file(self, fig):
+        if os.path.exists(self.results_dir):
+            fig.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
+
+    def aggregate_subplots(self, plots) -> go.Figure:
+        # Create a subplot with one column and as many rows as the number of plots
+        main_fig = make_subplots(rows=len(plots), cols=1, subplot_titles=[fig.layout.title.text for fig in plots])
+
+        # Iterate through the plots and add traces to the main subplot
+        for plot_index, (plot, layout) in enumerate(zip(plots, [fig.layout for fig in plots])):
+            figure_data = plot.to_dict()['data']
+            # Add traces to the main subplot
+            for trace in figure_data:
+                main_fig.add_trace(trace, row=plot_index + 1, col=1,)
+
+            # Update xaxis properties
+            main_fig.update_xaxes(title_text=layout.xaxis.title.text, row=plot_index+1, col=1)
+            main_fig.update_yaxes(title_text=layout.yaxis.title.text, row=plot_index+1, col=1)
+            xaxis_ticks = layout.xaxis.tickvals
+            xaxis_ticktext = layout.xaxis.ticktext
+
+            # Apply xaxis tick information to the main subplot
+            main_fig.update_xaxes(tickvals=xaxis_ticks, ticktext=xaxis_ticktext, row=plot_index+1, col=1)
+            for shape in layout.shapes:
+                main_fig.add_shape(shape, row=plot_index+1, col=1)
+
+            # Update layout of the main subplot based on the individual layout of each subplot
+
+        # Update layout of the main subplot
+        main_fig.update_layout(title_text="Results:")
+
+        return main_fig
+    def subplot_time_series_entities(self, captured_attribute="Carbon Released", events=None, entities=None) -> go.Figure:
         if entities is None:
             entities = self.power_domain.powered_entities
 
@@ -154,12 +187,10 @@ class FileHandler:
             title_x=0.5,  # Adjust the horizontal position of the title
             title_font=dict(size=16),  # Adjust the font size of the title
         )
+        return fig
 
-        if os.path.exists(self.results_dir) and write:
-            fig.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
-        if show:
-            fig.show()
-    def time_series_power_sources(self, captured_attribute="Carbon Released", events=None, power_sources=None, write: bool = False, show: bool = True ):
+
+    def subplot_time_series_power_sources(self, captured_attribute="Carbon Released", events=None, power_sources=None) -> go.Figure:
         if power_sources is None:
             power_sources = self.power_domain.power_sources
 
@@ -167,7 +198,6 @@ class FileHandler:
         fig = subplot_figure()
 
         keys = self.power_domain.captured_data.keys()
-        print(self.power_domain.captured_data)
         start_time = self.power_domain.get_current_time(list(keys)[0])
         end_time = self.power_domain.get_current_time(list(keys)[-1])
 
@@ -210,18 +240,15 @@ class FileHandler:
             title_x=0.5,  # Adjust the horizontal position of the title
             title_font=dict(size=16),  # Adjust the font size of the title
         )
-
-        if os.path.exists(self.results_dir) and write:
-            fig.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
-        if show:
-            fig.show()
+        return fig
 
     def retrieve_select_data_entities(self, time_series, desired_nodes: ["Node"]):
         nodes = {}
         for node in desired_nodes:
-            nodes[node.name] = {"Power Used": [None] * len(list(time_series.keys())),
-                                "Carbon Intensity": [None] * len(list(time_series.keys())),
-                                "Carbon Released": [None] * len(list(time_series.keys()))}
+            if node is not None:
+                nodes[node.name] = {"Power Used": [None] * len(list(time_series.keys())),
+                                    "Carbon Intensity": [None] * len(list(time_series.keys())),
+                                    "Carbon Released": [None] * len(list(time_series.keys()))}
         # Go through each time series
         for time_index, (time, power_sources) in enumerate(time_series.items()):
             # Go through each power source to isolate nodes
@@ -240,10 +267,11 @@ class FileHandler:
     def retrieve_select_data_power_sources(self, time_series, desired_power_sources: ["PowerSource"]):
         power_source_results = {}
         for power_source in desired_power_sources:
-            power_source_results[power_source.name] = {"Power Used": [None] * len(list(time_series.keys())),
-                                "Carbon Intensity": [power_source.get_carbon_intensity_at_time(time) for time in range(len(list(time_series.keys())))],
-                                "Power Available": [power_source.get_power_at_time(time) for time in range(len(list(time_series.keys())))],
-                                "Carbon Released": [None] * len(list(time_series.keys()))}
+            if power_source is not None:
+                power_source_results[power_source.name] = {"Power Used": [None] * len(list(time_series.keys())),
+                                    "Carbon Intensity": [power_source.get_carbon_intensity_at_time(time) for time in range(len(list(time_series.keys())))],
+                                    "Power Available": [power_source.get_power_at_time(time) for time in range(len(list(time_series.keys())))],
+                                    "Carbon Released": [None] * len(list(time_series.keys()))}
         # Go through each time series
         for time_index, (time, power_sources) in enumerate(time_series.items()):
             # Go through each power source to isolate nodes

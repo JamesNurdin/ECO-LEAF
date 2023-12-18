@@ -2,10 +2,11 @@ from typing import List, Tuple, Iterator, TypeVar, Union, Type
 import networkx as nx
 import simpy
 
+from src.extendedLeaf.power import EntityDistributor
 from src.extended_Examples.custom_smart_city_traffic.infrastructure import *
 from mobility import Location
 from src.extended_Examples.custom_smart_city_traffic.orchestrator import CityOrchestrator
-from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, SolarPower, GridPower, NodeDistributor
+from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, SolarPower, GridPower, EntityDistributor
 from src.extended_Examples.custom_smart_city_traffic.settings import *
 from src.extendedLeaf.infrastructure import Infrastructure, Node
 
@@ -15,6 +16,7 @@ _recharge_station_counter: int = 0
 class City:
     _TNode = TypeVar("_TNode", bound=Node)  # Generics
     _NodeTypeFilter = Union[Type[_TNode], Tuple[Type[_TNode], ...]]
+
     def __init__(self, env: simpy.Environment):
         self.env = env
         self.street_graph, self.entry_point_locations, self.recharge_locations = _create_street_graph()
@@ -34,32 +36,25 @@ class City:
         cloud: Cloud = self.infrastructure.nodes(type_filter=Cloud)[0]
         recharge_station = RechargeStation(location=location, application_sink=cloud,
                                            _recharge_station_counter=_recharge_station_counter)
-        power_domain = PowerDomain(env, name=f"Power Domain Recharge Station {_recharge_station_counter}", node_distributor=NodeDistributor(static_nodes=False),
-                                   start_time_str=START_TIME, update_interval=1, associated_nodes=[recharge_station])
+        power_domain = PowerDomain(env, name=f"Power Domain Recharge Station {_recharge_station_counter}", entity_distributor=EntityDistributor(static_entities=False),
+                                   start_time_str=START_TIME, update_interval=1, powered_entities=[recharge_station])
         solar_power = SolarPower(env, name=f"Solar Panel Recharge Station {_recharge_station_counter}",
                                  power_domain=power_domain, priority=0)
         grid1 = GridPower(env, power_domain=power_domain, priority=5)
         power_domain.add_power_source(grid1)
         power_domain.add_power_source(solar_power)
 
-        self.infrastructure.add_link(LinkWanUp(recharge_station, cloud))
-        self.infrastructure.add_link(LinkWanDown(cloud, recharge_station))
+        self.infrastructure.add_link(LinkWanUp(name=f"Link up {_recharge_station_counter}",src=recharge_station, dst=cloud))
+        self.infrastructure.add_link(LinkWanDown(name=f"Link up {_recharge_station_counter}",src=cloud, dst=recharge_station))
         _recharge_station_counter += 1
         return power_domain
 
     def find_power_domain_containing_node(self, node_name):
         for power_domain in self.power_domains:
-            for node in power_domain.associated_nodes:
+            for node in power_domain.powered_entities:
                 if node.name == node_name:
                     return power_domain
         return None
-    def _add_fog_node(self, location: Location):
-        """Fog nodes are connected to a traffic lights via Ethernet (no power usage)"""
-        fog_node = FogNode(location)
-        for traffic_light in self.infrastructure.nodes(type_filter=TrafficLight):
-            if traffic_light.location == location:
-                self.infrastructure.add_link(LinkEthernet(traffic_light, fog_node))
-                self.infrastructure.add_link(LinkEthernet(fog_node, traffic_light))
 
     def _update_wifi_connections(self):
         """Recalculates the traffic lights in range for all taxis."""
