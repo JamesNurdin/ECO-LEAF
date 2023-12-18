@@ -794,11 +794,17 @@ class SolarPower(PowerSource):
     def get_current_power(self) -> float:
         time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
+    def get_power_at_time(self, time_int) -> float:
+        time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
+        return float(self.power_data[time])
 
     def update_carbon_intensity(self):
         pass
 
     def get_current_carbon_intensity(self, offset):
+        return self.inherent_carbon_intensity
+
+    def get_carbon_intensity_at_time(self, time) -> float:
         return self.inherent_carbon_intensity
 
 
@@ -829,10 +835,17 @@ class WindPower(PowerSource):
         time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
 
+    def get_power_at_time(self, time_int) -> float:
+        time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
+        return float(self.power_data[time])
+
     def update_carbon_intensity(self):
         pass
 
     def get_current_carbon_intensity(self, offset):
+        return self.inherent_carbon_intensity
+
+    def get_carbon_intensity_at_time(self, time) -> float:
         return self.inherent_carbon_intensity
 
 
@@ -867,6 +880,12 @@ class GridPower(PowerSource):
 
     def get_current_power(self) -> float:
         return numpy.inf
+    def get_power_at_time(self, time) -> float:
+        return numpy.inf
+
+    def get_carbon_intensity_at_time(self, time_int) -> float:
+        time = self._map_to_time(((time_int) // self.update_interval) % len(self.power_data))
+        return float(self.power_data[time])
 
 
 class BatteryPower(PowerSource):
@@ -891,6 +910,10 @@ class BatteryPower(PowerSource):
 
     def get_current_power(self) -> float:
         return self.remaining_power
+
+    def get_power_at_time(self, time) -> float:
+        #TODO add functionality
+        raise AttributeError(f"Error: unable to retrieve power")
 
     def set_current_power(self, remaining_power):
         if remaining_power < 0:
@@ -923,9 +946,15 @@ class BatteryPower(PowerSource):
             self.remaining_power -= power_consumed
 
     def update_carbon_intensity(self):
+        #  Only produced from recharging the battery
         pass
 
     def get_current_carbon_intensity(self, offset) -> float:
+        #  Only produced from recharging the battery
+        return 0
+
+    def get_carbon_intensity_at_time(self, time) -> float:
+        #  Only produced from recharging the battery
         return 0
 
 

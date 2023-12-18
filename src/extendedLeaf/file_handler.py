@@ -167,7 +167,7 @@ class FileHandler:
         fig = subplot_figure()
 
         keys = self.power_domain.captured_data.keys()
-        print(keys)
+        print(self.power_domain.captured_data)
         start_time = self.power_domain.get_current_time(list(keys)[0])
         end_time = self.power_domain.get_current_time(list(keys)[-1])
 
@@ -241,7 +241,8 @@ class FileHandler:
         power_source_results = {}
         for power_source in desired_power_sources:
             power_source_results[power_source.name] = {"Power Used": [None] * len(list(time_series.keys())),
-                                "Carbon Intensity": [power_source.get_current_carbon_intensity(time) for time in range(len(list(time_series.keys())))],
+                                "Carbon Intensity": [power_source.get_carbon_intensity_at_time(time) for time in range(len(list(time_series.keys())))],
+                                "Power Available": [power_source.get_power_at_time(time) for time in range(len(list(time_series.keys())))],
                                 "Carbon Released": [None] * len(list(time_series.keys()))}
         # Go through each time series
         for time_index, (time, power_sources) in enumerate(time_series.items()):
@@ -253,7 +254,6 @@ class FileHandler:
                     # Go through nodes
                     for node_index, node in enumerate(power_sources[power_source]):
                         if node != "Total Carbon Released":
-                            print(power_sources[power_source][node]["Power Used"])
                             power_used = power_used + power_sources[power_source][node]["Power Used"]
                             carbon_released = carbon_released + power_sources[power_source][node]["Carbon Released"]
                     power_source_results[power_source]["Power Used"][time_index] = power_used
