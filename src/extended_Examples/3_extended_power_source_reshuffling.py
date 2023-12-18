@@ -33,14 +33,14 @@ def main():
     power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=entities,
                                start_time_str="19:00:00", update_interval=1)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
-    grid_power = GridPower(env, power_domain=power_domain, priority=5)
+    grid1 = GridPower(env, power_domain=power_domain, priority=5)
     wind_power = WindPower(env, power_domain=power_domain, priority=0)
     power_domain.add_power_source(wind_power)
-    power_domain.add_power_source(grid_power)
+    power_domain.add_power_source(grid1)
     events = [
         ("19:20:00", False, (power_domain.remove_power_source, [wind_power])),
         ("19:40:00", False, (power_domain.add_power_source, [solar_power])),
-        ("20:00:00", False, (power_domain.add_entity, [node4]))]
+        ("20:30:00", False, (power_domain.add_entity, [node4]))]
     power_domain.power_source_events = events
 
     # three nodes 1,2,3
@@ -79,8 +79,11 @@ def main():
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
+
     file_handler = FileHandler(power_domain)
-    file_handler.time_series_power_sources("Power Available", events=events, power_sources=[solar_power,grid_power,wind_power])
+    file_handler.time_series_entities("Carbon Released", events=events, entities=power_domain.powered_entities)
+    file_handler.time_series_power_sources("Power Available", events=events, power_sources=[solar_power,grid1,wind_power])
+
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
         return self.infrastructure.node("node2")

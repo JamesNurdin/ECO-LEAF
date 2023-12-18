@@ -653,10 +653,12 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
-            self.update_recorded_data(self.convert_to_time_string((self.env.now + self.start_time_index)%1440), current_carbon_intensities)
-            logger.debug(f"{env.now}: ({self.convert_to_time_string(self.env.now + self.start_time_index)}) "
+            self.update_recorded_data(self.get_current_time_string(), current_carbon_intensities)
+            logger.debug(f"{env.now}: ({self.get_current_time_string()}) "
                          f"{self.name} released {current_interval_released_carbon} gCO2")
 
+    def get_current_time_string(self):
+        return self.convert_to_time_string((self.env.now + self.start_time_index)%1440)
     def record_power_source_carbon_released(self, current_power_source):
         if current_power_source is None:
             raise ValueError(f"Error: No power source was supplied.")
@@ -671,6 +673,8 @@ class PowerDomain:
                          "Carbon Released": carbon_released}
             current_power_source_carbon_released += carbon_released
             current_power_source_dictionary[entity.name] = entity_data
+        if current_power_source.powerType == PowerType.BATTERY:
+            current_power_source.power_log[self.env.now] = current_power_source.get_current_power()
         return current_power_source_dictionary, current_power_source_carbon_released
 
     def add_power_source(self, power_source):
@@ -757,6 +761,7 @@ class PowerDomain:
 
     @classmethod
     def convert_to_time_string(cls, time):
+        print(time)
         if not isinstance(time, int):
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:
@@ -766,7 +771,6 @@ class PowerDomain:
 
     def update_recorded_data(self, time, data):
         self.captured_data[time] = data
-
 
 
 class SolarPower(PowerSource):
@@ -794,6 +798,7 @@ class SolarPower(PowerSource):
     def get_current_power(self) -> float:
         time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
+
     def get_power_at_time(self, time_int) -> float:
         time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
@@ -880,11 +885,12 @@ class GridPower(PowerSource):
 
     def get_current_power(self) -> float:
         return numpy.inf
+
     def get_power_at_time(self, time) -> float:
         return numpy.inf
 
     def get_carbon_intensity_at_time(self, time_int) -> float:
-        time = self._map_to_time(((time_int) // self.update_interval) % len(self.power_data))
+        time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
 
 
@@ -907,13 +913,13 @@ class BatteryPower(PowerSource):
         self.remaining_power = 0  # kWh
         self.recharge_rate = charge_rate  # kw/h
         self.recharge_data = []
+        self.power_log = {}
 
     def get_current_power(self) -> float:
         return self.remaining_power
 
-    def get_power_at_time(self, time) -> float:
-        #TODO add functionality
-        raise AttributeError(f"Error: unable to retrieve power")
+    def get_power_at_time(self, time_int) -> float:
+        return self.power_log[time_int+1]
 
     def set_current_power(self, remaining_power):
         if remaining_power < 0:
