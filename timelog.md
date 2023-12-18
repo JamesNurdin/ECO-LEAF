@@ -205,3 +205,4 @@
 ### 17th December
 * *2 Hours* Continued work on graphing function that allows the user to display the time series of results, allowing for a range of features to customise results.
 * *2.5 Hours* Also introduced the ability to allow for the power domains to now be graphed, during which a bug appeared that caused simulations to extend into a new day i.e. any simulation that continued after 24:00:00 has been fixed.
+* *1.5 Hour* Introduced the ability for batteries to now have their power recorded, this is to allow for the ability to graph data as while the data is recorded in respect to the nodes it is not for the power sources as the renewables are logged using the data from file and mixed power sources are assumed to be infinite.

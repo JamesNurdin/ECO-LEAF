@@ -77,7 +77,7 @@ def main():
 
     file_handler = FileHandler(power_domain)
     file_handler.time_series_entities("Carbon Released", events=events, entities=power_domain.powered_entities)
-    file_handler.time_series_power_sources("Power Available", events=events,
+    file_handler.time_series_power_sources("Power Used", events=events,
                                            power_sources=[grid1,battery_power])
 
 
