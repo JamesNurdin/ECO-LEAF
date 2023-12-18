@@ -198,10 +198,10 @@
 * *0.5 Hours* Updated unit tests to reflect changes made to framework
 * *2 Hours* Implemented the file writer along with the necessary validation and unit tests respectively.  
 * *1.5 Hours* Reshuffled the work done recently, created a new file to handle file details along with creating a new directory for results every time the fileHandler class is created.
-* *4.5 Hours* After getting the previous work done, a large road block has appeared with the plotly and kaleido packages, unfortunatley despite countless hours trying to get the packages to work I am unable to get the write_image function to work. I will have to re-examine the problem later
+* *4.5 Hours* After getting the previous work done, a large road block has appeared with the plotly and kaleido packages, unfortunately despite countless hours trying to get the packages to work I am unable to get the write_image function to work. I will have to re-examine the problem later
 ### 16th December
 * *2 Hours* Resolved the issue by installing an earlier version of kaleidoscope, apparently other people had the same problem but version 0.1.0.post1 resolved the issue.
 * *3 Hours* Implemented a function that was capable of restructuring the captured data from the simulation, along with this worked on a graphing function that allows for graphs to be saved that take in an attribute and a list of entities and shows the time series 
-* TODO:
-Main example
-Check Battery, in particular allow for managing of nodes and the reading of data from file(just want update intervals for the battery could retrieve the headers where data would be header [1])
+### 17th December
+* *2 Hours* Continued work on graphing function that allows the user to display the time series of results, allowing for a range of features to customise results.
+* *2.5 Hours* Also introduced the ability to allow for the power domains to now be graphed, during which a bug appeared that caused simulations to extend into a new day i.e. any simulation that continued after 24:00:00 has been fixed.

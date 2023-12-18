@@ -53,10 +53,6 @@ def main():
     logger.info(f"Total power usage: {float(PowerMeasurement.sum(power_meter.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
-    file_handler = FileHandler(power_domain)
-    file_handler.test()
-
-
 def placement(env, node, task):
     """Places the task after 3 seconds and removes it after 8 seconds."""
     yield env.timeout(3)
