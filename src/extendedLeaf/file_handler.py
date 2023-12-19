@@ -58,8 +58,7 @@ class FileHandler:
 
     def __init__(self):
         self.creation_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.results_dir = self.create_results_dir()
-
+        self.results_dir = None
     def create_results_dir(self) -> str:
         """ Creates a directory for the results. """
         results_dir = self.get_results_dir()
@@ -84,6 +83,8 @@ class FileHandler:
     def write_out_results(self, power_domain: PowerDomain, dir_path: str = None, filename: str = "output.json"):
         """ Allows user to write raw data to file, allows for a desired filepath and filename
             if either are absent the missing aspects are defaulted, """
+        if self.results_dir is None:
+            self.results_dir = self.create_results_dir()
         if not self.is_valid_filename(filename):
             filename = "output.json"
 
@@ -104,7 +105,9 @@ class FileHandler:
         pattern = re.compile(r'^[a-zA-Z0-9_-]+\.json$')
         return bool(pattern.match(filename))
 
-    def write_to_file(self, fig):
+    def write_figure_to_file(self, fig):
+        if self.results_dir is None:
+            self.results_dir = self.create_results_dir()
         if os.path.exists(self.results_dir):
             fig.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
 
