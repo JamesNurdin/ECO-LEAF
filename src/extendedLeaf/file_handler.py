@@ -56,8 +56,7 @@ def subplot_figure():
 
 class FileHandler:
 
-    def __init__(self, power_domain: PowerDomain):
-        self.power_domain = power_domain
+    def __init__(self):
         self.creation_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.results_dir = self.create_results_dir()
 
@@ -82,7 +81,7 @@ class FileHandler:
         filepath = os.path.join(dir_path, "src", "results")
         return filepath
 
-    def write_out_results(self, dir_path: str = None, filename: str = "output.json"):
+    def write_out_results(self, power_domain: PowerDomain, dir_path: str = None, filename: str = "output.json"):
         """ Allows user to write raw data to file, allows for a desired filepath and filename
             if either are absent the missing aspects are defaulted, """
         if not self.is_valid_filename(filename):
@@ -94,7 +93,7 @@ class FileHandler:
         filepath = os.path.join(dir_path, filename)
 
         # Convert dictionary to JSON format
-        json_data = json.dumps(self.power_domain.captured_data, indent=2)
+        json_data = json.dumps(power_domain.captured_data, indent=2)
 
         # Write JSON data to a file
         with open(filepath, 'w') as json_file:
@@ -137,19 +136,19 @@ class FileHandler:
         main_fig.update_layout(title_text="Results:")
 
         return main_fig
-    def subplot_time_series_entities(self, captured_attribute="Carbon Released", events=None, entities=None) -> go.Figure:
+    def subplot_time_series_entities(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None, entities=None) -> go.Figure:
         if entities is None:
-            entities = self.power_domain.powered_entities
+            entities = power_domain.powered_entities
 
         global n
         fig = subplot_figure()
 
-        keys = self.power_domain.captured_data.keys()
-        start_time = self.power_domain.get_current_time(list(keys)[0])
-        end_time = self.power_domain.get_current_time(list(keys)[-1])
+        keys = power_domain.captured_data.keys()
+        start_time = power_domain.get_current_time(list(keys)[0])
+        end_time = power_domain.get_current_time(list(keys)[-1])
 
         offset = start_time
-        time, data = self.retrieve_select_data_entities(self.power_domain.captured_data, entities)
+        time, data = self.retrieve_select_data_entities(power_domain.captured_data, entities)
 
         # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
@@ -164,7 +163,7 @@ class FileHandler:
             showlegend=True,
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
-                ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
+                ticktext=[power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
                 tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, n)]),
             yaxis=dict(
                 title=dict(text=captured_attribute, standoff=0))
@@ -173,7 +172,7 @@ class FileHandler:
         # add event lines
         if events is not None:
             for (time, _, (event, args)) in events:
-                time_x_value = self.power_domain.get_current_time(time)
+                time_x_value = power_domain.get_current_time(time)
                 fig.add_vrect(
                     x0=time_x_value - offset,
                     x1=time_x_value - offset,
@@ -190,19 +189,19 @@ class FileHandler:
         return fig
 
 
-    def subplot_time_series_power_sources(self, captured_attribute="Carbon Released", events=None, power_sources=None) -> go.Figure:
+    def subplot_time_series_power_sources(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None, power_sources=None) -> go.Figure:
         if power_sources is None:
-            power_sources = self.power_domain.power_sources
+            power_sources = power_domain.power_sources
 
         global n
         fig = subplot_figure()
 
-        keys = self.power_domain.captured_data.keys()
-        start_time = self.power_domain.get_current_time(list(keys)[0])
-        end_time = self.power_domain.get_current_time(list(keys)[-1])
+        keys = power_domain.captured_data.keys()
+        start_time = power_domain.get_current_time(list(keys)[0])
+        end_time = power_domain.get_current_time(list(keys)[-1])
 
         offset = start_time
-        time, data = self.retrieve_select_data_power_sources(self.power_domain.captured_data, power_sources)
+        time, data = self.retrieve_select_data_power_sources(power_domain.captured_data, power_sources)
 
         # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
@@ -217,7 +216,7 @@ class FileHandler:
             showlegend=True,
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
-                ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
+                ticktext=[power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
                 tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, n)]),
             yaxis=dict(
                 title=dict(text=captured_attribute, standoff=0))
@@ -226,7 +225,7 @@ class FileHandler:
         # add event lines
         if events is not None:
             for (time, _, (event, args)) in events:
-                time_x_value = self.power_domain.get_current_time(time)
+                time_x_value = power_domain.get_current_time(time)
                 fig.add_vrect(
                     x0=time_x_value - offset,
                     x1=time_x_value - offset,

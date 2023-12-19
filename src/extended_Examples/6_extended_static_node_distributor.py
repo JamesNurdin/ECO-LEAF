@@ -20,8 +20,8 @@ def main():
     node3 = Node("node3", cu=20, power_model=PowerModelNode(max_power=50, static_power=7))  # sink
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
-    wifi_link_from_source = Link("Link1", node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
-    wifi_link_to_sink = Link("Link2", node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    wifi_link_from_source = Link(name="Link1", src=node1, dst=node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
+    wifi_link_to_sink = Link(name="Link2", src=node2, dst=node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_sink)
     infrastructure.add_link(wifi_link_from_source)
 
@@ -61,8 +61,9 @@ def main():
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
-    file_handler = FileHandler(power_domain)
-    file_handler.time_series_entities("Power Used", entities=solar_power.powered_entities)
+    file_handler = FileHandler()
+    file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=solar_power.powered_entities)
+
 
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
