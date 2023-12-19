@@ -267,7 +267,7 @@ class TestPowerDomain(unittest.TestCase):
             self.power_domain.convert_to_time_string(-5)
 
     def test_write_out_results(self):
-        file_handler = FileHandler(self.power_domain)
+        file_handler = FileHandler()
         """ Test the write out function to ensure that side effect is a json file. """
         filename = "test_output.json"
         current_script_path = os.path.abspath(__file__)
@@ -287,7 +287,7 @@ class TestPowerDomain(unittest.TestCase):
         expected_data = json.dumps(mocked_data, indent=2)
 
         self.power_domain.captured_data = mocked_data
-        filepath_written_to, data_written = file_handler.write_out_results(filename=filename)
+        filepath_written_to, data_written = file_handler.write_out_results(filename=filename,power_domain=self.power_domain)
 
         self.assertEqual(expected_data, data_written)
         self.assertEqual(expected_filepath, filepath_written_to)

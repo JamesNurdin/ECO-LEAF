@@ -1,7 +1,9 @@
 from typing import List, Tuple, Iterator, TypeVar, Union, Type
 import networkx as nx
 import simpy
-
+from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
 from src.extendedLeaf.power import EntityDistributor
 from src.extended_Examples.precision_agriculture.infrastructure import *
 from mobility import Location
@@ -12,25 +14,110 @@ from src.extendedLeaf.infrastructure import Infrastructure, Node
 
 _recharge_station_counter: int = 0
 
+class Plot:
+    def __init__(self, env: simpy.Environment, plot_graph, sensor_locations, fog_location, name: str = "Plot"):
+        self.env = env
+        self.graph = plot_graph
+        self.sensor_locations = sensor_locations
+        self.fog_location = fog_location
+        self.name = name
+        self.power_domain = PowerDomain(self.env, name=f"{self.name}_power_domain")
 class Farm:
-    def __init__(self, env: simpy.Environment):
+    def __init__(self, env: simpy.Environment, start_time="00:00:00"):
         self.env = env
         self.farm_graph, self.entry_point_locations, self.recharge_locations = _create_street_graph()
 
-        self.infrastructure = Infrastructure()
-
+        self.cloud = Cloud()
         # Create infrastructure
-        self.infrastructure.add_node(Cloud())
+        self.plots: [Plot] = self._create_farm_plots()
 
-        self.plots = _create_farm_plots()
+        fig, axes = plt.subplots(len(self.plots), 1, figsize=(10, 5))
+
+        for i, plot in enumerate(self.plots):
+            nx.draw(plot.graph, with_labels=False, ax=axes[i])
+            axes[i].set_title(f'Graph {i}')
+        # Adjust layout to prevent overlap
+        plt.show()
 
     def run(self, env):
-        for power_domain in self.plots.power_domain:
-            env.process(power_domain.run(env))
+        for plot in self.plots:
+            env.process(plot.power_domain.run(env))
 
 
-def _create_farm_plots():
-    return None
+    def _create_farm_plots(self) -> [Plot]:
+        plots = []
+        occupied_locations = []  # perimeter = [(top left),(bottom_right)]
+        for current_plot_index in range(NUMBER_OF_PLOTS):
+            plot_graph, sensor_locations, fog_location = self._create_plot_graph(current_plot_index)
+            current_plot = Plot(self.env, plot_graph, sensor_locations, fog_location, name=f"{PLOT_NAMES[current_plot_index]}")
+            plots.append(current_plot)
+        return plots
+
+    # TODO ensure that locations of plots dont encroach on each other
+
+    def _create_plot_graph(self, current_plot_index):
+        graph = nx.Graph()
+        sensor_locations: [Location]
+        fog_node_location: Location = Location(0, 0)
+
+        n_points = SENSORS_PER_AXIS
+        step_size_x = PLOT_SIZES[current_plot_index][0] / (n_points - 1)
+        step_size_y = PLOT_SIZES[current_plot_index][1] / (n_points - 1)
+
+        sensor_locations = [[None for _ in range(n_points)] for _ in range(n_points)]
+        for x in range(n_points):
+            for y in range(n_points):
+                location = Location((x+1) * step_size_x, y * step_size_y)
+                sensor_locations[x][y] = location
+                graph.add_node(location)
+                if x > 0:
+                    graph.add_edge(location, sensor_locations[x - 1][y])
+                if y> 0:
+                    graph.add_edge(location, sensor_locations[x][y - 1])
+
+        graph.add_edge(fog_node_location, sensor_locations[0][0])
+
+        return graph, sensor_locations, fog_node_location
+
+    def _create_street_graph(self) -> Tuple[nx.Graph, List[Location], List[Location]]:
+        graph = nx.Graph()
+        """Need to consider, charge points, smart cameras and entry points"""
+        n_points = STREETS_PER_AXIS + 2  # plus two accounting for removal of corners
+        step_size_x = CITY_WIDTH / (n_points - 1)
+        step_size_y = CITY_HEIGHT / (n_points - 1)
+
+        entry_point_locations = []
+        locations = [[None for _ in range(n_points)] for _ in range(n_points)]
+        for x in range(n_points):
+            for y in range(n_points):
+                location = Location(x * step_size_x, y * step_size_y)
+                if x == 0 or x == (n_points - 1) or y == 0 or y == (n_points - 1):
+                    entry_point_locations.append(location)
+                locations[x][y] = location
+                graph.add_node(location)
+                if x > 0 and y > 0:
+                    if y < n_points - 1:
+                        graph.add_edge(location, locations[x - 1][y])
+                    if x < n_points - 1:
+                        graph.add_edge(location, locations[x][y - 1])
+
+        for corner_location in [locations[0][0],
+                                locations[n_points - 1][0],
+                                locations[0][n_points - 1],
+                                locations[n_points - 1][n_points - 1]]:
+            graph.remove_node(corner_location)
+            entry_point_locations.remove(corner_location)
+
+        potential_charging_points = []
+        for x in range(n_points):
+            for y in range(n_points):
+                location = locations[x][y]
+                if location not in entry_point_locations:
+                    potential_charging_points.append(location)
+
+        charging_points = RNG.choice(potential_charging_points, size=NUMBER_RECHARGE_POINTS, replace=False)
+
+        return graph, entry_point_locations, charging_points
 
 
 class City:

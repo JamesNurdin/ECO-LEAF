@@ -22,10 +22,11 @@ def main():
     # ----------------- Set up experiment -----------------
     env = simpy.Environment()
     farm = Farm(env)
-    env.process(farm.run(env))
+    #env.process(farm.run(env))
     mobility_manager = MobilityManager(farm)
     env.process(mobility_manager.run(env))
-    env.run(until=360)
+    file_reader = FileHandler()
+    #env.run(until=360)
 
 
 if __name__ == '__main__':

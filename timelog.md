@@ -210,3 +210,8 @@
 ## Week 14
 ### 18th December
 * *3 Hours* Introduced the ability to aggregate figures into a single pdf, allowing for the ability to see results from a range of values
+* *1 Hour* Carried out some research into a new type of example and have chosen to proceed with a precise agriculture example, where smart sensors help optimise farming, in addition to this planned out roughly core aspects and features
+* *2 Hours* Made some changes to the file reader along with started work on the precise agriculture example.
+### 19th December
+* *1 Hour* Organised work that needs that has been completed, works that needs to be done and work that could be done.
+* *2 Hours* Continued on with the precision agriculture example, in particular got the infrastructure started by allowing for plots to be constructed, where each plot is a rectangular grid with a node attached to the perimeter for the fog node.

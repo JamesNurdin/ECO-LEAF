@@ -17,7 +17,12 @@ UPDATE_WIFI_CONNECTIONS_INTERVAL = 60
 
 START_TIME = "19:00:00"
 
-"""City scenario parameters"""
+"""Farm scenario parameters"""
+NUMBER_OF_PLOTS = 4
+PLOT_NAMES = ["Plot_1", "Plot_2", "Plot_3", "Plot_4"]
+PLOT_SIZES = [(500, 500), (500, 500), (500, 500), (500, 500)]  # Length height
+SENSORS_PER_AXIS = 5
+
 STREETS_PER_AXIS = 4
 BLOCK_SIZE_WIDTH = 274  # Manhattan
 BLOCK_SIZE_HEIGHT = 80  # Manhattan
