@@ -203,3 +203,8 @@ class Application(PowerAware):
     def measure_power(self) -> PowerMeasurement:
         measurements = [t.measure_power() for t in self.tasks()] + [df.measure_power() for df in self.data_flows()]
         return PowerMeasurement.sum(measurements)
+
+    def pause_application(self, node: Node):
+        # TODO from node implement logic to allow for the return of 0 power to all nodes, links, tasks and data flows onwards in DAG
+        # actual logic to suspend application i.e. restarting the task is in the actual logic of the user
+        pass
