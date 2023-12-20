@@ -4,7 +4,7 @@ from typing import List, Tuple, Type, Optional, TypeVar, Union
 import networkx as nx
 
 from src.extendedLeaf.infrastructure import Node, Link
-from src.extendedLeaf.power import PowerAware, PowerMeasurement
+from src.extended_Examples.precision_agriculture.power import PowerAware, PowerMeasurement
 
 
 class Task(PowerAware):

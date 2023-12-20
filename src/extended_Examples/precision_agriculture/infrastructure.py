@@ -24,6 +24,47 @@ class Cloud(Node):
         # select the desired fog nodes to send task
 
 
+class CropSensor(Node):
+    def __init__(self, infrastructure, plot, sensor_index, location):
+        super().__init__(name=f"{plot.name}_Crop_Sensor_{sensor_index}",
+                         cu=SENSOR_CU,
+                         power_model=PowerModelNode(max_power=SENSOR_MAX_POWER, static_power=SENSOR_STATIC_POWER),
+                         location=location)
+        infrastructure.add_node(self)
+
+
+class FogNode(Node):
+    def __init__(self, plot, location):
+        super().__init__(name=f"{plot.name}_FogNode",
+                         cu=FOG_CU,
+                         power_model=PowerModelNode(max_power=FOG_MAX_POWER, static_power=SENSOR_STATIC_POWER),
+                         location=location)
+
+        self.application = self._create_fog_node_application()
+
+    def _create_fog_node_application(self) -> Application:
+        return None
+
+
+class Drone(Node):
+    def __init__(self, plot, location, env, power_domain):
+        super().__init__(name=f"{plot.name}_Drone",
+                         cu=DRONE_CU,
+                         power_model=PowerModelNode(max_power=DRONE_MAX_POWER, static_power=DRONE_STATIC_POWER),
+                         location=location)
+
+        #self.mobility_model = drone_mobility_model
+        self.application = self._create_drone_application()
+        self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
+        self.battery_power = BatteryPower(env, power_domain=power_domain, priority=0,
+                                     total_power_available=TAXI_BATTERY_SIZE)
+        power_domain.add_power_source(self.battery_power)
+
+    # TODO create application
+    def _create_drone_application(self) -> Application:
+        return None
+
+
 class RechargeStation(Node):
     def __init__(self, location: Location, application_sink: Node, _recharge_station_counter):
         super().__init__(name=f"Recharge Station {_recharge_station_counter}", location=location,
@@ -91,11 +132,13 @@ class Taxi(Node):
 
 
 class LinkEthernet(Link):
-    def __init__(self, src: Node, dst: Node):
-        super().__init__(src, dst,
+    def __init__(self, src: Node, dst: Node, name: str):
+        super().__init__(src=src,
+                         dst=dst,
                          bandwidth=ETHERNET_BANDWIDTH,
                          latency=ETHERNET_LATENCY,
-                         power_model=PowerModelLink(ETHERNET_WATT_PER_BIT))
+                         power_model=PowerModelLink(ETHERNET_WATT_PER_BIT),
+                         name=name)
 
 
 class LinkWanUp(Link):

@@ -683,7 +683,7 @@ class PowerDomain:
                              f"{self.power_sources.index(power_source)} ")
 
         if power_source.powerType == PowerType.MIXED and len([power_source for power_source in self.power_sources
-                                                              if power_source.powerType == PowerType.MIXED]) > 0:
+                                                              if power_source and power_source.powerType == PowerType.MIXED]) > 0:
             raise ValueError(f"Error: Power domain can only accept 1 mixed power source")
 
         if power_source.priority >= len(self.power_sources):

@@ -1,5 +1,8 @@
 import numpy as np
 
+from src.extended_Examples.precision_agriculture.power import SolarPower
+from src.extended_Examples.precision_agriculture.power import WindPower, GridPower
+
 RNG = np.random.default_rng(seed=0)  # Random Number Generator
 
 """The following two parameters were altered in the different experiments"""
@@ -17,11 +20,27 @@ UPDATE_WIFI_CONNECTIONS_INTERVAL = 60
 
 START_TIME = "19:00:00"
 
-"""Farm scenario parameters"""
+""" Farm scenario parameters """
 NUMBER_OF_PLOTS = 4
 PLOT_NAMES = ["Plot_1", "Plot_2", "Plot_3", "Plot_4"]
 PLOT_SIZES = [(500, 500), (500, 500), (500, 500), (500, 500)]  # Length height
-SENSORS_PER_AXIS = 5
+POWER_SOURCES_AVAILABLE = [[SolarPower,WindPower,GridPower],[WindPower,GridPower],[SolarPower,GridPower],[GridPower]]
+SENSORS_PER_AXIS = 5  # Accounts for scrutiny of measurements, more sensors = more detail, more power
+
+
+""" Plot attributes """
+
+SENSOR_CU = 30  # TODO CHECK
+SENSOR_MAX_POWER = 50  # TODO CHECK
+SENSOR_STATIC_POWER = 50  # TODO CHECK
+
+FOG_NODE_CU = 500  # TODO CHECK
+FOG_NODE_MAX_POWER = 200  # TODO CHECK
+FOG_NODE_STATIC_POWER = 25  # TODO CHECK
+
+DRONE_CU = 50  # TODO CHECK
+DRONE_MAX_POWER = 50  # TODO CHECK
+DRONE_STATIC_POWER = 50  # TODO CHECK
 
 STREETS_PER_AXIS = 4
 BLOCK_SIZE_WIDTH = 274  # Manhattan

@@ -83,7 +83,6 @@ class TaxiMobilityModel:
             return self._location_dict[max(self._location_dict.keys())]
 
     def _create_location_dict(self, path: List[Location], speed: float, interval: float):
-        """Computes the random path of the taxi and precomputes its location at specific time steps."""
         distance_per_interval = speed * UPDATE_MOBILITY_INTERVAL
 
         last_location: Location = None
