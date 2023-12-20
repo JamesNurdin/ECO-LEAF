@@ -215,3 +215,4 @@
 ### 19th December
 * *1 Hour* Organised work that needs that has been completed, works that needs to be done and work that could be done.
 * *2 Hours* Continued on with the precision agriculture example, in particular got the infrastructure started by allowing for plots to be constructed, where each plot is a rectangular grid with a node attached to the perimeter for the fog node.
+* *3 Hours* Continued on with the infrastructure, createtd the core nodes and setup the power domains and necessary ground work to apply the application tomorrow.
