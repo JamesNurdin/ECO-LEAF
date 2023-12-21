@@ -86,11 +86,15 @@ def main():
     #print(power_domain.captured_data)
 
     file_handler = FileHandler()
+    filename = "Results.Json"
+    file_handler.write_out_results(filename=filename, power_domain=power_domain)
+
     fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=all_entities)
     fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events, power_sources=[solar_power, grid1, wind_power])
     fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Available", events=events, power_sources=[solar_power, grid1, wind_power])
-    figure_data = fig2.to_dict()
-    main_fig = file_handler.aggregate_subplots([fig1, fig2,fig3])
+    figs = [fig1, fig2, fig3]
+    main_fig = file_handler.aggregate_subplots(figs)
+    file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 
 

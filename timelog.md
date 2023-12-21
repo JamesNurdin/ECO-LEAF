@@ -217,4 +217,5 @@
 * *2 Hours* Continued on with the precision agriculture example, in particular got the infrastructure started by allowing for plots to be constructed, where each plot is a rectangular grid with a node attached to the perimeter for the fog node.
 * *3 Hours* Continued on with the infrastructure, created the core nodes and set up the power domains and necessary ground-work to apply the application tomorrow.
 ### 20th December
-* *1 Hour* After working on a new small example before tomorrow's meeting, a bug was found due to the fact when a node is removed from the power domain, the power source still powering it never is notified and still thinks its apart of the power domain, a fix has been made that removes the node from the power source and vice versa. 
+* *1 Hour* After working on a new small example before tomorrow's meeting, a bug was found due to the fact when a node is removed from the power domain, the power source still powering it is never notified and still thinks it's a part of the power domain, a fix has been made that removes the node from the power source and vice versa. 
+* *2 Hours* Continued work on example by including the application and an initial full running and outputting of data to demo the features.

@@ -11,7 +11,7 @@ import plotly.graph_objs as go
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 from src.extendedLeaf.power import PowerDomain
-
+import tkinter as tk
 ExperimentResults = Dict[str, Tuple[pd.DataFrame, pd.DataFrame]]
 
 
@@ -65,7 +65,7 @@ class FileHandler:
         dir_name = f"{self.creation_time}_results"
         absolute_path = os.path.join(results_dir, dir_name)
         if os.path.exists(absolute_path):
-            raise FileExistsError(f"Error: directory {dir_name} exists")
+            return absolute_path
         os.makedirs(absolute_path)
         return absolute_path
 
@@ -105,7 +105,16 @@ class FileHandler:
         pattern = re.compile(r'^[a-zA-Z0-9_-]+\.json$')
         return bool(pattern.match(filename))
 
-    def write_figure_to_file(self, fig):
+    def write_figure_to_file(self, fig, number_of_figs):
+        # Set the size of the PDF dynamically based on the number of plots
+        pdf_height = 300 + (100 * number_of_figs)  # Adjust the multiplier as needed
+        root = tk.Tk()
+        screen_width = root.winfo_screenwidth()
+        root.destroy()
+        pdf_width = screen_width
+
+        # Create and save the figure as a PDF
+        fig.update_layout(height=pdf_height, width=pdf_width)  # Adjust the height and width as needed
         if self.results_dir is None:
             self.results_dir = self.create_results_dir()
         if os.path.exists(self.results_dir):
