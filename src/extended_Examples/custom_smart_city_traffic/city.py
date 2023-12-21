@@ -4,7 +4,7 @@ import simpy
 
 from src.extendedLeaf.power import EntityDistributor
 from src.extended_Examples.custom_smart_city_traffic.infrastructure import *
-from mobility import Location
+from src.extendedLeaf.mobility import Location
 from src.extended_Examples.custom_smart_city_traffic.orchestrator import CityOrchestrator
 from src.extended_Examples.custom_smart_city_traffic.power import PowerDomain, SolarPower, GridPower, EntityDistributor
 from src.extended_Examples.custom_smart_city_traffic.settings import *

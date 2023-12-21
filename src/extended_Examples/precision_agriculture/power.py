@@ -599,6 +599,7 @@ class PowerDomain:
             self.power_source_events = power_source_events
 
     def run(self, env):
+        print("ran")
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
 
                 Args:
@@ -761,7 +762,6 @@ class PowerDomain:
 
     @classmethod
     def convert_to_time_string(cls, time):
-        print(time)
         if not isinstance(time, int):
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:
