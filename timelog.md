@@ -190,7 +190,7 @@
 * *4 Hours* Finished off the status report ready for it to be submitted for tomorrow. In particular for the plan I thought carefully about the work I needed to get done and have decided to use the time over the holidays to heavily invest in the project ensuring that the framework is nearly finished by the start of semester 2.
 ### 12th December
 * *2.5 Hours* Continued on with the unit tests, started implementing tests for the Solar power class.
-* * 5 Hours* Finished off unit tests for all the power sources.
+* *5 Hours* Finished off unit tests for all the power sources.
 ### 14th December
 * *7 Hours* Implemented remaining unit tests for the power domain and node distributor classes, some tests have been omitted based on the fact that they only carry out side effects and should be considered for the integration testing.
 ### 15th December
@@ -215,4 +215,6 @@
 ### 19th December
 * *1 Hour* Organised work that needs that has been completed, works that needs to be done and work that could be done.
 * *2 Hours* Continued on with the precision agriculture example, in particular got the infrastructure started by allowing for plots to be constructed, where each plot is a rectangular grid with a node attached to the perimeter for the fog node.
-* *3 Hours* Continued on with the infrastructure, createtd the core nodes and setup the power domains and necessary ground work to apply the application tomorrow.
+* *3 Hours* Continued on with the infrastructure, created the core nodes and set up the power domains and necessary ground-work to apply the application tomorrow.
+### 20th December
+* *1 Hour* After working on a new small example before tomorrow's meeting, a bug was found due to the fact when a node is removed from the power domain, the power source still powering it never is notified and still thinks its apart of the power domain, a fix has been made that removes the node from the power source and vice versa. 

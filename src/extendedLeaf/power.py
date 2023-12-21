@@ -683,7 +683,7 @@ class PowerDomain:
                              f"{self.power_sources.index(power_source)} ")
 
         if power_source.powerType == PowerType.MIXED and len([power_source for power_source in self.power_sources
-                                                              if power_source.powerType == PowerType.MIXED]) > 0:
+                                                              if power_source and power_source.powerType == PowerType.MIXED]) > 0:
             raise ValueError(f"Error: Power domain can only accept 1 mixed power source")
 
         if power_source.priority >= len(self.power_sources):
@@ -745,13 +745,18 @@ class PowerDomain:
             raise ValueError(f"Error: unable to append entities when entities are static")
 
     def remove_entity(self, entity):
+        print(entity)
+        print(self.powered_entities)
         """ Only used to remove entities from scope, should not be called for entity distribution reasons. """
         if not self.entity_distributor.static_entities:
             if entity not in self.powered_entities:
                 raise ValueError(f"Error: {entity.name} not present in list")
             self.powered_entities.remove(entity)
+            entity_power_source = entity.power_model.power_source
+            entity_power_source.powered_entities.remove(entity)
         else:
             raise ValueError(f"Error: unable to append entities when entities are static")
+        print(self.powered_entities)
 
     @classmethod
     def get_current_time(cls, time):
@@ -761,7 +766,6 @@ class PowerDomain:
 
     @classmethod
     def convert_to_time_string(cls, time):
-        print(time)
         if not isinstance(time, int):
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:

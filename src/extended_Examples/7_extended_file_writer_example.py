@@ -23,6 +23,8 @@ def main():
     wifi_link_from_source = Link(name="Link 1", src=node1, dst=node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
     wifi_link_to_sink = Link(name="Link 2", src=node2, dst=node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
     wifi_link_to_node4 = Link(name="Link 3", src=node2, dst=node4, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    all_entities = [node1,node2,node3,node4,wifi_link_from_source,wifi_link_to_sink,wifi_link_to_node4]
+
     infrastructure.add_link(wifi_link_to_sink)
     infrastructure.add_link(wifi_link_from_source)
     infrastructure.add_link(wifi_link_to_node4)
@@ -40,7 +42,8 @@ def main():
     events = [
         ("19:20:00", False, (power_domain.remove_power_source, [wind_power])),
         ("19:40:00", False, (power_domain.add_power_source, [solar_power])),
-        ("20:30:00", False, (power_domain.add_entity, [node4]))]
+        ("20:30:00", False, (power_domain.add_entity, [node4])),
+        ("21:15:00", False, (power_domain.remove_entity, [node4]))]
     power_domain.power_source_events = events
 
     # three nodes 1,2,3
@@ -74,11 +77,21 @@ def main():
     # Run simulation
     env.process(application_pm.run(env))  # registering power metering process 2
     env.process(infrastructure_pm.run(env))  # registering power metering process 2
-    env.run(until=121)  # run simulation for 10 seconds
+    env.run(until=150)  # run simulation for 10 seconds
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
+
+    #print(power_domain.captured_data)
+
+    file_handler = FileHandler()
+    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=all_entities)
+    fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events, power_sources=[solar_power, grid1, wind_power])
+    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Available", events=events, power_sources=[solar_power, grid1, wind_power])
+    figure_data = fig2.to_dict()
+    main_fig = file_handler.aggregate_subplots([fig1, fig2,fig3])
+    main_fig.show()
 
 
 class SimpleOrchestrator(Orchestrator):
