@@ -4,8 +4,6 @@ import simpy
 from matplotlib import pyplot as plt
 import matplotlib
 
-from src.extendedLeaf.file_handler import FileHandler
-from src.extended_Examples.precision_agriculture.power import EntityDistributor
 from src.extended_Examples.precision_agriculture.infrastructure import *
 from src.extendedLeaf.mobility import Location
 from src.extended_Examples.precision_agriculture.orchestrator import FarmOrchestrator
@@ -105,20 +103,19 @@ class Farm:
         self.orchestrator = FarmOrchestrator(self.infrastructure, self.plots)
         for crop_sensor in self.infrastructure.nodes(type_filter=CropSensor):
             self.orchestrator.place(crop_sensor.application)
+        self._DEBUG_show_farm()
 
-        """main_graph = nx.Graph()
+    def _DEBUG_show_farm(self):
+        main_graph = nx.Graph()
         for plot_index, plot in enumerate(self.plots, start=1):
             mapping = {node: f'G{plot_index}_{node}' for node in plot.graph.nodes}
             plot.graph = nx.relabel_nodes(plot.graph, mapping)
             main_graph = nx.union(plot.graph, main_graph)
-        pos = nx.spring_layout(main_graph)"""
 
-        # Draw the combined graph with the specified layout
-        """
         pos = nx.spring_layout(main_graph)
         nx.draw(main_graph, pos, with_labels=False, node_size=500, node_color="skyblue", font_size=8, font_color="black", font_weight="bold", edge_color="gray", width=0.5)
         plt.title('Combined Graph')
-        plt.show()"""
+        plt.show()
 
     def run(self, env):
         for plot in self.plots:

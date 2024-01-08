@@ -1,21 +1,7 @@
 import logging
-
 import simpy
 
-from src.extendedLeaf.application import Application
-from src.extendedLeaf.orchestrator import Orchestrator
-from src.extendedLeaf.power import EntityDistributor
-from src.extended_Examples.custom_smart_city_traffic.city import City
 from src.extendedLeaf.file_handler import FileHandler
-from src.extended_Examples.precision_agriculture.application import ProcessingTask
-from src.extended_Examples.precision_agriculture.infrastructure import Cloud, LinkWanDown, LinkWanUp, \
-    LinkWifiTaxiToTrafficLight, LinkWifiBetweenTrafficLights, RechargeStation
-from src.extended_Examples.precision_agriculture.mobility import MobilityManager
-from src.extended_Examples.precision_agriculture.orchestrator import FarmOrchestrator
-from src.extended_Examples.precision_agriculture.settings import POWER_MEASUREMENT_INTERVAL, FOG_UTILIZATION_THRESHOLD
-from src.extendedLeaf.infrastructure import Infrastructure, Node
-from src.extended_Examples.precision_agriculture.power import PowerMeter, PowerDomain, SolarPower, GridPower, \
-    BatteryPower
 from src.extended_Examples.precision_agriculture.farm import Farm
 
 logger = logging.getLogger(__name__)
@@ -30,10 +16,11 @@ def main():
 
     # Early power meters when exploring isolated power measurements
     for plot in farm.plots:
-        env.process(plot.power_domain.run(env))  # registering power metering process 2
+        env.process(plot.power_domain.run(env))
 
     # Run simulation
     env.run(until=121)  # run simulation for 10 seconds
+
     for plot in farm.plots:
         file_handler = FileHandler()
         filename = f"Results_{plot.plot_index}.Json"
@@ -50,7 +37,6 @@ def main():
         file_handler.write_figure_to_file(main_fig, len(figs))
         main_fig.show()
 
-    #env.run(until=360)
 
 if __name__ == '__main__':
     main()

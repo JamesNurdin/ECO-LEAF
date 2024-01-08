@@ -745,8 +745,6 @@ class PowerDomain:
             raise ValueError(f"Error: unable to append entities when entities are static")
 
     def remove_entity(self, entity):
-        print(entity)
-        print(self.powered_entities)
         """ Only used to remove entities from scope, should not be called for entity distribution reasons. """
         if not self.entity_distributor.static_entities:
             if entity not in self.powered_entities:
@@ -756,7 +754,6 @@ class PowerDomain:
             entity_power_source.powered_entities.remove(entity)
         else:
             raise ValueError(f"Error: unable to append entities when entities are static")
-        print(self.powered_entities)
 
     @classmethod
     def get_current_time(cls, time):

@@ -599,7 +599,6 @@ class PowerDomain:
             self.power_source_events = power_source_events
 
     def run(self, env):
-        print("ran")
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
 
                 Args:

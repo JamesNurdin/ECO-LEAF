@@ -9,11 +9,6 @@ from src.extended_Examples.precision_agriculture.settings import *
 from src.extendedLeaf.infrastructure import Link, Node
 from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
 
-"""Counter for incrementally naming nodes"""
-_fog_nodes_created = 0
-_traffic_lights_created = 0
-_taxis_created = 0
-
 
 class Cloud(Node):
     def __init__(self):
