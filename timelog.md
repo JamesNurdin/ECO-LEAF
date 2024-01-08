@@ -219,3 +219,5 @@
 ### 20th December
 * *1 Hour* After working on a new small example before tomorrow's meeting, a bug was found due to the fact when a node is removed from the power domain, the power source still powering it is never notified and still thinks it's a part of the power domain, a fix has been made that removes the node from the power source and vice versa. 
 * *2 Hours* Continued work on example by including the application and an initial full running and outputting of data to demo the features.
+### 21st December
+* *0.5 Hours* Carried out the meeting with Lauritz and discussed the submitted winter status report, in particular we discussed the need to ensure that enough time is kept to ensure that a quality final dissertation can be written along with the fact that Laurtiz wont be able to review the work too much, as discussed with Laurtiz I will have the next two weeks off to be fresh and ready for the start of the new semeseter. 
