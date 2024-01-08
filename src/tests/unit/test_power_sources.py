@@ -127,15 +127,19 @@ class TestSolarPower(unittest.TestCase):
 
         """ Testing purposes only, the framework does not anticipate erroneous times. """
         self.power_source.env = simpy.Environment(600)  # A valid time
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 100)
 
         self.power_source.env = simpy.Environment(659)  # A valid time, outside of update interval
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 100)  # Should retain previous power before update
 
         self.power_source.env = simpy.Environment(2040)  # A valid time, after the 24 hours (24*60) = 1440
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 100)  # Should loop around back, 10am of Day 2
 
         self.power_source.env = simpy.Environment(-1)  # An invalid time
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 0)
 
     def test_update_carbon_intensity(self):
@@ -200,15 +204,19 @@ class TestWindPower(unittest.TestCase):
 
         """ Testing purposes only, the framework does not anticipate erroneous times. """
         self.power_source.env = simpy.Environment(600)  # A valid time
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 100)
 
         self.power_source.env = simpy.Environment(659)  # A valid time, outside of update interval
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 100)  # Should retain previous power before update
 
         self.power_source.env = simpy.Environment(2040)  # A valid time, after the 24 hours (24*60) = 1440
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 100)  # Should loop around back, 10am of Day 2
 
         self.power_source.env = simpy.Environment(-1)  # An invalid time
+        self.power_source.update_power_available()
         self.assertEqual(self.power_source.get_current_power(), 0)
 
     def test_update_carbon_intensity(self):

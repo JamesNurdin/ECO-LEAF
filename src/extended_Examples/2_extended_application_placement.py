@@ -20,8 +20,8 @@ def main():
     node3 = Node("node3", cu=20, power_model=PowerModelNode(max_power=50, static_power=7))  # sink
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
-    wifi_link_from_source = Link("Link1", node1, node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
-    wifi_link_to_sink = Link("Link2", node2, node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
+    wifi_link_from_source = Link(name="Link1", src=node1, dst=node2, latency=10, bandwidth=30e6, power_model=PowerModelLink(300e-9))
+    wifi_link_to_sink = Link(name="Link2", src=node2, dst=node3, latency=12, bandwidth=50e6, power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_sink)
     infrastructure.add_link(wifi_link_from_source)
     entities = infrastructure.nodes()+infrastructure.links()

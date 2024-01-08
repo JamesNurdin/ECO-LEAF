@@ -9,6 +9,7 @@ from functools import reduce
 from typing import Union, Collection, Callable, Optional, Iterable
 
 import numpy
+import numpy as np
 import simpy
 from simpy import Environment
 from enum import auto
@@ -304,11 +305,11 @@ class PowerSource(ABC):
                     distribution of powered entities when being executed, with 0 being the most important
     """
     def __init__(self, env: Environment, name, data_set_filename=None, power_domain=None, priority: int = 0,
-                 powered_entities: ["PowerModel"] = None):
+                 powered_entities: ["PowerModel"] = None, remaining_power=0):
         self.name = name
         self.env = env
         self.carbon_intensity = 0
-
+        self.remaining_power = remaining_power
         self.priority = priority
 
         self.powerType = None
@@ -635,6 +636,8 @@ class PowerDomain:
             current_interval_released_carbon = 0
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
+                """Update the power available to the power source"""
+                current_power_source.update_power_available()
 
                 """distribute entities among power sources"""
                 self.entity_distributor.entity_distributor_method(current_power_source, self)
@@ -784,7 +787,7 @@ class SolarPower(PowerSource):
     SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
+                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None, remaining_power=0):
         super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
@@ -796,9 +799,11 @@ class SolarPower(PowerSource):
         start_time = times.index(start_time_str)
         return start_time
 
+    def update_power_available(self):
+        self.remaining_power = self.get_power_at_time(self.env.now)
+
     def get_current_power(self) -> float:
-        time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
-        return float(self.power_data[time])
+        return self.remaining_power
 
     def get_power_at_time(self, time_int) -> float:
         time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
@@ -825,7 +830,7 @@ class WindPower(PowerSource):
 
     def __init__(self, env: Environment, name: str = "Wind", data_set_filename: str = WIND_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities, remaining_power=0)
         self.inherent_carbon_intensity = 12
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
@@ -837,9 +842,11 @@ class WindPower(PowerSource):
         start_time = times.index(start_time_str)
         return start_time
 
+    def update_power_available(self):
+        self.remaining_power = self.get_power_at_time(self.env.now)
+
     def get_current_power(self) -> float:
-        time = self._map_to_time((self.env.now // self.update_interval) % len(self.power_data))
-        return float(self.power_data[time])
+        return self.remaining_power
 
     def get_power_at_time(self, time_int) -> float:
         time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
@@ -865,8 +872,9 @@ class GridPower(PowerSource):
     GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
 
     def __init__(self, env: Environment, name: str = "Grid", data_set_filename: str = GRID_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None,
+                 ):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities, remaining_power=np.inf)
         self.carbon_intensity = 0
         self.powerType = PowerType.MIXED
 
@@ -885,10 +893,12 @@ class GridPower(PowerSource):
         return float(self.power_data[time])
 
     def get_current_power(self) -> float:
-        return numpy.inf
+        return self.remaining_power
+    def update_power_available(self):
+        pass
 
     def get_power_at_time(self, time) -> float:
-        return numpy.inf
+        return self.remaining_power
 
     def get_carbon_intensity_at_time(self, time_int) -> float:
         time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
@@ -906,15 +916,16 @@ class BatteryPower(PowerSource):
     def __init__(self, env: Environment, name: str = "Battery",
                  power_domain: PowerDomain = None, priority: int = 10,
                  total_power_available=40, charge_rate=22, powered_entities=None):
-        super().__init__(env, name, None, power_domain, priority, powered_entities)
+        super().__init__(env, name, None, power_domain, priority, powered_entities, remaining_power=0)
 
         self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
         self.powerType = PowerType.BATTERY
         self.total_power = total_power_available  # kWh
-        self.remaining_power = 0  # kWh
         self.recharge_rate = charge_rate  # kw/h
         self.recharge_data = []
         self.power_log = {}
+    def update_power_available(self):
+        pass
 
     def get_current_power(self) -> float:
         return self.remaining_power
@@ -963,6 +974,7 @@ class BatteryPower(PowerSource):
     def get_carbon_intensity_at_time(self, time) -> float:
         #  Only produced from recharging the battery
         return 0
+
 
 
 def validate_str_time(time_string: str):

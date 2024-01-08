@@ -21,8 +21,11 @@ class MyTestCase(unittest.TestCase):
                                         start_time_str="00:00:00", update_interval=1, entity_distributor=self.entity_distributor)
         self.high_priority_power_source = SolarPower(self.mock_env, "Test Solar Power Source", "test_data.csv",
                                                 power_domain=self.power_domain, priority=0)
+        self.high_priority_power_source.update_power_available()
         self.low_priority_power_source = GridPower(self.mock_env, "Test Solar Power Source",
                                               power_domain=self.power_domain, priority=5)
+        self.low_priority_power_source.update_power_available()
+
 
     def test_default_update_entity_distribution_method_dynamic_smart(self):
         """ Test to ensure that the side effect causes the entity to move to the desirable power source. """
