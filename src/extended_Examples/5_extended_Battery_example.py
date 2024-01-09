@@ -5,7 +5,7 @@ from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, \
-    GridPower, PowerDomain, PowerSource, EntityDistributor, BatteryPower, EntityDistributor, PowerModelLink
+    GridPower, PowerDomain, PowerSource, EntityDistributor, BatteryPower, EntityDistributor, PowerModelLink, SolarPower
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -32,13 +32,14 @@ def main():
     entities = infrastructure.nodes()+infrastructure.links()
 
     power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=entities,
-                               start_time_str="19:00:00", update_interval=1, entity_distributor=EntityDistributor())
+                               start_time_str="10:00:00", update_interval=1, entity_distributor=EntityDistributor())
     battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=500)
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
+    sol = SolarPower(env, power_domain=power_domain, priority=1)
     power_domain.add_power_source(battery_power)
-    power_domain.add_power_source(grid1)
+    power_domain.add_power_source(sol)
     events = [
-        ("19:40:00", False, (battery_power.recharge_battery, [grid1]))]
+        ("10:40:00", False, (battery_power.recharge_battery, [sol]))]
     power_domain.power_source_events = events
 
     # Initialise three tasks
@@ -74,11 +75,16 @@ def main():
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
+    print(power_domain.captured_data)
 
     file_handler = FileHandler()
-    file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=power_domain.powered_entities)
-    file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events,
-                                                   power_sources=[grid1,battery_power])
+    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=power_domain.powered_entities)
+    fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events,
+                                                   power_sources=[sol,battery_power])
+    figs = [fig1, fig2]
+    main_fig = file_handler.aggregate_subplots(figs)
+    file_handler.write_figure_to_file(main_fig, len(figs))
+    main_fig.show()
 
 
 class SimpleOrchestrator(Orchestrator):

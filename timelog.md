@@ -221,3 +221,9 @@
 * *2 Hours* Continued work on example by including the application and an initial full running and outputting of data to demo the features.
 ### 21st December
 * *0.5 Hours* Carried out the meeting with Lauritz and discussed the submitted winter status report, in particular we discussed the need to ensure that enough time is kept to ensure that a quality final dissertation can be written along with the fact that Laurtiz wont be able to review the work too much, as discussed with Laurtiz I will have the next two weeks off to be fresh and ready for the start of the new semeseter. 
+
+## Week 15
+Holiday break
+
+## Week 16
+* *1.5 Hours* Introduced a change to prepare for a new feature that will be added, the current state of the power is now held in the remaining_power field that needs to be updated every event, this will allow for the get_current_power to just call this method 

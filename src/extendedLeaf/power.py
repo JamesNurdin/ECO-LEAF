@@ -338,9 +338,14 @@ class PowerSource(ABC):
             self.update_interval = self.power_domain.get_current_time(
                 list(self.power_data.keys())[1]) - self.power_domain.get_current_time(list(self.power_data.keys())[0])
 
-    @abstractmethod
-    def get_current_power(self) -> PowerMeasurement:
-        """Return the current power provided."""
+    def get_current_power(self) -> float:
+        return self.remaining_power
+
+    def consume_power(self, power_consumed):
+        if self.get_current_power() < power_consumed:
+            raise ValueError(f"Error, not enough power is able to be supplied.")
+        else:
+            self.remaining_power = self.remaining_power - power_consumed
 
     @abstractmethod
     def get_current_carbon_intensity(self, offset: int):
@@ -575,8 +580,10 @@ class PowerDomain:
         else:
             self.name = name
         self.power_sources = []
-        self.carbon_emitted = []
-        self.captured_data = {}
+        self.carbon_emitted = [] # running count of carbon emissions
+        self.captured_data = {} # data to be potentially written to file
+        self.logging_data = {}  # any data that needs to be logged which is captured in events
+
 
         self.entity_distributor = entity_distributor or EntityDistributor()
 
@@ -617,7 +624,6 @@ class PowerDomain:
 
         while True:
             yield env.timeout(self.update_interval)
-
             """Execute any pre-planned commands at the current moment of time"""
             for index, (time, ran, (event, args)) in enumerate(self.power_source_events):
                 if (self.env.now + self.start_time_index) >= self.get_current_time(time):
@@ -633,7 +639,6 @@ class PowerDomain:
                 - distribute entities among power sources
                 - log the carbon released since the last update"""
             current_carbon_intensities = {}
-            current_interval_released_carbon = 0
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
                 """Update the power available to the power source"""
@@ -643,11 +648,9 @@ class PowerDomain:
                 self.entity_distributor.entity_distributor_method(current_power_source, self)
 
                 """Record respective power readings this interval"""
-                current_ps_dictionary, current_ps_carbon_released = \
-                    self.record_power_source_carbon_released(current_power_source)
-                current_ps_dictionary["Total Carbon Released"] = current_ps_carbon_released
+                current_ps_dictionary = self.record_power_source_carbon_released(current_power_source)
+
                 current_carbon_intensities[current_power_source.name] = current_ps_dictionary
-                current_interval_released_carbon += current_ps_carbon_released
 
             if not self.entity_distributor.static_entities:
                 for entity in self.powered_entities:
@@ -657,8 +660,7 @@ class PowerDomain:
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
             self.update_recorded_data(self.get_current_time_string(), current_carbon_intensities)
-            logger.debug(f"{env.now}: ({self.get_current_time_string()}) "
-                         f"{self.name} released {current_interval_released_carbon} gCO2")
+            self.update_logs()
 
     def get_current_time_string(self):
         return self.convert_to_time_string((self.env.now + self.start_time_index)%1440)
@@ -668,17 +670,56 @@ class PowerDomain:
         current_power_source_dictionary = {}
         current_power_source_carbon_released = 0
         for entity in current_power_source.powered_entities:
+
             power_used = float(entity.power_model.update_sensitive_measure(self.update_interval))
             carbon_intensity = current_power_source.get_current_carbon_intensity(0)
             carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
+
             entity_data = {"Power Used": power_used,
                          "Carbon Intensity": carbon_intensity,
                          "Carbon Released": carbon_released}
+
             current_power_source_carbon_released += carbon_released
             current_power_source_dictionary[entity.name] = entity_data
         if current_power_source.powerType == PowerType.BATTERY:
             current_power_source.power_log[self.env.now] = current_power_source.get_current_power()
-        return current_power_source_dictionary, current_power_source_carbon_released
+
+        current_power_source_dictionary["Total Carbon Released"] = current_power_source_carbon_released
+        return current_power_source_dictionary
+
+    def update_logs(self):
+        time = self.get_current_time_string()
+        for power_source in self.logging_data:
+            for node in self.logging_data[power_source]:
+                self.insert_power_reading(time, power_source, node, self.logging_data[power_source][node])
+        self.logging_data = {}
+
+    def insert_power_reading(self, time, power_source, node, reading):
+        print("done")
+
+        if power_source in self.captured_data[time]:
+            self.captured_data[time][power_source][node] = reading
+            self.captured_data[time][power_source]["Total Carbon Released"] = \
+                self.captured_data[time][power_source]["Total Carbon Released"] + reading["Carbon Released"]
+        else:
+            self.captured_data[time][power_source] = {node: reading, "Total Carbon Released": reading["Carbon Released"]}
+
+    def update_carbon_intensity(self, increment_data):
+        """ Using the data of the current time interval i.e.
+            {PowerSource: {Entity: {Power used, Carbon intensity, Carbon Released}}...{Total Carbon Released}}
+            we calculate the total power released during the interval."""
+        increment_total_carbon_omitted = 0
+        for increment in increment_data.values():
+            increment_total_carbon_omitted += increment["Total Carbon Released"]
+        self.carbon_emitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
+
+    def return_total_carbon_emissions(self) -> float:
+        if self.carbon_emitted is None:
+            return 0
+        return sum(self.carbon_emitted)
+
+    def update_recorded_data(self, time, data):
+        self.captured_data[time] = data
 
     def add_power_source(self, power_source):
         if power_source in self.power_sources:
@@ -724,20 +765,6 @@ class PowerDomain:
             and the duration of time elapsed."""
         return float(power_used) * (10 ** -3) * float(carbon_intensity)
 
-    def update_carbon_intensity(self, increment_data):
-        """ Using the data of the current time interval i.e.
-            {PowerSource: {Entity: {Power used, Carbon intensity, Carbon Released}}...{Total Carbon Released}}
-            we calculate the total power released during the interval."""
-        increment_total_carbon_omitted = 0
-        for increment in increment_data.values():
-            increment_total_carbon_omitted += increment["Total Carbon Released"]
-        self.carbon_emitted.append(increment_total_carbon_omitted)  # this is to account for the time interval
-
-    def return_total_carbon_emissions(self) -> float:
-        if self.carbon_emitted is None:
-            raise ValueError(f"Error Carbon emitted is none.")
-        return sum(self.carbon_emitted)
-
     def add_entity(self, entity):
         """ Only used to add entities into scope, should not be called for entity distribution reasons. """
         if not self.entity_distributor.static_entities:
@@ -773,9 +800,6 @@ class PowerDomain:
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
 
-    def update_recorded_data(self, time, data):
-        self.captured_data[time] = data
-
 
 class SolarPower(PowerSource):
     """A concrete example class of the PowerSource class
@@ -801,9 +825,6 @@ class SolarPower(PowerSource):
 
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
-
-    def get_current_power(self) -> float:
-        return self.remaining_power
 
     def get_power_at_time(self, time_int) -> float:
         time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
@@ -844,9 +865,6 @@ class WindPower(PowerSource):
 
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
-
-    def get_current_power(self) -> float:
-        return self.remaining_power
 
     def get_power_at_time(self, time_int) -> float:
         time = self._map_to_time((time_int // self.update_interval) % len(self.power_data))
@@ -892,8 +910,6 @@ class GridPower(PowerSource):
         time = self._map_to_time(((self.env.now + offset) // self.update_interval) % len(self.power_data))
         return float(self.power_data[time])
 
-    def get_current_power(self) -> float:
-        return self.remaining_power
     def update_power_available(self):
         pass
 
@@ -927,9 +943,6 @@ class BatteryPower(PowerSource):
     def update_power_available(self):
         pass
 
-    def get_current_power(self) -> float:
-        return self.remaining_power
-
     def get_power_at_time(self, time_int) -> float:
         return self.power_log[time_int+1]
 
@@ -940,19 +953,26 @@ class BatteryPower(PowerSource):
 
     def recharge_battery(self, power_source):
         power_to_recharge = self.total_power - self.remaining_power
+        if power_source.get_current_power() < power_to_recharge:
+            raise ValueError(f"Error, power source {power_source} failed to charge battery.")
+        power_source.consume_power(power_to_recharge)
         time_to_recharge = math.ceil(power_to_recharge / self.recharge_rate)
         self.remaining_power = self.total_power
 
         """Calculate how much carbon was released by charging the battery"""
         carbon_released = 0
+        carbon_intensity = 0
         for time_offset in range(time_to_recharge):
             carbon_intensity = power_source.get_current_carbon_intensity(time_offset)
             carbon_released += self.power_domain.calculate_carbon_released(self.recharge_rate, carbon_intensity)
         recharge_data = {"Power Used": power_to_recharge,
-                         "Carbon Released": carbon_released,
-                         "Power Source": power_source.name}
-        self.recharge_data.append(recharge_data)
-        logger.debug(f"{self.name} was recharged by {power_source.name}, {carbon_released} gCO2 was released")
+                         "Carbon Intensity": carbon_intensity,
+                         "Carbon Released": carbon_released}
+
+        """ Update the logs of the power source"""
+        power_source.power_domain.logging_data[power_source.name] = {self.name: recharge_data}
+        power_source.power_domain.carbon_emitted.append(carbon_released)
+
         return time_to_recharge
 
     def consume_battery_power(self, power_consumed):
@@ -974,7 +994,6 @@ class BatteryPower(PowerSource):
     def get_carbon_intensity_at_time(self, time) -> float:
         #  Only produced from recharging the battery
         return 0
-
 
 
 def validate_str_time(time_string: str):
