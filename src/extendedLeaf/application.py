@@ -42,6 +42,8 @@ class Task(PowerAware):
         self.node = None
 
     def measure_power(self) -> PowerMeasurement:
+        if self.paused:
+            return PowerMeasurement(0, 0)
         try:
             return self.node.measure_power().multiply(self.cu / self.node.used_cu)
         except ZeroDivisionError:
@@ -50,14 +52,13 @@ class Task(PowerAware):
     def pause_task(self):
         if self.paused:
             raise ValueError(f"Error, task already paused")
-        else:
-            self.paused = True
+        self.paused = True
 
     def unpause_task(self):
         if not self.paused:
             raise ValueError(f"Error, task not paused")
-        else:
-            self.paused = False
+        self.paused = False
+
 
 
 class SourceTask(Task):
@@ -111,6 +112,7 @@ class DataFlow(PowerAware):
         """
         self.bit_rate = bit_rate
         self.links: Optional[List[Link]] = None
+        self.paused = False
 
     def __repr__(self):
         return f"{self.__class__.__name__}(bit_rate={self.bit_rate})"
@@ -132,10 +134,24 @@ class DataFlow(PowerAware):
         self.links = None
 
     def measure_power(self) -> PowerMeasurement:
-        if self.links is None:
-            raise RuntimeError("Cannot measure power: DataFlow was not placed on any links.")
-        return PowerMeasurement.sum(link.measure_power().multiply(self.bit_rate / link.used_bandwidth)
-                                    for link in self.links)
+        try:
+            if self.paused:
+                return PowerMeasurement(0, 0)
+            if self.links is None:
+                raise RuntimeError("Cannot measure power: DataFlow was not placed on any links.")
+            return PowerMeasurement.sum(link.measure_power().multiply(self.bit_rate / link.used_bandwidth) for link in self.links)
+        except AttributeError:
+            return PowerMeasurement(0, 0)
+
+    def pause_data_flow(self):
+        if self.paused:
+            raise ValueError(f"Error, data flow already paused")
+        self.paused = True
+
+    def unpause_data_flow(self):
+        if not self.paused:
+            raise ValueError(f"Error, data flow not paused")
+        self.paused = False
 
 
 class Application(PowerAware):
@@ -201,10 +217,31 @@ class Application(PowerAware):
             data_flow.deallocate()
 
     def measure_power(self) -> PowerMeasurement:
+        source_tasks = self.tasks(type_filter=SourceTask)
+        sink_tasks = self.tasks(type_filter=SinkTask)
+        measure = []
+        for source_task in source_tasks:
+            for sink_task in sink_tasks:
+                all_paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=sink_task.id))
+                for path in all_paths:
+                    power_measure = self.graph.nodes[path[0]]["data"].measure_power()
+                    measure.append(power_measure)
+                    if float(power_measure) == 0.0:
+                        print("pause a")
+                        break
+                    for i in range(1, len(path)):
+                        power_measure = self.graph[path[i-1]][path[i]]['data'].measure_power()
+                        measure.append(power_measure)
+                        if float(power_measure) == 0.0:
+                            print("pause b")
+                            break
+                        power_measure = self.graph.nodes[path[i]]["data"].measure_power()
+                        measure.append(power_measure)
+                        if float(power_measure) == 0.0:
+                            print("pause c")
+                            break
+                        # Perform your evaluation based on edge_data and node_data
+
         measurements = [t.measure_power() for t in self.tasks()] + [df.measure_power() for df in self.data_flows()]
         return PowerMeasurement.sum(measurements)
 
-    def pause_application(self, node: Node):
-        # TODO from node implement logic to allow for the return of 0 power to all nodes, links, tasks and data flows onwards in DAG
-        # actual logic to suspend application i.e. restarting the task is in the actual logic of the user
-        pass

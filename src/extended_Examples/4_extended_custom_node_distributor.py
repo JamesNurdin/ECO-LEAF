@@ -82,25 +82,24 @@ def main():
 
 def custom_distribution_method(current_power_source: PowerSource, power_domain):
     """Update renewable sources"""
-    total_current_power = current_power_source.get_current_power()
 
     for entity in power_domain.powered_entities:
         current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(power_domain.update_interval))
 
         """Check if entity is currently being powered by the desired power source"""
         if entity.power_model.power_source == current_power_source:
-            if total_current_power < current_entity_power_requirement:
+            if current_power_source.get_current_power() < current_entity_power_requirement:
                 entity.power_model.power_source = None
                 current_power_source.remove_entity(entity)
             else:
-                total_current_power = total_current_power - current_entity_power_requirement
+                current_power_source.consume_power(current_entity_power_requirement)
             continue
 
         """Check if entity is currently unpowered"""
-        if entity.power_model.power_source is None and current_entity_power_requirement < total_current_power:
+        if entity.power_model.power_source is None and current_entity_power_requirement < current_power_source.get_current_power():
             current_power_source.add_entity(entity)
             entity.power_model.power_source = current_power_source
-            total_current_power = total_current_power - current_entity_power_requirement
+            current_power_source.consume_power(current_entity_power_requirement)
             continue
 
 

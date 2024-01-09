@@ -97,15 +97,11 @@ class Node(PowerAware):
         if self.paused:
             raise ValueError(f"Error, node already paused")
         self.paused = True
-        for task in self.tasks:
-            task.pause_task()
 
     def unpause_node(self):
         if not self.paused:
             raise ValueError(f"Error, node not paused")
         self.paused = False
-        for task in self.tasks:
-            task.unpause_task()
 
     def check_if_node_paused(self) -> bool:
         return self.paused
@@ -141,6 +137,8 @@ class Link(PowerAware):
         self.power_model.set_parent(self)
         self.data_flows: List["DataFlow"] = []
 
+        self.paused = False
+
     def __repr__(self):
         latency_repr = f", latency={self.latency}" if self.latency else ""
         return f"{self.__class__.__name__}('{self.src.name}' -> '{self.dst.name}', bandwidth={self.used_bandwidth}/{self.bandwidth}{latency_repr})"
@@ -163,6 +161,8 @@ class Link(PowerAware):
 
     def measure_power(self) -> PowerMeasurement:
         try:
+            if self.paused:
+                return PowerMeasurement(0, 0)
             return self.power_model.measure()
         except AttributeError:
             return PowerMeasurement(0, 0)
@@ -178,6 +178,23 @@ class Link(PowerAware):
         if new_used_bandwidth < 0:
             raise ValueError(f"Cannot release {bandwidth} bandwidth on network link {self}.")
         self.used_bandwidth = new_used_bandwidth
+
+    def pause_link(self):
+        if self.paused:
+            raise ValueError(f"Error, link already paused")
+        self.paused = True
+        for data_flow in self.data_flows:
+            data_flow.pause_data_flow()
+
+    def unpause_link(self):
+        if not self.paused:
+            raise ValueError(f"Error, link not paused")
+        self.paused = False
+        for data_flow in self.data_flows:
+            data_flow.unpause_data_flow()
+
+    def check_if_node_paused(self) -> bool:
+        return self.paused
 
 
 class Infrastructure(PowerAware):

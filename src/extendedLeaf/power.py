@@ -479,14 +479,13 @@ class EntityDistributor:
                     in a time conscious context
         """
 
-        total_current_power = current_power_source.get_current_power()
         """Check if entity is currently being powered by the desired power source"""
         for entity in power_domain.powered_entities:
             current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
 
             if entity.power_model.power_source == current_power_source:
-                if total_current_power < current_entity_power_requirement:
+                if current_power_source.get_current_power() < current_entity_power_requirement:
                     current_power_source.remove_entity(entity)
                 else:
                     current_power_source.consume_power(current_entity_power_requirement)
@@ -496,7 +495,7 @@ class EntityDistributor:
             current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
 
-            if entity.power_model.power_source is None and current_entity_power_requirement < total_current_power:
+            if entity.power_model.power_source is None and current_entity_power_requirement < current_power_source.get_current_power():
                 current_power_source.add_entity(entity)
                 current_power_source.consume_power(current_entity_power_requirement)
 
@@ -507,33 +506,32 @@ class EntityDistributor:
             if self.smart_distribution:
                 if entity.power_model.power_source is not None \
                         and entity.power_model.power_source.priority > current_power_source.priority:
-                    if current_entity_power_requirement < total_current_power:
+                    if current_entity_power_requirement < current_power_source.get_current_power():
                         entity.power_model.power_source.remove_entity(entity)
                         current_power_source.add_entity(entity)
                         current_power_source.consume_power(current_entity_power_requirement)
 
     def default_update_entity_distribution_method_static(self, current_power_source, power_domain):
-        total_current_power = current_power_source.get_current_power()
         """Check if the entity is currently running"""
         for entity in current_power_source.powered_entities:
             current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
-            if type(entity) == "<Class 'Node'>":
-                if not entity.check_if_node_paused():
-                    if total_current_power < current_entity_power_requirement:
-                        entity.pause_node()
-                    else:
-                        current_power_source.consume_power(current_entity_power_requirement)
+            if not entity.check_if_node_paused():
+                if current_power_source.get_current_power() < current_entity_power_requirement:
+                    entity.pause_node()
+                    print("pause")
+                else:
+                    current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if entity is currently paused"""
         for entity in current_power_source.powered_entities:
-            if type(entity) == "<Class 'Node'>":
-                current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
-                    power_domain.update_interval))
-                if entity.check_if_node_paused():
-                    if current_entity_power_requirement < total_current_power:
-                        entity.unpause_node()
-                        current_power_source.consume_power(current_entity_power_requirement)
+            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
+                power_domain.update_interval))
+            if entity.check_if_node_paused():
+                if current_entity_power_requirement < current_power_source.get_current_power():
+                    entity.unpause_node()
+                    print("unpause")
+                    current_power_source.consume_power(current_entity_power_requirement)
 
 
 class PowerDomain:

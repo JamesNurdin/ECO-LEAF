@@ -75,7 +75,6 @@ def main():
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
-    print(power_domain.captured_data)
 
     file_handler = FileHandler()
     fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=power_domain.powered_entities)
