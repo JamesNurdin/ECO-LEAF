@@ -222,7 +222,7 @@ class PowerMeter:
             (3) a function which returns a list of :class:`PowerAware` entities, if the number of these entities
             changes during the simulation.
         name: Name of the power meter for logging and reporting
-        measurement_interval: The freequency in which measurement take place.
+        measurement_interval: The frequency in which measurement take place.
         callback: A function which will be called with the PowerMeasurement result after each conducted measurement.
     """
 
@@ -340,6 +340,11 @@ class PowerSource(ABC):
 
     def get_current_power(self) -> float:
         return self.remaining_power
+
+    def set_current_power(self, remaining_power):
+        if remaining_power < 0:
+            raise ValueError(f"Error: Battery {self.name} can't store negative power")
+        self.remaining_power = remaining_power
 
     def consume_power(self, power_consumed):
         if self.get_current_power() < power_consumed:
@@ -484,9 +489,7 @@ class EntityDistributor:
                 if total_current_power < current_entity_power_requirement:
                     current_power_source.remove_entity(entity)
                 else:
-                    total_current_power = total_current_power - current_entity_power_requirement
-                    if current_power_source.powerType == PowerType.BATTERY:
-                        current_power_source.set_current_power(total_current_power)
+                    current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if entity is currently unpowered"""
         for entity in power_domain.powered_entities:
@@ -495,9 +498,7 @@ class EntityDistributor:
 
             if entity.power_model.power_source is None and current_entity_power_requirement < total_current_power:
                 current_power_source.add_entity(entity)
-                total_current_power = total_current_power - current_entity_power_requirement
-                if current_power_source.powerType == PowerType.BATTERY:
-                    current_power_source.set_current_power(total_current_power)
+                current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if any entities in lower priority power sources can move up if excess energy is available"""
         for entity in power_domain.powered_entities:
@@ -509,9 +510,7 @@ class EntityDistributor:
                     if current_entity_power_requirement < total_current_power:
                         entity.power_model.power_source.remove_entity(entity)
                         current_power_source.add_entity(entity)
-                        total_current_power = total_current_power - current_entity_power_requirement
-                        if current_power_source.powerType == PowerType.BATTERY:
-                            current_power_source.set_current_power(total_current_power)
+                        current_power_source.consume_power(current_entity_power_requirement)
 
     def default_update_entity_distribution_method_static(self, current_power_source, power_domain):
         total_current_power = current_power_source.get_current_power()
@@ -524,22 +523,17 @@ class EntityDistributor:
                     if total_current_power < current_entity_power_requirement:
                         entity.pause_node()
                     else:
-                        total_current_power = total_current_power - current_entity_power_requirement
-                        if current_power_source.powerType == PowerType.BATTERY:
-                            current_power_source.set_current_power(total_current_power)
+                        current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if entity is currently paused"""
         for entity in current_power_source.powered_entities:
             if type(entity) == "<Class 'Node'>":
                 current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                     power_domain.update_interval))
-
                 if entity.check_if_node_paused():
                     if current_entity_power_requirement < total_current_power:
                         entity.unpause_node()
-                        total_current_power = total_current_power - current_entity_power_requirement
-                        if current_power_source.powerType == PowerType.BATTERY:
-                            current_power_source.set_current_power(total_current_power)
+                        current_power_source.consume_power(current_entity_power_requirement)
 
 
 class PowerDomain:
@@ -580,10 +574,9 @@ class PowerDomain:
         else:
             self.name = name
         self.power_sources = []
-        self.carbon_emitted = [] # running count of carbon emissions
-        self.captured_data = {} # data to be potentially written to file
+        self.carbon_emitted = []  # running count of carbon emissions
+        self.captured_data = {}  # data to be potentially written to file
         self.logging_data = {}  # any data that needs to be logged which is captured in events
-
 
         self.entity_distributor = entity_distributor or EntityDistributor()
 
@@ -596,7 +589,7 @@ class PowerDomain:
                 self.powered_entities = powered_entities
         else:
             if powered_entities is not None:
-                raise AttributeError(f"Error: Entity Distributor has been configured to handle static entities, but the "
+                raise AttributeError(f"Error: Entity Distributor has been configured to handle static entities, but the"
                                      f"power domain has been provided entities to dynamically distribute.")
         if update_interval < 1:
             raise ValueError(f"Error update interval should be positive.")
@@ -615,7 +608,7 @@ class PowerDomain:
                 Requirements:
                     -A power domain is provided with:
                         - Power source(s) to provide power to entities
-                        - Powered entitiess to provide power to
+                        - Powered entities to provide power to
         """
         if self.power_sources is None:
             raise AttributeError(f"Error: No power source was provided")
@@ -663,7 +656,8 @@ class PowerDomain:
             self.update_logs()
 
     def get_current_time_string(self):
-        return self.convert_to_time_string((self.env.now + self.start_time_index)%1440)
+        return self.convert_to_time_string((self.env.now + self.start_time_index) % 1440)
+
     def record_power_source_carbon_released(self, current_power_source):
         if current_power_source is None:
             raise ValueError(f"Error: No power source was supplied.")
@@ -676,8 +670,8 @@ class PowerDomain:
             carbon_released = self.calculate_carbon_released(power_used, carbon_intensity)
 
             entity_data = {"Power Used": power_used,
-                         "Carbon Intensity": carbon_intensity,
-                         "Carbon Released": carbon_released}
+                           "Carbon Intensity": carbon_intensity,
+                           "Carbon Released": carbon_released}
 
             current_power_source_carbon_released += carbon_released
             current_power_source_dictionary[entity.name] = entity_data
@@ -695,14 +689,13 @@ class PowerDomain:
         self.logging_data = {}
 
     def insert_power_reading(self, time, power_source, node, reading):
-        print("done")
-
         if power_source in self.captured_data[time]:
             self.captured_data[time][power_source][node] = reading
             self.captured_data[time][power_source]["Total Carbon Released"] = \
                 self.captured_data[time][power_source]["Total Carbon Released"] + reading["Carbon Released"]
         else:
-            self.captured_data[time][power_source] = {node: reading, "Total Carbon Released": reading["Carbon Released"]}
+            self.captured_data[time][power_source] = \
+                {node: reading, "Total Carbon Released": reading["Carbon Released"]}
 
     def update_carbon_intensity(self, increment_data):
         """ Using the data of the current time interval i.e.
@@ -726,8 +719,9 @@ class PowerDomain:
             raise ValueError(f"Error: Power source {power_source.name} is already present at priority "
                              f"{self.power_sources.index(power_source)} ")
 
-        if power_source.powerType == PowerType.MIXED and len([power_source for power_source in self.power_sources
-                                                              if power_source and power_source.powerType == PowerType.MIXED]) > 0:
+        if power_source.powerType == PowerType.MIXED \
+                and len([power_source for power_source in self.power_sources
+                         if power_source and power_source.powerType == PowerType.MIXED]) > 0:
             raise ValueError(f"Error: Power domain can only accept 1 mixed power source")
 
         if power_source.priority >= len(self.power_sources):
@@ -811,8 +805,8 @@ class SolarPower(PowerSource):
     SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None, remaining_power=0):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities, remaining_power=0)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
 
@@ -940,16 +934,12 @@ class BatteryPower(PowerSource):
         self.recharge_rate = charge_rate  # kw/h
         self.recharge_data = []
         self.power_log = {}
+
     def update_power_available(self):
         pass
 
     def get_power_at_time(self, time_int) -> float:
         return self.power_log[time_int+1]
-
-    def set_current_power(self, remaining_power):
-        if remaining_power < 0:
-            raise ValueError(f"Error: Battery {self.name} can't store negative power")
-        self.remaining_power = remaining_power
 
     def recharge_battery(self, power_source):
         power_to_recharge = self.total_power - self.remaining_power
@@ -993,7 +983,7 @@ class BatteryPower(PowerSource):
 
     def get_carbon_intensity_at_time(self, time) -> float:
         #  Only produced from recharging the battery
-        return 0
+        return self.carbon_intensity
 
 
 def validate_str_time(time_string: str):

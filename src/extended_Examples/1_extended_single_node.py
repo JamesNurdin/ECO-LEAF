@@ -1,10 +1,8 @@
 import logging
-import time
 
 import simpy
 
 from src.extendedLeaf.application import Task
-from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, SolarPower
 from src.extendedLeaf.power import PowerDomain

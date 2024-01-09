@@ -308,9 +308,7 @@ class PowerSource(ABC):
         self.name = name
         self.env = env
         self.carbon_intensity = 0
-
         self.priority = priority
-
         self.powerType = None
 
         if power_domain is None:
