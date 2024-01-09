@@ -85,15 +85,13 @@ class TestPowerDomain(unittest.TestCase):
         mock_entity_2.power_model.update_sensitive_measure.return_value = 75.0
         expected_dict = {
             mock_entity_1.name: {'Power Used': 50.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.025},
-            mock_entity_2.name: {'Power Used': 75.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.0375}
+            mock_entity_2.name: {'Power Used': 75.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.0375},
+            "Total Carbon Released": 0.0375+0.025
         }
-        expected_carbon_released = 0.025 + 0.0375
 
-        result_dict, result_carbon_released = \
-            self.power_domain.record_power_source_carbon_released(mock_current_power_source)
+        result_dict = self.power_domain.record_power_source_carbon_released(mock_current_power_source)
 
         self.assertEqual(result_dict, expected_dict)
-        self.assertEqual(result_carbon_released, expected_carbon_released)
 
         with self.assertRaises(ValueError):
             self.power_domain.record_power_source_carbon_released(None)
@@ -209,9 +207,10 @@ class TestPowerDomain(unittest.TestCase):
         self.power_domain.carbon_emitted = [2, 3, 5]
         self.assertEqual(self.power_domain.return_total_carbon_emissions(), 10)
 
-        with self.assertRaises(ValueError):
-            self.power_domain.carbon_emitted = None
-            self.power_domain.return_total_carbon_emissions()
+        self.power_domain.carbon_emitted = None
+        self.power_domain.return_total_carbon_emissions()
+        self.assertEqual(self.power_domain.return_total_carbon_emissions(), 0)
+
 
     def test_add_entity(self):
         """ Test to ensure that entities are correctly added to the power domain. """
