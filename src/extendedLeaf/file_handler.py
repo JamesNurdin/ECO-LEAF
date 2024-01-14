@@ -6,11 +6,9 @@ from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
-# Figure generation libraries
 import plotly.graph_objs as go
-from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
-from src.extendedLeaf.power import PowerDomain
+from src.extendedLeaf.power import PowerDomain, PowerMeter
 import tkinter as tk
 ExperimentResults = Dict[str, Tuple[pd.DataFrame, pd.DataFrame]]
 
@@ -148,9 +146,11 @@ class FileHandler:
         main_fig.update_layout(title_text="Results:")
 
         return main_fig
-    def subplot_time_series_entities(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None, entities=None) -> go.Figure:
+
+    def subplot_time_series_entities(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None,
+                                     entities=None) -> go.Figure:
         if entities is None:
-            entities = power_domain.powered_entities
+            entities = power_domain.powered_infrastructure
 
         global n
         fig = subplot_figure()
@@ -160,12 +160,14 @@ class FileHandler:
         end_time = power_domain.get_current_time(list(keys)[-1])
 
         offset = start_time
-        time, data = self.retrieve_select_data_entities(power_domain.captured_data, entities)
+        data = self.retrieve_select_data_entities(power_domain.captured_data, entities)
+        time = list(range(end_time-start_time+1))
 
         # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
             x = time
             y = data[node][captured_attribute]
+
             # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
             n = 6
@@ -194,7 +196,7 @@ class FileHandler:
                 )
         # Update layout to add a title
         fig.update_layout(
-            title_text=f"Timeseries of {captured_attribute} for Entities.",
+            title_text=f"Timeseries of {captured_attribute} for Powered Infrastructure.",
             title_x=0.5,  # Adjust the horizontal position of the title
             title_font=dict(size=16),  # Adjust the font size of the title
         )
@@ -213,7 +215,9 @@ class FileHandler:
         end_time = power_domain.get_current_time(list(keys)[-1])
 
         offset = start_time
-        time, data = self.retrieve_select_data_power_sources(power_domain.captured_data, power_sources)
+        data = self.retrieve_select_data_power_sources(power_domain.captured_data, power_sources)
+        time = list(range(end_time-start_time+1))
+
 
         # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
@@ -247,7 +251,56 @@ class FileHandler:
                 )
         # Update layout to add a title
         fig.update_layout(
-            title_text=f"Timeseries of {captured_attribute} for Entities.",
+            title_text=f"Timeseries of {captured_attribute} for Power Sources.",
+            title_x=0.5,  # Adjust the horizontal position of the title
+            title_font=dict(size=16),  # Adjust the font size of the title
+        )
+        return fig
+
+    def subplot_time_series_power_meter(self, power_domain: PowerDomain, power_meters: [PowerMeter], events=None) -> go.Figure:
+        if power_meters is None:
+            raise ValueError(f"Error, no power meter provided")
+
+        fig = subplot_figure()
+
+        keys = power_domain.captured_data.keys()
+        start_time = power_domain.get_current_time(list(keys)[0])
+        end_time = power_domain.get_current_time(list(keys)[-1])
+        global n
+        offset = start_time
+
+        for power_meter in power_meters:
+            y = [float(measurement) for measurement in power_meter.measurements[1:-1]]
+            x = list(range(end_time-start_time))
+            # Add the trace to the subplot
+            fig.add_trace(go.Scatter(x=x, y=y, name=f"{power_meter.name}", line=dict(width=1)))
+            n = 6
+
+        # Update layout and show the figure
+        fig.update_layout(
+            showlegend=True,
+            xaxis=dict(
+                title=dict(text="Time", standoff=0),
+                ticktext=[power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, n)]),
+            yaxis=dict(
+                title=dict(text="Power Used", standoff=0))
+        )
+
+        # add event lines
+        if events is not None:
+            for (time, _, (event, args)) in events:
+                time_x_value = power_domain.get_current_time(time)
+                fig.add_vrect(
+                    x0=time_x_value - offset,
+                    x1=time_x_value - offset,
+                    fillcolor="red", opacity=0.5,
+                    layer="above", line_width=1,
+                    label=dict(text=f"{event.__name__}({', '.join(arg.name for arg in args)})")
+                )
+        # Update layout to add a title
+        fig.update_layout(
+            title_text=f"Timeseries of power used for Power Meters.",
             title_x=0.5,  # Adjust the horizontal position of the title
             title_font=dict(size=16),  # Adjust the font size of the title
         )
@@ -272,8 +325,7 @@ class FileHandler:
                                 power_sources[power_source][node].items()):
 
                             nodes[node][attribute][time_index] = values
-        times = [i for i in range(len(list(time_series.keys())))]
-        return times, nodes
+        return nodes
 
     def retrieve_select_data_power_sources(self, time_series, desired_power_sources: ["PowerSource"]):
         power_source_results = {}
@@ -297,5 +349,4 @@ class FileHandler:
                             carbon_released = carbon_released + power_sources[power_source][node]["Carbon Released"]
                     power_source_results[power_source]["Power Used"][time_index] = power_used
                     power_source_results[power_source]["Carbon Released"][time_index] = carbon_released
-        times = [i for i in range(len(list(time_series.keys())))]
-        return times, power_source_results
+        return power_source_results

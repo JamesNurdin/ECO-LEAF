@@ -232,3 +232,7 @@ Holiday break
 * *0.5 Hours* Fixed an issue due to the fact that the actual power sources when consuming power for an update event wasn't being saved to the current score
 ### 6th January
 * *4.5 Hours* Implemented the ability that when a node is task at a point all data flows and tasks further on in the graph return 0 in addition to this
+### 7th January
+* *2 Hours* Changed the term entities to Powered Infrastructure to give more meaning to the items that are concrete implementations of the Power Model class. In addition to this went through and made some optimisation changes and resolved any issues that were preventing tests from passing.
+
+### Week 17

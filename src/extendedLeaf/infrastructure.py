@@ -44,6 +44,7 @@ class Node(PowerAware):
         self.location = location
 
         self.paused = False
+        self.recover_task_power = 0
 
     def __repr__(self):
         cu_repr = self.cu if self.cu is not None else "∞"
@@ -62,6 +63,8 @@ class Node(PowerAware):
 
         Private as this is only called by leaf.application.Task and not part of the public interface.
         """
+        if self.paused is True:
+            raise AttributeError(f"Error, node {self.name} is paused and unable to have tasks added.")
         self._reserve_cu(task.cu)
         self.tasks.append(task)
 
@@ -96,16 +99,36 @@ class Node(PowerAware):
     def pause_node(self):
         if self.paused:
             raise ValueError(f"Error, node already paused")
+        self.recover_task_power = self.measure_power()
         self.paused = True
+        for current_task in self.tasks:
+            application = current_task.application
+            current_path = application.get_application_paths(current_task)
+            for path in current_path:
+                for i in range(0, len(path)):
+                    if application.graph.nodes[path[i]]["data"].paused is False:
+                        application.graph.nodes[path[i]]["data"].pause()
 
     def unpause_node(self):
         if not self.paused:
             raise ValueError(f"Error, node not paused")
+        self.recover_task_power = 0
         self.paused = False
+        for current_task in self.tasks:
+            application = current_task.application
+            current_path = application.get_application_paths(current_task)
+            for path in current_path:
+                for i in range(0, len(path)):
+                    if application.graph.nodes[path[i]]["data"].paused is True:
+                        application.graph.nodes[path[i]]["data"].unpause()
 
     def check_if_node_paused(self) -> bool:
         return self.paused
 
+    def check_power_needed_to_unpause(self):
+        if not self.paused:
+            raise AttributeError(f"Error, node {self.name} is not paused")
+        return self.recover_task_power
 
 class Link(PowerAware):
     def __init__(self, src: Node, dst: Node, bandwidth: float, power_model: "PowerModelLink", latency: float = 0, name: str = None):
@@ -138,6 +161,7 @@ class Link(PowerAware):
         self.data_flows: List["DataFlow"] = []
 
         self.paused = False
+        self.recover_task_power = 0
 
     def __repr__(self):
         latency_repr = f", latency={self.latency}" if self.latency else ""
@@ -182,6 +206,7 @@ class Link(PowerAware):
     def pause_link(self):
         if self.paused:
             raise ValueError(f"Error, link already paused")
+        self.recover_task_power = self.measure_power()
         self.paused = True
         for data_flow in self.data_flows:
             data_flow.pause_data_flow()
@@ -189,12 +214,18 @@ class Link(PowerAware):
     def unpause_link(self):
         if not self.paused:
             raise ValueError(f"Error, link not paused")
+        self.recover_task_power = 0
         self.paused = False
         for data_flow in self.data_flows:
             data_flow.unpause_data_flow()
 
     def check_if_node_paused(self) -> bool:
         return self.paused
+
+    def check_power_needed_to_unpause(self):
+        if not self.paused:
+            raise AttributeError(f"Error, link {self.name} is not paused")
+        return self.recover_task_power
 
 
 class Infrastructure(PowerAware):

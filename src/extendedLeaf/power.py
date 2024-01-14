@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Union, Collection, Callable, Optional, Iterable
 
-import numpy
 import numpy as np
 import simpy
 from simpy import Environment
@@ -143,7 +142,6 @@ class PowerModelLink(PowerModel):
         self.energy_per_bit = energy_per_bit
         self.link = None
         self.power_source = None
-
 
     def measure(self) -> PowerMeasurement:
         dynamic_power = self.energy_per_bit * self.link.used_bandwidth
@@ -532,9 +530,9 @@ class PoweredInfrastructureDistributor:
         """
         """Check if the entity is currently running"""
         for entity in current_power_source.powered_infrastructure:
-            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
-                power_domain.update_interval))
             if not entity.check_if_node_paused():
+                current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
+                    power_domain.update_interval))
                 if current_power_source.get_current_power() < current_entity_power_requirement:
                     entity.pause_node()
                 else:
@@ -542,10 +540,10 @@ class PoweredInfrastructureDistributor:
 
         """Check if entity is currently paused"""
         for entity in current_power_source.powered_infrastructure:
-            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
-                power_domain.update_interval))
             if entity.check_if_node_paused():
+                current_entity_power_requirement = float(entity.check_power_needed_to_unpause())
                 if current_entity_power_requirement < current_power_source.get_current_power():
+                    print(power_domain.env.now)
                     entity.unpause_node()
                     current_power_source.consume_power(current_entity_power_requirement)
 
