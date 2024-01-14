@@ -235,4 +235,7 @@ Holiday break
 ### 7th January
 * *2 Hours* Changed the term entities to Powered Infrastructure to give more meaning to the items that are concrete implementations of the Power Model class. In addition to this went through and made some optimisation changes and resolved any issues that were preventing tests from passing.
 
-### Week 17
+## Week 17
+### 9th January
+* *2.5 Hours* Introduced a new example to demonstrate the pausing features of the framework, in addition to this fixed an issue with the pausing feature where the unpause method was being called repeatedly so have a check which saves the state, in addition included a new figure for the power meter.
+* *2 Hours * On inspecting the figure it still appeared that power measurements were still recording subsiquent readings as normal and not treating them as 0, the issue is due to the fact that the power meter for an application calls the task.measure() call, instead of trying again to work around it, I have introduced a new attribute for tasks keeping track of the application and then when a task is paused we can just traverse through entities and pause them.
