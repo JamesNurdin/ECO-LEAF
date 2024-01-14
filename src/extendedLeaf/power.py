@@ -297,15 +297,19 @@ class PowerSource(ABC):
     """Abstract class for the power sources.
 
             Args:
-                env: Simpy environment (for timing and correct retrieval of data read from file)
-                data_set_filename: filename for data of the power source (either power or carbon intensity)
+                env: Simpy environment (for timing and correct retrieval of data read from file).
+                name: Unique name to identify the power source.
+                data_set_filename: filename for data of the power source (either power or carbon intensity).
                 power_domain: The power domain associated with the source, we require a two-way association between
-                    classes to allow for the correct starting time of the simulation as it occurs during file reading
+                    classes to allow for the correct starting time of the simulation as it occurs during file reading.
                 priority: An integer value determining the importance of the power source, priority allows for the
-                    distribution of powered entities when being executed, with 0 being the most important
+                    distribution of powered entities when being executed, with 0 being the most important.
+                powered_infrastructure: List of entities which are concrete implementations of the PowerModel.
+                remaining_power: Floating point which describes the remaining power of the power source for the
+                    remainder of the "update event".
     """
     def __init__(self, env: Environment, name, data_set_filename=None, power_domain=None, priority: int = 0,
-                 powered_entities: ["PowerModel"] = None, remaining_power=0):
+                 powered_infrastructure: ["PowerModel"] = None, remaining_power=0):
         self.name = name
         self.env = env
         self.carbon_intensity = 0
@@ -318,19 +322,19 @@ class PowerSource(ABC):
             raise AttributeError(f"No power domain was supplied")
         self.power_domain = power_domain
 
-        if self.power_domain.entity_distributor.static_entities:
-            if powered_entities is None:
-                self.powered_entities = []
+        if self.power_domain.powered_infrastructure_distributor.static_powered_infrastructure:
+            if powered_infrastructure is None:
+                self.powered_infrastructure = []
             else:
-                self.powered_entities = powered_entities
-                for entity in self.powered_entities:
+                self.powered_infrastructure = powered_infrastructure
+                for entity in self.powered_infrastructure:
                     entity.power_model.power_source = self
         else:
-            self.powered_entities = []
-            if powered_entities is not None:
-                raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have dynamic"
-                                     f"powered entities for the power sources but power entities for power source "
-                                     f"{self.name} have been provided")
+            self.powered_infrastructure = []
+            if powered_infrastructure is not None:
+                raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have the "
+                                     f"powered infrastructure be dynamically distributed between the power sources but "
+                                     f"infrastructure entities have explicitly been provided to {self.name}.")
 
         if data_set_filename is not None:
             self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
@@ -343,7 +347,7 @@ class PowerSource(ABC):
 
     def set_current_power(self, remaining_power):
         if remaining_power < 0:
-            raise ValueError(f"Error: Battery {self.name} can't store negative power")
+            raise ValueError(f"Error: Power Source {self.name} can't store negative power.")
         self.remaining_power = remaining_power
 
     def consume_power(self, power_consumed):
@@ -354,23 +358,23 @@ class PowerSource(ABC):
 
     @abstractmethod
     def get_current_carbon_intensity(self, offset: int):
-        """Retrieve the current carbon intensity"""
+        """Retrieve the current carbon intensity."""
 
     @abstractmethod
     def update_carbon_intensity(self):
-        """Update a power sources carbon intensity"""
+        """Update a power sources carbon intensity."""
 
     def remove_entity(self, entity):
-        if entity not in self.powered_entities:
-            raise ValueError(f"Error: {entity.name} not present in list")
+        if entity not in self.powered_infrastructure:
+            raise ValueError(f"Error: {entity.name} not present in powered_infrastructure.")
         entity.power_model.power_source = None
-        self.powered_entities.remove(entity)
+        self.powered_infrastructure.remove(entity)
 
     def add_entity(self, entity):
-        if entity in self.powered_entities:
-            raise ValueError(f"Error: {entity.name} already present in list")
+        if entity in self.powered_infrastructure:
+            raise ValueError(f"Error: {entity.name} already present in powered_infrastructure.")
         entity.power_model.power_source = self
-        self.powered_entities.append(entity)
+        self.powered_infrastructure.append(entity)
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str):
         """Reads the data concerning the power source from file, and formats it according to the start time
@@ -428,122 +432,137 @@ class PowerSource(ABC):
         return times[current_increment]
 
 
-class EntityDistributor:
-    """Class for the distribution of entities between power sources during runtime.
+class PoweredInfrastructureDistributor:
+    """Class for the distribution of the powered infrastructure between power sources during runtime.
 
                 Args:
-                    entity_distributor_method: An optional user defined custom method that allows the user to exactly
-                        specify how entities are distributed between power sources during runtime, the arguments are:
+                    powered_infrastructure_distributor_method: An optional user defined custom method that allows the user to exactly
+                        specify how the powered infrastructure is distributed between power sources during runtime,
+                        the arguments are:
                         - The current power source being considered
-                        - The power domains list of entities (this can be filtered to only consider the subset for the
-                            power source's entities, NOTE: need to ensure at the end of an iteration all entities of the
-                            power domain have been provided a power source
+                        - The power domains list of powered infrastructure (this can be filtered to only consider the
+                            subset for the power source's powered infrastructure), NOTE: need to ensure at the end of an
+                            iteration all the powered infrastructure of the power domain is provided a power source.
                         - The update interval, as the power measurements are in Watts and the amount of power used
                             is subjective to the amount of time since the last update (the update interval) when
-                           retrieving power measurements as we are in a time sensitive context we need to call
-                           update_sensitive_measure(update_interval)
+                            retrieving power measurements as we are in a time sensitive context we need to call
+                            update_sensitive_measure(update_interval)
                     smart_distribution: A boolean value used to determine whether to allow a power source with
                         excess energy to take entities from lower priority if the available power is there.
+                    static_powered_infrastructure: A state attribute determining whether powered infrastructure is
+                        distributed automatically between entities or kept statically allocated a power source.
     """
-    def __init__(self, entity_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
-                 smart_distribution: bool = True, static_entities: bool = False):
-        self.static_entities = static_entities
-        if not static_entities:
-            self.entity_distributor_method = entity_distributor_method or \
-                                           self.default_update_entity_distribution_method_dynamic
+    def __init__(self, powered_infrastructure_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
+                 smart_distribution: bool = True, static_powered_infrastructure: bool = False):
+        self.static_powered_infrastructure = static_powered_infrastructure
+        if not static_powered_infrastructure:
+            self.powered_infrastructure_distributor_method = powered_infrastructure_distributor_method or \
+                                           self.default_powered_infrastructure_distribution_method_dynamic
         else:
-            self.entity_distributor_method = entity_distributor_method or \
-                                           self.default_update_entity_distribution_method_static
+            self.powered_infrastructure_distributor_method = powered_infrastructure_distributor_method or \
+                                           self.default_powered_infrastructure_distribution_method_static
 
         self.smart_distribution = smart_distribution
 
-    """DEFAULT entity handler for a power source, every pass of the while loop in the simulation, have to expect
-    that the power sources may not be able to power their entities, depending on the power sources provided to the 
-    power domain"""
-    def default_update_entity_distribution_method_dynamic(self, current_power_source, power_domain):
-        """The standard entity distribution method if the user does not provide a method. The method works based on the
-            knowledge that the order of execution of the method is based on priority, if power source i is passed into
-            the method then all power sources prior in list powerDomain.power_sources (sources with a higher priority)
-            have already been sorted so power source i should acquire as many entities as possible. The inner working
+    """DEFAULT powered infrastructure handler for a power source, every pass of the while loop in the simulation, 
+    have to expect that the power sources may not be able to power their powered infrastructure, depending on the
+    power sources provided to the power domain."""
+    def default_powered_infrastructure_distribution_method_dynamic(self, current_power_source, power_domain):
+        """The standard powered infrastructure distribution method if the user does not provide a method. The method
+            works based on the knowledge that the order of execution of the method is based on priority, if power
+            source i is passed into the method then all power sources prior in list powerDomain.power_sources
+            (sources with a higher priority) have already had there powered infrastructure for that update event
+             allocated, so power source i should acquire as many entities as possible. The inner working
             logic goes as:
-                1. Check if all existing entities can be powered, if not release excess entities
-                2. if remaining power is available try and add unpowered entities to source
+                1. Check if the existing powered infrastructure can be powered, if not release excess entities.
+                2. if remaining power is available try and add unpowered infrastructure to source.
                 3. if there is still excess power, try and add entities being powered by less preferable power sources
             Finally there is an expectation in the default method that the last power source adds all remaining
             unpowered entities, in order to avoid a raised exception.
 
                 Args:
                     current_power_source: the current power source being considered
-                    power_domain: the power domain to retrieve the associated entities(for dynamic distributions) and the
-                        update interval
-                    in a time conscious context
+                    power_domain: the power domain to retrieve the powered infrastructure (for dynamic distributions)
         """
 
-        """Check if entity is currently being powered by the desired power source"""
-        for entity in power_domain.powered_entities:
-            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
-                power_domain.update_interval))
-
+        """Check if the current powered infrastructure for the power source is currently able to be powered."""
+        for entity in power_domain.powered_infrastructure:
             if entity.power_model.power_source == current_power_source:
+                current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
+                    power_domain.update_interval))
                 if current_power_source.get_current_power() < current_entity_power_requirement:
                     current_power_source.remove_entity(entity)
                 else:
                     current_power_source.consume_power(current_entity_power_requirement)
 
-        """Check if entity is currently unpowered"""
-        for entity in power_domain.powered_entities:
-            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
-                power_domain.update_interval))
+        """Check if any unpowered infrastructure is able to be powered"""
+        for entity in power_domain.powered_infrastructure:
 
-            if entity.power_model.power_source is None and current_entity_power_requirement < current_power_source.get_current_power():
-                current_power_source.add_entity(entity)
-                current_power_source.consume_power(current_entity_power_requirement)
+            if entity.power_model.power_source is None:
+                current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
+                    power_domain.update_interval))
+                if current_entity_power_requirement < current_power_source.get_current_power():
+                    current_power_source.add_entity(entity)
+                    current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if any entities in lower priority power sources can move up if excess energy is available"""
-        for entity in power_domain.powered_entities:
-            current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
-                power_domain.update_interval))
-            if self.smart_distribution:
+        if self.smart_distribution:
+            for entity in power_domain.powered_infrastructure:
                 if entity.power_model.power_source is not None \
                         and entity.power_model.power_source.priority > current_power_source.priority:
+                    current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
+                        power_domain.update_interval))
                     if current_entity_power_requirement < current_power_source.get_current_power():
                         entity.power_model.power_source.remove_entity(entity)
                         current_power_source.add_entity(entity)
                         current_power_source.consume_power(current_entity_power_requirement)
 
-    def default_update_entity_distribution_method_static(self, current_power_source, power_domain):
+    def default_powered_infrastructure_distribution_method_static(self, current_power_source, power_domain):
+        """The standard static powered infrastructure distribution method if the user does not provide a method. The
+            method works based on the knowledge that the order of execution of the method is based on priority, if power
+            source i is passed into the method then all power sources prior in list powerDomain.power_sources
+            (sources with a higher priority) have already had there powered infrastructure for that update event
+             allocated, so power source i should acquire as many entities as possible. The inner working
+            logic goes as:
+                1. Check if the existing powered infrastructure can be powered, if not pause excess entities.
+                2. if remaining power is available, unpause any entities associated with the power source.
+                Args:
+                    current_power_source: the current power source being considered
+                    power_domain: the power domain to retrieve the powered infrastructure (for dynamic distributions)
+        """
         """Check if the entity is currently running"""
-        for entity in current_power_source.powered_entities:
+        for entity in current_power_source.powered_infrastructure:
             current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
             if not entity.check_if_node_paused():
                 if current_power_source.get_current_power() < current_entity_power_requirement:
                     entity.pause_node()
-                    print("pause")
                 else:
                     current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if entity is currently paused"""
-        for entity in current_power_source.powered_entities:
+        for entity in current_power_source.powered_infrastructure:
             current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                 power_domain.update_interval))
             if entity.check_if_node_paused():
                 if current_entity_power_requirement < current_power_source.get_current_power():
                     entity.unpause_node()
-                    print("unpause")
                     current_power_source.consume_power(current_entity_power_requirement)
 
 
 class PowerDomain:
-    """The power domain for a collection of entities, the main interface and point of interaction for dealing with
-        Extended LEAF power classes
+    """The power domain for a collection of powerable infrastructure, the main interface and point of interaction for
+        dealing with Extended LEAF power classes.
 
                 Args:
-                    env: Simpy environment (for timing and to allow running during the simulation)
-                    name: Name of the power domain
-                    entity_distributor: The entity distributor class to distribute entities between power sources
-                    start_time_str: A string denoting the start time of the simulation
-                    powered_entities: All entities that want to be associated with the power domain
+                    env: Simpy environment (for timing and to allow running during the simulation).
+                    name: Name of the power domain.
+                    powered_infrastructure_distributor: The powered infrastructure distributor class to distribute
+                        entities between power sources.
+                    start_time_str: A string denoting the start time of the simulation.
+                    powered_infrastructure: (Optional) All entities that want to be associated with the power domain,
+                        if no entities are provided it is assumed and checked that powered infrastructure is provided
+                        statically with the power source.
                     update_interval: The number of units of time between measurements of the carbon released.
                     power_source_events: a list of events the user wants to occur during runtime, the structure follows:
                         - time of event, in the format hh:mm:ss
@@ -553,15 +572,16 @@ class PowerDomain:
                         - args, a list arguments required by the method call
 
                 Assumptions:
-                    - 1 unit in env.timeout is equal to a minute
+                    - 1 unit in env.timeout is equal to a minute, used in order to correctly calculate power consumed.
 
                 Requirements:
                     name: Must be unique
                     start_time_str: must appear in all initial power source files, power sources added during execution
                         of the simulation can be ignored
     """
-    def __init__(self, env: Environment = None, name: str = None, entity_distributor: EntityDistributor = None,
-                 start_time_str: str = "00:00:00", powered_entities=None, update_interval: int = 1,
+    def __init__(self, env: Environment = None, name: str = None,
+                 powered_infrastructure_distributor: PoweredInfrastructureDistributor = None,
+                 start_time_str: str = "00:00:00", powered_infrastructure=None, update_interval: int = 1,
                  power_source_events: [(str, bool, (Callable[[], None], []))] = None):
         if env is None:
             raise ValueError(f"Error: Power  Domain was not supplied an environment. ")
@@ -576,19 +596,21 @@ class PowerDomain:
         self.captured_data = {}  # data to be potentially written to file
         self.logging_data = {}  # any data that needs to be logged which is captured in events
 
-        self.entity_distributor = entity_distributor or EntityDistributor()
+        self.powered_infrastructure_distributor = powered_infrastructure_distributor or \
+            PoweredInfrastructureDistributor()
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
-        if not self.entity_distributor.static_entities:
-            if powered_entities is None:
-                self.powered_entities = []
+        if not self.powered_infrastructure_distributor.static_powered_infrastructure:
+            if powered_infrastructure is None:
+                self.powered_infrastructure = []
             else:
-                self.powered_entities = powered_entities
+                self.powered_infrastructure = powered_infrastructure
         else:
-            if powered_entities is not None:
-                raise AttributeError(f"Error: Entity Distributor has been configured to handle static entities, but the"
-                                     f"power domain has been provided entities to dynamically distribute.")
+            if powered_infrastructure is not None:
+                raise AttributeError(f"Error: Powered Infrastructure Distributor has been configured to handle static"
+                                     f" entities, but the power domain has been provided entities to dynamically "
+                                     f"distribute.")
         if update_interval < 1:
             raise ValueError(f"Error update interval should be positive.")
         self.update_interval = update_interval
@@ -605,13 +627,14 @@ class PowerDomain:
 
                 Requirements:
                     -A power domain is provided with:
-                        - Power source(s) to provide power to entities
-                        - Powered entities to provide power to
+                        - Power source(s) to provide power to infrastructure.
+                        - Powerable Infrastructure to receive power.
         """
         if self.power_sources is None:
             raise AttributeError(f"Error: No power source was provided")
-        if not self.entity_distributor.static_entities and not self.powered_entities:
-            raise AttributeError(f"Error: No entity are present in the power domain")
+        if not self.powered_infrastructure_distributor.static_powered_infrastructure and not self.powered_infrastructure:
+            raise AttributeError(f"Error: No powered infrastructure was provided to the power domain, despite"
+                                 f" being configured dynamically.")
 
         while True:
             yield env.timeout(self.update_interval)
@@ -636,15 +659,16 @@ class PowerDomain:
                 current_power_source.update_power_available()
 
                 """distribute entities among power sources"""
-                self.entity_distributor.entity_distributor_method(current_power_source, self)
+                self.powered_infrastructure_distributor.powered_infrastructure_distributor_method(current_power_source,
+                                                                                                  self)
 
                 """Record respective power readings this interval"""
                 current_ps_dictionary = self.record_power_source_carbon_released(current_power_source)
 
                 current_carbon_intensities[current_power_source.name] = current_ps_dictionary
 
-            if not self.entity_distributor.static_entities:
-                for entity in self.powered_entities:
+            if not self.powered_infrastructure_distributor.static_powered_infrastructure:
+                for entity in self.powered_infrastructure:
                     if entity.power_model.power_source is None:
                         raise ValueError(f"Error: no power source found for entity {entity} at time {self.env.now}")
 
@@ -661,7 +685,7 @@ class PowerDomain:
             raise ValueError(f"Error: No power source was supplied.")
         current_power_source_dictionary = {}
         current_power_source_carbon_released = 0
-        for entity in current_power_source.powered_entities:
+        for entity in current_power_source.powered_infrastructure:
 
             power_used = float(entity.power_model.update_sensitive_measure(self.update_interval))
             carbon_intensity = current_power_source.get_current_carbon_intensity(0)
@@ -741,9 +765,9 @@ class PowerDomain:
         self.power_sources[index_of_power_source] = None
         power_source.power_domain = None
         power_source.priority = None
-        for entity in power_source.powered_entities:
+        for entity in power_source.powered_infrastructure:
             entity.power_model.power_source = None
-        power_source.powered_entities = []
+        power_source.powered_infrastructure = []
 
     def assign_power_source_priority(self):
         for counter in range(len(self.power_sources)):
@@ -758,22 +782,24 @@ class PowerDomain:
         return float(power_used) * (10 ** -3) * float(carbon_intensity)
 
     def add_entity(self, entity):
-        """ Only used to add entities into scope, should not be called for entity distribution reasons. """
-        if not self.entity_distributor.static_entities:
-            if entity in self.powered_entities:
+        """ Only used to add entities into scope, should not be called for powered infrastructure distribution
+        reasons."""
+        if not self.powered_infrastructure_distributor.static_powered_infrastructure:
+            if entity in self.powered_infrastructure:
                 raise ValueError(f"Error: {entity.name} already present in list")
-            self.powered_entities.append(entity)
+            self.powered_infrastructure.append(entity)
         else:
             raise ValueError(f"Error: unable to append entities when entities are static")
 
     def remove_entity(self, entity):
-        """ Only used to remove entities from scope, should not be called for entity distribution reasons. """
-        if not self.entity_distributor.static_entities:
-            if entity not in self.powered_entities:
+        """ Only used to remove entities from scope, should not be called for powered infrastructure distribution
+        reasons."""
+        if not self.powered_infrastructure_distributor.static_powered_infrastructure:
+            if entity not in self.powered_infrastructure:
                 raise ValueError(f"Error: {entity.name} not present in list")
-            self.powered_entities.remove(entity)
+            self.powered_infrastructure.remove(entity)
             entity_power_source = entity.power_model.power_source
-            entity_power_source.powered_entities.remove(entity)
+            entity_power_source.powered_infrastructure.remove(entity)
         else:
             raise ValueError(f"Error: unable to append entities when entities are static")
 
@@ -803,8 +829,9 @@ class SolarPower(PowerSource):
     SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities, remaining_power=0)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_infrastructure,
+                         remaining_power=0)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
 
@@ -842,8 +869,9 @@ class WindPower(PowerSource):
     WIND_DATASET_FILENAME = "01-01-2023 Ireland wind data.csv"
 
     def __init__(self, env: Environment, name: str = "Wind", data_set_filename: str = WIND_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities, remaining_power=0)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_infrastructure,
+                         remaining_power=0)
         self.inherent_carbon_intensity = 12
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
@@ -882,9 +910,9 @@ class GridPower(PowerSource):
     GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
 
     def __init__(self, env: Environment, name: str = "Grid", data_set_filename: str = GRID_DATASET_FILENAME,
-                 power_domain: PowerDomain = None, priority: int = 0, powered_entities=None,
-                 ):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_entities, remaining_power=np.inf)
+                 power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None):
+        super().__init__(env, name, data_set_filename, power_domain, priority, powered_infrastructure,
+                         remaining_power=np.inf)
         self.carbon_intensity = 0
         self.powerType = PowerType.MIXED
 
@@ -923,8 +951,8 @@ class BatteryPower(PowerSource):
     """
     def __init__(self, env: Environment, name: str = "Battery",
                  power_domain: PowerDomain = None, priority: int = 10,
-                 total_power_available=40, charge_rate=22, powered_entities=None):
-        super().__init__(env, name, None, power_domain, priority, powered_entities, remaining_power=0)
+                 total_power_available=40, charge_rate=22, powered_infrastructure=None):
+        super().__init__(env, name, None, power_domain, priority, powered_infrastructure, remaining_power=0)
 
         self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
         self.powerType = PowerType.BATTERY

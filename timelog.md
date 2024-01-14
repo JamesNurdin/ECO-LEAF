@@ -229,6 +229,6 @@ Holiday break
 ### 3rd January
 * *1.5 Hours* Introduced a change to prepare for a new feature that will be added, the current state of the power is now held in the remaining_power field that needs to be updated every event, this will allow for the get_current_power to just call this method.
 * *2.5 Hours* Following the previous change, in order to log the charging of the battery, a few new features have been added, first the ability to append to the captured data log, in addition to this a new dictionary has been added called log changes where events in the event queue that require data to be written to the captured data are temporarily stored here before the log is actually written to avoid key errors.
-* *0.5 Hours* Fixed an issue due to the fact that the actual power sources when consuming power for an update event wasnt being saved to the current score
+* *0.5 Hours* Fixed an issue due to the fact that the actual power sources when consuming power for an update event wasn't being saved to the current score
 ### 6th January
 * *4.5 Hours* Implemented the ability that when a node is task at a point all data flows and tasks further on in the graph return 0 in addition to this

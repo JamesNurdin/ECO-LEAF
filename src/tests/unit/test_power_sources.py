@@ -25,11 +25,11 @@ class TestSolarPower(unittest.TestCase):
         """ Abstract Test: Test that when entities are removed from the power source they are done so correctly. """
 
         self.mock_entity.power_source = self.power_source
-        self.power_source.powered_entities = [self.mock_entity]
+        self.power_source.powered_infrastructure = [self.mock_entity]
 
         self.power_source.remove_entity(self.mock_entity)
 
-        self.assertEqual(self.power_source.powered_entities, [])
+        self.assertEqual(self.power_source.powered_infrastructure, [])
         self.assertIsNone(self.mock_entity.power_model.power_source)
         with self.assertRaises(ValueError):
             self.power_source.remove_entity(self.mock_entity)
@@ -38,11 +38,11 @@ class TestSolarPower(unittest.TestCase):
         """ Abstract Test: Test that when entities are added to the power source they are done so correctly. """
 
         self.mock_entity.power_source = None
-        self.power_source.powered_entities = []
+        self.power_source.powered_infrastructure = []
 
         self.power_source.add_entity(self.mock_entity)
 
-        self.assertEqual(self.power_source.powered_entities, [self.mock_entity])
+        self.assertEqual(self.power_source.powered_infrastructure, [self.mock_entity])
         self.assertEqual(self.mock_entity.power_model.power_source, self.power_source)
         with self.assertRaises(ValueError):
             self.power_source.add_entity(self.mock_entity)
@@ -99,7 +99,7 @@ class TestSolarPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Solar Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.powered_entities, [])
+        self.assertEqual(self.power_source.powered_infrastructure, [])
 
         self.assertEqual(self.power_source.inherent_carbon_intensity, 46)
         self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
@@ -176,7 +176,7 @@ class TestWindPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Wind Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.powered_entities, [])
+        self.assertEqual(self.power_source.powered_infrastructure, [])
 
         self.assertEqual(self.power_source.inherent_carbon_intensity, 12)
         self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
@@ -253,7 +253,7 @@ class TestWindPower(unittest.TestCase):
             self.assertEqual(self.power_source.name, "Test Wind Power Source")
             self.assertEqual(self.power_source.priority, 1)
             self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-            self.assertEqual(self.power_source.powered_entities, [])
+            self.assertEqual(self.power_source.powered_infrastructure, [])
 
             self.assertEqual(self.power_source.inherent_carbon_intensity, 12)
             self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
@@ -320,7 +320,7 @@ class TestGridPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Grid Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.powered_entities, [])
+        self.assertEqual(self.power_source.powered_infrastructure, [])
 
         self.assertEqual(self.power_source.powerType, PowerType.MIXED)
         self.assertEqual(self.power_source.carbon_intensity, 0)
@@ -392,7 +392,7 @@ class TestBatteryPower(unittest.TestCase):
         self.assertEqual(self.power_source.name, "Test Battery Power Source")
         self.assertEqual(self.power_source.priority, 1)
         self.assertEqual(self.power_source.power_domain, self.mock_power_domain)
-        self.assertEqual(self.power_source.powered_entities, [])
+        self.assertEqual(self.power_source.powered_infrastructure, [])
 
         self.assertEqual(self.power_source.powerType, PowerType.BATTERY)
         self.assertEqual(self.power_source.carbon_intensity, 0)

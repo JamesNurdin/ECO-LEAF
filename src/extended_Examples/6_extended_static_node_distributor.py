@@ -4,14 +4,37 @@ from src.extendedLeaf.application import Task, Application, SourceTask, Processi
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
-from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, PowerSource, EntityDistributor
+from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, \
+    PowerDomain, PoweredInfrastructureDistributor
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 
 
 def main():
+    """
+    Log Output:
+        INFO	Placing Application(tasks=3):
+        INFO	- SourceTask(id=0, cu=0.4) on Node('node1', cu=0/10).
+        INFO	- ProcessingTask(id=1, cu=5) on Node('node2', cu=0/40).
+        INFO	- SinkTask(id=2, cu=1) on Node('node3', cu=0/20).
+        INFO	- DataFlow(bit_rate=1000) on [Link('node1' -> 'node2', bandwidth=0/30000000.0, latency=10)].
+        INFO	- DataFlow(bit_rate=300) on [Link('node2' -> 'node3', bandwidth=0/50000000.0, latency=12)].
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	2: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	2: infrastructure_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        ...
+        DEBUG	119: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	120: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        INFO	Total application power usage: 1843.8508199999972 Ws
+        INFO	Total infrastructure power usage: 1843.8000000000006 Ws
+        INFO	Total carbon emitted: 1.3900203333333325 gCo2
+    """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
     # Initializing infrastructure and workload
@@ -27,8 +50,8 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1",
                                start_time_str="19:00:00", update_interval=1,
-                               entity_distributor=EntityDistributor(static_entities=True))
-    solar_power = SolarPower(env, power_domain=power_domain, priority=0, powered_entities=[node1, node2, node3])
+                               powered_infrastructure_distributor=PoweredInfrastructureDistributor(static_powered_infrastructure=True))
+    solar_power = SolarPower(env, power_domain=power_domain, priority=0, powered_infrastructure=[node1, node2, node3])
     power_domain.add_power_source(solar_power)
 
     # Initialise three tasks
@@ -62,7 +85,7 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
     file_handler = FileHandler()
-    file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=solar_power.powered_entities)
+    file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=solar_power.powered_infrastructure)
 
 
 class SimpleOrchestrator(Orchestrator):

@@ -5,13 +5,38 @@ from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, \
-    GridPower, PowerDomain, PowerSource, EntityDistributor, BatteryPower, EntityDistributor, PowerModelLink, SolarPower
+    GridPower, PowerDomain, PoweredInfrastructureDistributor, BatteryPower, PowerModelLink, SolarPower
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 
 
 def main():
+    """
+    Log Output:
+        INFO	Placing Application(tasks=3):
+        INFO	- SourceTask(id=0, cu=0.4) on Node('node1', cu=0/10).
+        INFO	- ProcessingTask(id=1, cu=5) on Node('node2', cu=0/40).
+        INFO	- SinkTask(id=2, cu=1) on Node('node3', cu=0/20).
+        INFO	- DataFlow(bit_rate=1000) on [Link('node1' -> 'node2', bandwidth=0/30000000.0, latency=10)].
+        INFO	- DataFlow(bit_rate=300) on [Link('node2' -> 'node3', bandwidth=0/50000000.0, latency=12)].
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
+        DEBUG	2: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	2: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
+        ...
+        DEBUG	47: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	47: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
+        DEBUG	48: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	48: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
+        DEBUG	49: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	49: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
+        INFO	Total application power usage: 1536.5209999999997 Ws
+        INFO	Total infrastructure power usage: 8036.499999999993 Ws
+        INFO	Total carbon emitted: 28.081839558000002 gCo2
+    """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
 
@@ -31,8 +56,8 @@ def main():
 
     entities = infrastructure.nodes()+infrastructure.links()
 
-    power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=entities,
-                               start_time_str="10:00:00", update_interval=1, entity_distributor=EntityDistributor())
+    power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,
+                               start_time_str="10:00:00", update_interval=1, powered_infrastructure_distributor=PoweredInfrastructureDistributor())
     battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=500)
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
     sol = SolarPower(env, power_domain=power_domain, priority=1)
@@ -77,7 +102,7 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
     file_handler = FileHandler()
-    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=power_domain.powered_entities)
+    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=power_domain.powered_infrastructure)
     fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events,
                                                    power_sources=[sol,battery_power])
     figs = [fig1, fig2]

@@ -4,7 +4,7 @@ from src.extendedLeaf.application import Task, Application, SourceTask, Processi
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
-from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
+from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower,\
     GridPower, PowerDomain
 
 logger = logging.getLogger(__name__)
@@ -12,6 +12,32 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 
 
 def main():
+    """
+    Log output:
+        INFO	Placing Application(tasks=3):
+        INFO	- SourceTask(id=0, cu=0.4) on Node('node1', cu=0/10).
+        INFO	- ProcessingTask(id=1, cu=5) on Node('node2', cu=0/40).
+        INFO	- SinkTask(id=2, cu=1) on Node('node3', cu=0/20).
+        INFO	- DataFlow(bit_rate=1000) on [Link('node1' -> 'node2', bandwidth=0/30000000.0, latency=10)].
+        INFO	- DataFlow(bit_rate=300) on [Link('node2' -> 'node3', bandwidth=0/50000000.0, latency=12)].
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
+        DEBUG	2: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	2: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
+        ...
+        DEBUG	118: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	118: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
+        DEBUG	119: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
+        DEBUG	120: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
+        DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
+        INFO	Total application power usage: 3718.380820000001 Ws
+        INFO	Total infrastructure power usage: 12793.329999999976 Ws
+        INFO	Total carbon emitted: 18.03130105700002 gCo2
+
+    """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
 
@@ -30,7 +56,7 @@ def main():
     entities = infrastructure.nodes()+infrastructure.links()
     entities.remove(node4)
 
-    power_domain = PowerDomain(env, name="Power Domain 1", powered_entities=entities,
+    power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,
                                start_time_str="19:00:00", update_interval=1)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
