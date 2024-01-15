@@ -241,3 +241,5 @@ Holiday break
 * *2 Hours * On inspecting the figure it still appeared that power measurements were still recording subsequent readings as normal and not treating them as 0, the issue is due to the fact that the power meter for an application calls the task.measure() call, instead of trying again to work around it, I have introduced a new attribute for tasks keeping track of the application and then when a task is paused we can just traverse through entities and pause them.
 ### 11th January
 * *2 Hours* Also introduced the ability for links to be paused and subsequent data flows associated.
+### 12th January
+* *2.5 Hours* Created a new small example called carbon aware orchestrator, the focus is the distribution of applications on optimal nodes, to do this a few changes needed to be made, in particular the orchestrator class now requires the power domain and the power meters are now able to measure readings while not placed on infrastructure to keep an accurate timeline. 
