@@ -54,9 +54,9 @@ def main():
     power_domain = PowerDomain(env, name="Power Domain 1",
                                start_time_str="15:00:00", update_interval=1, powered_infrastructure_distributor=
                                PoweredInfrastructureDistributor(static_powered_infrastructure=True))
-    solar_power = SolarPower(env, power_domain=power_domain, priority=1, powered_infrastructure=[node1, node3, wifi_link_to_sink, wifi_link_from_source])
+    solar_power = SolarPower(env, power_domain=power_domain, priority=1, powered_infrastructure=[node1, node3, wifi_link_to_sink])
     battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=30,
-                                 powered_infrastructure=[node2])
+                                 powered_infrastructure=[wifi_link_from_source,node2])
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(solar_power)
 

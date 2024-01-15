@@ -96,33 +96,41 @@ class Node(PowerAware):
             raise ValueError(f"Cannot release {cu} CU on compute node {self}.")
         self.used_cu = new_used_cu
 
-    def pause_node(self):
+    def pause(self):
         if self.paused:
             raise ValueError(f"Error, node already paused")
         self.recover_task_power = self.measure_power()
         self.paused = True
         for current_task in self.tasks:
             application = current_task.application
-            current_path = application.get_application_paths(current_task)
-            for path in current_path:
-                for i in range(0, len(path)):
+            paths = application.get_application_paths(current_task)
+            for path in paths:
+                if application.graph.nodes[path[0]]["data"].paused is False:
+                    application.graph.nodes[path[0]]["data"].pause()
+                for i in range(1, len(path)):
                     if application.graph.nodes[path[i]]["data"].paused is False:
                         application.graph.nodes[path[i]]["data"].pause()
+                    if application.graph[path[i-1]][path[i]]["data"].paused is False:
+                        application.graph[path[i-1]][path[i]]["data"].pause()
 
-    def unpause_node(self):
+    def unpause(self):
         if not self.paused:
             raise ValueError(f"Error, node not paused")
         self.recover_task_power = 0
         self.paused = False
         for current_task in self.tasks:
             application = current_task.application
-            current_path = application.get_application_paths(current_task)
-            for path in current_path:
-                for i in range(0, len(path)):
+            paths = application.get_application_paths(current_task)
+            for path in paths:
+                if application.graph.nodes[path[0]]["data"].paused is True:
+                    application.graph.nodes[path[0]]["data"].unpause()
+                for i in range(1, len(path)):
                     if application.graph.nodes[path[i]]["data"].paused is True:
                         application.graph.nodes[path[i]]["data"].unpause()
+                    if application.graph[path[i - 1]][path[i]]["data"].paused is True:
+                        application.graph[path[i - 1]][path[i]]["data"].unpause()
 
-    def check_if_node_paused(self) -> bool:
+    def check_if_paused(self) -> bool:
         return self.paused
 
     def check_power_needed_to_unpause(self):
@@ -203,23 +211,54 @@ class Link(PowerAware):
             raise ValueError(f"Cannot release {bandwidth} bandwidth on network link {self}.")
         self.used_bandwidth = new_used_bandwidth
 
-    def pause_link(self):
+    def pause(self):
         if self.paused:
             raise ValueError(f"Error, link already paused")
         self.recover_task_power = self.measure_power()
         self.paused = True
-        for data_flow in self.data_flows:
-            data_flow.pause_data_flow()
+        for current_data_flow in self.data_flows:
+            if current_data_flow.paused is False:
+                current_data_flow.pause()
+            application = current_data_flow.application
+            desired_task = None
+            for task in self.dst.tasks:
+                if task.application == application:
+                    desired_task = task
+            paths = application.get_application_paths(desired_task)
+            for path in paths:
+                if application.graph.nodes[path[0]]["data"].paused is False:
+                    application.graph.nodes[path[0]]["data"].pause()
+                for i in range(1, len(path)):
+                    if application.graph.nodes[path[i]]["data"].paused is False:
+                        application.graph.nodes[path[i]]["data"].pause()
+                    if application.graph[path[i - 1]][path[i]]["data"].paused is False:
+                        application.graph[path[i - 1]][path[i]]["data"].pause()
 
-    def unpause_link(self):
+
+    def unpause(self):
         if not self.paused:
             raise ValueError(f"Error, link not paused")
         self.recover_task_power = 0
         self.paused = False
-        for data_flow in self.data_flows:
-            data_flow.unpause_data_flow()
+        for current_data_flow in self.data_flows:
+            if current_data_flow.paused is True:
+                current_data_flow.unpause()
+            application = current_data_flow.application
+            desired_task = None
+            for task in self.dst.tasks:
+                if task.application == application:
+                    desired_task = task
+            paths = application.get_application_paths(desired_task)
+            for path in paths:
+                if application.graph.nodes[path[0]]["data"].paused is True:
+                    application.graph.nodes[path[0]]["data"].unpause()
+                for i in range(1, len(path)):
+                    if application.graph.nodes[path[i]]["data"].paused is True:
+                        application.graph.nodes[path[i]]["data"].unpause()
+                    if application.graph[path[i - 1]][path[i]]["data"].paused is True:
+                        application.graph[path[i - 1]][path[i]]["data"].unpause()
 
-    def check_if_node_paused(self) -> bool:
+    def check_if_paused(self) -> bool:
         return self.paused
 
     def check_power_needed_to_unpause(self):

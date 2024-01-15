@@ -228,8 +228,14 @@ class Application(PowerAware):
         all_paths = []
         if dest_tasks is None:
             dest_tasks = self.tasks(type_filter=SinkTask)
-        for dest_task in dest_tasks:
-            paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
-            all_paths = all_paths + paths
+        if isinstance(source_task, Task):
+            for dest_task in dest_tasks:
+                paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
+                all_paths = all_paths + paths
+        else:
+            for dest_task in dest_tasks:
+                print(f"f {source_task}")
+                #paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
+                #all_paths = all_paths + paths
         return all_paths
 

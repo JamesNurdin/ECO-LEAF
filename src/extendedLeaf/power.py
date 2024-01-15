@@ -530,21 +530,20 @@ class PoweredInfrastructureDistributor:
         """
         """Check if the entity is currently running"""
         for entity in current_power_source.powered_infrastructure:
-            if not entity.check_if_node_paused():
+            if not entity.check_if_paused():
                 current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(
                     power_domain.update_interval))
                 if current_power_source.get_current_power() < current_entity_power_requirement:
-                    entity.pause_node()
+                    entity.pause()
                 else:
                     current_power_source.consume_power(current_entity_power_requirement)
 
         """Check if entity is currently paused"""
         for entity in current_power_source.powered_infrastructure:
-            if entity.check_if_node_paused():
+            if entity.check_if_paused():
                 current_entity_power_requirement = float(entity.check_power_needed_to_unpause())
                 if current_entity_power_requirement < current_power_source.get_current_power():
-                    print(power_domain.env.now)
-                    entity.unpause_node()
+                    entity.unpause()
                     current_power_source.consume_power(current_entity_power_requirement)
 
 
