@@ -84,7 +84,7 @@ def main():
     application.add_task(sink_task, incoming_data_flows=[(processing_task, 300)])
 
     # Place over Infrastructure
-    orchestrator = SimpleOrchestrator(infrastructure)
+    orchestrator = SimpleOrchestrator(infrastructure, power_domain)
     orchestrator.place(application)
 
     # Early power meters when exploring isolated power measurements
