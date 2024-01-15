@@ -7,6 +7,7 @@ import networkx as nx
 
 from src.extendedLeaf.application import ProcessingTask, Application, SourceTask, SinkTask
 from src.extendedLeaf.infrastructure import Infrastructure, Node
+from src.extendedLeaf.power import PowerDomain
 
 ProcessingTaskPlacement = Callable[[ProcessingTask, Application, Infrastructure], Node]
 DataFlowPath = Callable[[nx.Graph, str, str], List[str]]
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Orchestrator(ABC):
-    def __init__(self, infrastructure: Infrastructure, shortest_path: DataFlowPath = None):
+    def __init__(self, infrastructure: Infrastructure,power_domain: PowerDomain, shortest_path: DataFlowPath = None):
         """Orchestrator which is responsible for allocating/placing application tasks on the infrastructure.
 
         Args:
@@ -27,6 +28,7 @@ class Orchestrator(ABC):
                 `here <https://networkx.org/documentation/stable/reference/algorithms/shortest_paths.html>`_.
         """
         self.infrastructure = infrastructure
+        self.power_domain = power_domain
         if shortest_path is None:
             self.shortest_path = partial(nx.shortest_path, weight="latency")
 

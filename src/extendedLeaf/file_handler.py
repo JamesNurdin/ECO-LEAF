@@ -192,7 +192,7 @@ class FileHandler:
                     x1=time_x_value - offset,
                     fillcolor="red", opacity=0.5,
                     layer="above", line_width=1,
-                    label=dict(text=f"{event.__name__}({', '.join(arg.name for arg in args)})")
+                    label=dict(text=f"{event.__name__}({', '.join(arg.name for arg in args if arg is not None)})")
                 )
         # Update layout to add a title
         fig.update_layout(

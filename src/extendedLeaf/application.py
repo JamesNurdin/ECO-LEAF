@@ -47,7 +47,7 @@ class Task(PowerAware):
             return PowerMeasurement(0, 0)
         try:
             return self.node.measure_power().multiply(self.cu / self.node.used_cu)
-        except ZeroDivisionError:
+        except (ZeroDivisionError, AttributeError) as e:
             return PowerMeasurement(0, 0)
 
     def pause(self):
@@ -141,7 +141,7 @@ class DataFlow(PowerAware):
             if self.paused:
                 return PowerMeasurement(0, 0)
             if self.links is None:
-                raise RuntimeError("Cannot measure power: DataFlow was not placed on any links.")
+                return PowerMeasurement(0, 0)
             return PowerMeasurement.sum(link.measure_power().multiply(self.bit_rate / link.used_bandwidth) for link in self.links)
         except AttributeError:
             return PowerMeasurement(0, 0)
@@ -164,9 +164,9 @@ class Application(PowerAware):
     _TaskTypeFilter = Union[Type[_TTask], Tuple[Type[_TTask], ...]]
     _DataFlowTypeFilter = Union[Type[_TDataFlow], Tuple[Type[_TDataFlow], ...]]
 
-    def __init__(self):
+    def __init__(self, name: str = "Application"):
         self.graph = nx.DiGraph()
-
+        self.name = name
     def __repr__(self):
         return f"{self.__class__.__name__}(tasks={len(self.tasks())})"
 
@@ -226,16 +226,13 @@ class Application(PowerAware):
 
     def get_application_paths(self, source_task, dest_tasks=None):
         all_paths = []
+        if source_task is None:
+            raise ValueError(f"Error: No start task was provided.")
         if dest_tasks is None:
             dest_tasks = self.tasks(type_filter=SinkTask)
-        if isinstance(source_task, Task):
-            for dest_task in dest_tasks:
-                paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
-                all_paths = all_paths + paths
-        else:
-            for dest_task in dest_tasks:
-                print(f"f {source_task}")
-                #paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
-                #all_paths = all_paths + paths
+
+        for dest_task in dest_tasks:
+            paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
+            all_paths = all_paths + paths
         return all_paths
 
