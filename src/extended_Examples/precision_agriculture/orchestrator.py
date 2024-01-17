@@ -9,10 +9,9 @@ from src.extendedLeaf.orchestrator import Orchestrator
 
 class FarmOrchestrator(Orchestrator):
 
-    def __init__(self, infrastructure: Infrastructure, plots, utilization_threshold: float = FOG_UTILIZATION_THRESHOLD):
-        super().__init__(infrastructure)
+    def __init__(self, infrastructure: Infrastructure, power_domain, utilization_threshold: float = FOG_UTILIZATION_THRESHOLD):
+        super().__init__(infrastructure, power_domain)
         self.utilization_threshold = utilization_threshold
-        self.plots = plots
 
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
         result_node = None

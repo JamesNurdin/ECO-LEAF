@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Orchestrator(ABC):
-    def __init__(self, infrastructure: Infrastructure,power_domain: PowerDomain, shortest_path: DataFlowPath = None):
+    def __init__(self, infrastructure: Infrastructure, power_domain: PowerDomain, shortest_path: DataFlowPath = None):
         """Orchestrator which is responsible for allocating/placing application tasks on the infrastructure.
 
         Args:

@@ -14,6 +14,7 @@ MEASURE_APPLICATIONS = True
 
 """Simulation duration and intervals in simulated seconds"""
 SIMULATION_TIME = 360
+CARBON_AWARE = True
 UPDATE_MOBILITY_INTERVAL = 1
 POWER_MEASUREMENT_INTERVAL = 1
 UPDATE_WIFI_CONNECTIONS_INTERVAL = 60
@@ -38,10 +39,14 @@ FOG_NODE_CU = 5000000  # TODO CHECK
 FOG_NODE_MAX_POWER = 200  # TODO CHECK
 FOG_NODE_STATIC_POWER = 25  # TODO CHECK
 
-DRONE_CU = 500000  # TODO CHECK
-DRONE_MAX_POWER = 50  # TODO CHECK
-DRONE_STATIC_POWER = 50  # TODO CHECK
+DRONE_CU = 9000000
+DRONE_MAX_POWER = 270
+DRONE_STATIC_POWER = 5  # for flying the drone
+DRONE_SPEED = 5  # m/s
+DRONE_BATTERY_THRESHOLD = 0.2  # battery percent before recharging
+DRONE_MEASURE_DENSITY = 1
 
+""" Assume that video captured and analytics are transferred and processed """
 
 """Taxi generation rate and speed distribution according to 2015 DEBS Grand Challenge dataset"""
 MAX_CARS_PER_MINUTE = 75  # This parameter can be adapted to scale the simulation

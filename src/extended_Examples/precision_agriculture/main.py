@@ -3,6 +3,7 @@ import simpy
 
 from src.extendedLeaf.file_handler import FileHandler
 from src.extended_Examples.precision_agriculture.farm import Farm
+from src.extended_Examples.precision_agriculture.mobility import MobilityManager
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
@@ -13,11 +14,13 @@ def main():
     env = simpy.Environment()
     farm = Farm(env)
     farm.run(env)
+    mobility_model = MobilityManager()
 
     # Early power meters when exploring isolated power measurements
     for plot in farm.plots:
         env.process(plot.power_domain.run(env))
 
+    env.process(mobility_model.run(env, farm))
     # Run simulation
     env.run(until=121)  # run simulation for 10 seconds
 

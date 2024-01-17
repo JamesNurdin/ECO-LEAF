@@ -243,3 +243,5 @@ Holiday break
 * *2 Hours* Also introduced the ability for links to be paused and subsequent data flows associated.
 ### 12th January
 * *2.5 Hours* Created a new small example called carbon aware orchestrator, the focus is the distribution of applications on optimal nodes, to do this a few changes needed to be made, in particular the orchestrator class now requires the power domain and the power meters are now able to measure readings while not placed on infrastructure to keep an accurate timeline. 
+### 14th January
+* *4 Hours* Continued work on the example by introducing the drone class along with generating a flight path and the ability to return back to the recharge station when under a threshold of power.

@@ -4,7 +4,7 @@ import simpy
 
 from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.mobility import Location
-from src.extended_Examples.precision_agriculture.power import PowerDomain, EntityDistributor, BatteryPower
+from src.extended_Examples.precision_agriculture.power import PowerDomain, PoweredInfrastructureDistributor, BatteryPower
 from src.extended_Examples.precision_agriculture.settings import *
 from src.extendedLeaf.infrastructure import Link, Node
 from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
@@ -44,22 +44,23 @@ class FogNode(Node):
 
 
 class Drone(Node):
-    def __init__(self, plot, location, env, power_domain):
+    def __init__(self, plot, location, env, power_domain, drone_path):
         super().__init__(name=f"{plot.name}_Drone",
                          cu=DRONE_CU,
                          power_model=PowerModelNode(max_power=DRONE_MAX_POWER, static_power=DRONE_STATIC_POWER),
                          location=location)
 
-        #self.mobility_model = drone_mobility_model
         self.application = self._create_drone_application()
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
-        self.battery_power = BatteryPower(env, power_domain=power_domain, priority=0,
-                                     total_power_available=TAXI_BATTERY_SIZE)
+        self.battery_power = BatteryPower(env, power_domain=power_domain, priority=1,
+                                          total_power_available=TAXI_BATTERY_SIZE)
         power_domain.add_power_source(self.battery_power)
+        self.locations_iterator = drone_path
 
     # TODO create application
     def _create_drone_application(self) -> Application:
         return None
+
 
 
 class RechargeStation(Node):
