@@ -60,36 +60,6 @@ class PowerMeasurement:
     def total(self) -> float:
         return float(self)
 
-class CarbonMeasurement:
-    def __init__(self, intensity: float, released: float):
-        """Power measurement of one or more entities at a certain point in time.
-
-        Args:
-            dynamic: Dynamic (load-dependent) power usage in Watt
-            static: Static (load-independent) power usage in Watt
-        """
-        self.intensity = intensity
-        self.released = released
-
-    @classmethod
-    def sum(cls, measurements: Iterable["CarbonMeasurement"]):
-        intensity, released = reduce(lambda acc, cur: (acc[0] + cur.intensity, acc[1] + cur.released), measurements, (0,0))
-        return CarbonMeasurement(intensity, released)
-
-    def __repr__(self):
-        return f"PowerMeasurement(Intensity={self.intensity:.2f}W, Released={self.released:.2f}W)"
-
-    def __add__(self, other):
-        return CarbonMeasurement(self.intensity + other.intensity, self.released + other.released)
-
-    def __radd__(self, other):  # Required for sum()
-        if other == 0:
-            return self
-        else:
-            return self.__add__(other)
-
-
-
 class PowerModel(ABC):
     """Abstract base class for power models."""
 
