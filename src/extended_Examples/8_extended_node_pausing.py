@@ -5,7 +5,7 @@ from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerDomainEvent
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -70,8 +70,8 @@ def main():
     power_domain.add_power_source(solar_power)
 
     events = [
-        ("15:20:00", False, (battery_power.recharge_battery, [solar_power]))]
-    power_domain.power_source_events = events
+        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="15:20:00", repeat=False)]
+    power_domain.power_domain_events = events
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3

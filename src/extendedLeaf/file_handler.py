@@ -185,14 +185,14 @@ class FileHandler:
 
         # add event lines
         if events is not None:
-            for (time, _, (event, args)) in events:
-                time_x_value = power_domain.get_current_time(time)
+            for event in events:
+                time_x_value = power_domain.get_current_time(event.time)
                 fig.add_vrect(
                     x0=time_x_value - offset,
                     x1=time_x_value - offset,
                     fillcolor="red", opacity=0.5,
                     layer="above", line_width=1,
-                    label=dict(text=f"{event.__name__}({', '.join(arg.name for arg in args if arg is not None)})")
+                    label=dict(text=f"{event.event.__name__}({', '.join(arg.name for arg in event.args if arg is not None)})")
                 )
         # Update layout to add a title
         fig.update_layout(
@@ -240,14 +240,14 @@ class FileHandler:
 
         # add event lines
         if events is not None:
-            for (time, _, (event, args)) in events:
-                time_x_value = power_domain.get_current_time(time)
+            for event in events:
+                time_x_value = power_domain.get_current_time(event.time)
                 fig.add_vrect(
                     x0=time_x_value - offset,
                     x1=time_x_value - offset,
                     fillcolor="red", opacity=0.5,
                     layer="above", line_width=1,
-                    label=dict(text=f"{event.__name__}({', '.join(arg.name for arg in args)})")
+                    label=dict(text=f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})")
                 )
         # Update layout to add a title
         fig.update_layout(
@@ -289,14 +289,14 @@ class FileHandler:
 
         # add event lines
         if events is not None:
-            for (time, _, (event, args)) in events:
-                time_x_value = power_domain.get_current_time(time)
+            for event in events:
+                time_x_value = power_domain.get_current_time(event.time)
                 fig.add_vrect(
                     x0=time_x_value - offset,
                     x1=time_x_value - offset,
                     fillcolor="red", opacity=0.5,
                     layer="above", line_width=1,
-                    label=dict(text=f"{event.__name__}({', '.join(arg.name for arg in args)})")
+                    label=dict(text=f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})")
                 )
         # Update layout to add a title
         fig.update_layout(

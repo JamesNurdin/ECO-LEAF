@@ -577,13 +577,13 @@ class PowerDomain:
     def __init__(self, env: Environment = None, name: str = None,
                  powered_infrastructure_distributor: PoweredInfrastructureDistributor = None,
                  start_time_str: str = "00:00:00", powered_infrastructure=None, update_interval: int = 1,
-                 power_source_events: [(str, bool, (Callable[[], None], []))] = None):
+                 power_source_events = None):
         if env is None:
-            raise ValueError(f"Error: Power  Domain was not supplied an environment. ")
+            raise ValueError(f"Error: Power Domain was not supplied an environment. ")
         else:
             self.env = env
         if name is None:
-            raise ValueError(f"Error: Power  Domain was not supplied a name. ")
+            raise ValueError(f"Error: Power Domain was not supplied a name. ")
         else:
             self.name = name
         self.power_sources = []
@@ -591,8 +591,7 @@ class PowerDomain:
         self.captured_data = {}  # data to be potentially written to file
         self.logging_data = {}  # any data that needs to be logged which is captured in events
 
-        self.powered_infrastructure_distributor = powered_infrastructure_distributor or \
-            PoweredInfrastructureDistributor()
+        self.powered_infrastructure_distributor = powered_infrastructure_distributor or PoweredInfrastructureDistributor()
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
@@ -610,9 +609,9 @@ class PowerDomain:
             raise ValueError(f"Error update interval should be positive.")
         self.update_interval = update_interval
         if power_source_events is None:
-            self.power_source_events = []
+            self.power_domain_events = []
         else:
-            self.power_source_events = power_source_events
+            self.power_domain_events = power_source_events
 
     def run(self, env):
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
@@ -634,13 +633,7 @@ class PowerDomain:
         while True:
             yield env.timeout(self.update_interval)
             """Execute any pre-planned commands at the current moment of time"""
-            for index, (time, ran, (event, args)) in enumerate(self.power_source_events):
-                if (self.env.now + self.start_time_index) >= self.get_current_time(time):
-                    if not ran:
-                        event(*args)
-                        updated_event = list(self.power_source_events[index])
-                        updated_event[1] = True
-                        self.power_source_events[index] = tuple(updated_event)
+            self.run_events()
 
             self.assign_power_source_priority()
 
@@ -798,6 +791,18 @@ class PowerDomain:
         else:
             raise ValueError(f"Error: unable to append entities when entities are static")
 
+    def run_events(self):
+        for event in self.power_domain_events:
+            if (self.env.now + self.start_time_index) >= self.get_current_time(event.time):
+                if event.repeat:
+                    if event.counter < event.repeat_counter:
+                        event.counter += 1
+                    if event.counter == event.repeat_counter:
+                        event.ran = False
+                if not event.ran:
+                    event(*event.args)
+                    event.ran = True
+
     @classmethod
     def get_current_time(cls, time):
         validate_str_time(time)
@@ -812,6 +817,20 @@ class PowerDomain:
             raise ValueError("Error: Invalid input. Please provide a non-negative integer.")
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
+
+
+class PowerDomainEvent:
+    def __init__(self, event, args, time, repeat=False, repeat_counter=30):
+        self.event = event
+        self.args = args
+        self.time = time
+        self.repeat = repeat
+        self.ran = False
+        self.repeat_counter = repeat_counter
+        self.current_counter = 0
+
+    def __call__(self, *args, **kwargs):
+        self.event(*args)
 
 
 class SolarPower(PowerSource):

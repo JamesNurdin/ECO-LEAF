@@ -8,7 +8,7 @@ from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerDomainEvent
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -115,13 +115,14 @@ def main():
     # orchestrator.place(application2)
 
     events = [
-        ("15:10:00", False, (orchestrator.place, [application1])),
-        ("15:30:00", False, (battery_power.recharge_battery, [solar_power])),
-        ("15:40:00", False, (orchestrator.place, [application2])),
-        ("16:00:00", False, (battery_power.recharge_battery, [solar_power])),
-        ("16:30:00", False, (application1.deallocate, [])),
-        ("17:00:00", False, (battery_power.recharge_battery, [solar_power]))]
-    power_domain.power_source_events = events
+        PowerDomainEvent(event=orchestrator.place, args=[application1], time="15:10:00", repeat=False),
+        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="15:30:00", repeat=False),
+        PowerDomainEvent(event=orchestrator.place, args=[application2], time="15:40:00", repeat=False),
+        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="16:00:00", repeat=False),
+        PowerDomainEvent(event=application1.deallocate, args=[], time="16:30:00", repeat=False),
+        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="17:00:00", repeat=False)]
+
+    power_domain.power_domain_events = events
 
     # Early power meters when exploring isolated power measurements
     application1_pm = PowerMeter(application1, name="application_meter")

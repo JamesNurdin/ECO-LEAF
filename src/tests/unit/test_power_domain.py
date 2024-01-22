@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from src.extendedLeaf.file_handler import FileHandler
-from src.extendedLeaf.power import PowerDomain, SolarPower
+from src.extendedLeaf.power import PowerDomain, SolarPower, PowerDomainEvent
 
 
 class TestPowerDomain(unittest.TestCase):
@@ -37,7 +37,8 @@ class TestPowerDomain(unittest.TestCase):
         string_start_time = "12:00:00"
         powered_infrastructure = [self.mock_entity]
         update_interval = 15
-        events = [("19:40:00", False, (self.mock_power_domain.remove_entity, [self.mock_entity]))]
+        events = [
+            PowerDomainEvent(event=self.mock_power_domain.remove_entity, args=[self.mock_entity], time="19:40:00", repeat=False)]
 
         # Provided valid entry data
         power_domain = PowerDomain(self.mock_env, name, self.mock_powered_infrastructure_distributor, string_start_time,
@@ -48,7 +49,7 @@ class TestPowerDomain(unittest.TestCase):
         self.assertEqual(power_domain.start_time_string, string_start_time)
         self.assertEqual(power_domain.powered_infrastructure, powered_infrastructure)
         self.assertEqual(power_domain.update_interval, update_interval)
-        self.assertEqual(power_domain.power_source_events, events)
+        self.assertEqual(power_domain.power_domain_events, events)
 
         # Assert attributes constructed automatically
         self.assertEqual(power_domain.carbon_emitted, [])

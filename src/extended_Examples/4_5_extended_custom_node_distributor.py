@@ -5,7 +5,7 @@ from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, PowerSource, PoweredInfrastructureDistributor
+    GridPower, PowerDomain, PowerSource, PoweredInfrastructureDistributor, PowerDomainEvent
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -74,8 +74,8 @@ def main():
     application.add_task(sink_task, incoming_data_flows=[(processing_task, 300)])
 
     events = [
-        ("19:10:00", False, (power_domain.add_power_source, [solar_power])),
-        ("19:30:00", False, (solar_power.add_entity, [node4]))]
+        PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time="19:10:00", repeat=False),
+        PowerDomainEvent(event=solar_power.add_entity, args=[node4], time="19:30:00", repeat=False)]
     power_domain.power_source_events = events
 
 
