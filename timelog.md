@@ -245,3 +245,7 @@ Holiday break
 * *2.5 Hours* Created a new small example called carbon aware orchestrator, the focus is the distribution of applications on optimal nodes, to do this a few changes needed to be made, in particular the orchestrator class now requires the power domain and the power meters are now able to measure readings while not placed on infrastructure to keep an accurate timeline. 
 ### 14th January
 * *4 Hours* Continued work on the example by introducing the drone class along with generating a flight path and the ability to return back to the recharge station when under a threshold of power.
+
+## Week 18
+### 15th January
+* *2.5 Hours* Introduced a new example demonstrating the ability to create a custom static powered infrastructure distributor for power sources. The intention might be for this is to allow users to change the focus for potentially allowing unpowered entities the ability to run if power is limited in a round-robin mentality. Also, re-worked how entities in the dynamic approach are handled after identifying a bug where they are now initially paused. 
