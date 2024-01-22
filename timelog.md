@@ -250,3 +250,5 @@ Holiday break
 ### 15th January
 * *2.5 Hours* Introduced a new example demonstrating the ability to create a custom static powered infrastructure distributor for power sources. The intention might be for this is to allow users to change the focus for potentially allowing unpowered entities the ability to run if power is limited in a round-robin mentality. Also, re-worked how entities in the dynamic approach are handled after identifying a bug where they are now initially paused. 
 * *1.5 Hours* Explored introducing a new approach to handling the node data when being captured akin to the power meter but the infrastructure requreies the data to be easily accessible so was scrapped, also removed some unnecessary methods found
+### 17th January
+* *1 Hour* Reworked the events system into its own class allowing for events to be created in a clearer manner, also introduced the ability to repeat events after a certain amount of time 
