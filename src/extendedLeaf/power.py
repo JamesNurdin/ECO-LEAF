@@ -322,8 +322,9 @@ class PowerSource(ABC):
         self.powered_infrastructure = []
 
         if self.power_domain.powered_infrastructure_distributor.static_powered_infrastructure:
-            for entity in powered_infrastructure:
-                self.add_entity(entity)
+            if powered_infrastructure:
+                for entity in powered_infrastructure:
+                    self.add_entity(entity)
         else:
             if powered_infrastructure is not None:
                 raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have the "
@@ -598,8 +599,9 @@ class PowerDomain:
         self.start_time_index = self.get_current_time(start_time_str)
         self.powered_infrastructure = []
         if not self.powered_infrastructure_distributor.static_powered_infrastructure:
-            for entity in powered_infrastructure:
-                self.add_entity(entity)
+            if powered_infrastructure:
+                for entity in powered_infrastructure:
+                    self.add_entity(entity)
         else:
             if powered_infrastructure is not None:
                 raise AttributeError(f"Error: Powered Infrastructure Distributor has been configured to handle static"
