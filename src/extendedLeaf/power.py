@@ -60,6 +60,35 @@ class PowerMeasurement:
     def total(self) -> float:
         return float(self)
 
+class CarbonMeasurement:
+    def __init__(self, intensity: float, released: float):
+        """Power measurement of one or more entities at a certain point in time.
+
+        Args:
+            dynamic: Dynamic (load-dependent) power usage in Watt
+            static: Static (load-independent) power usage in Watt
+        """
+        self.intensity = intensity
+        self.released = released
+
+    @classmethod
+    def sum(cls, measurements: Iterable["CarbonMeasurement"]):
+        intensity, released = reduce(lambda acc, cur: (acc[0] + cur.intensity, acc[1] + cur.released), measurements, (0,0))
+        return CarbonMeasurement(intensity, released)
+
+    def __repr__(self):
+        return f"PowerMeasurement(Intensity={self.intensity:.2f}W, Released={self.released:.2f}W)"
+
+    def __add__(self, other):
+        return CarbonMeasurement(self.intensity + other.intensity, self.released + other.released)
+
+    def __radd__(self, other):  # Required for sum()
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+
+
 
 class PowerModel(ABC):
     """Abstract base class for power models."""
@@ -831,13 +860,6 @@ class SolarPower(PowerSource):
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
 
-    def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
-
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
 
@@ -872,13 +894,6 @@ class WindPower(PowerSource):
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
 
-    def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
-
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
 
@@ -911,13 +926,6 @@ class GridPower(PowerSource):
                          remaining_power=np.inf)
         self.carbon_intensity = 0
         self.powerType = PowerType.MIXED
-
-    def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
 
     def update_carbon_intensity(self):
         self.carbon_intensity = self.get_current_carbon_intensity(0)

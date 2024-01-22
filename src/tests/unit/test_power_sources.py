@@ -106,20 +106,6 @@ class TestSolarPower(unittest.TestCase):
         self.assertEqual(self.power_source.carbon_intensity, 0)
         self.assertEqual(self.power_source.next_update_time, "00:00:00")
 
-    def test_get_start_time_index(self):
-        """ Test that when provided a string time, the correct corresponding index is returned. """
-
-        start_time_1 = "00:00:00"  # First correct time
-        start_time_2 = "23:00:00"  # Last correct time
-        start_time_3 = "25:00:00"  # Erroneous time
-        start_time_4 = "a"  # Erroneous value
-
-        self.assertEqual(self.power_source._get_start_time_index(start_time_1), 0)
-        self.assertEqual(self.power_source._get_start_time_index(start_time_2), 23)
-        with self.assertRaises(ValueError):
-            self.power_source._get_start_time_index(start_time_3)
-            self.power_source._get_start_time_index(start_time_4)
-
     def test_get_current_power(self):
         """ Test that a power source can retrieve the current power. """
 
@@ -182,20 +168,6 @@ class TestWindPower(unittest.TestCase):
         self.assertEqual(self.power_source.powerType, PowerType.RENEWABLE)
         self.assertEqual(self.power_source.carbon_intensity, 0)
         self.assertEqual(self.power_source.next_update_time, "00:00:00")
-
-    def test_get_start_time_index(self):
-        """ Test that when provided a string time, the correct corresponding index is returned. """
-
-        start_time_1 = "00:00:00"  # First correct time
-        start_time_2 = "23:00:00"  # Last correct time
-        start_time_3 = "25:00:00"  # Erroneous time
-        start_time_4 = "a"  # Erroneous value
-
-        self.assertEqual(self.power_source._get_start_time_index(start_time_1), 0)
-        self.assertEqual(self.power_source._get_start_time_index(start_time_2), 23)
-        with self.assertRaises(ValueError):
-            self.power_source._get_start_time_index(start_time_3)
-            self.power_source._get_start_time_index(start_time_4)
 
     def test_get_current_power(self):
         """ Test that a power source can retrieve the current power. """
@@ -260,20 +232,6 @@ class TestWindPower(unittest.TestCase):
             self.assertEqual(self.power_source.carbon_intensity, 0)
             self.assertEqual(self.power_source.next_update_time, "00:00:00")
 
-        def test_get_start_time_index(self):
-            """ Test that when provided a string time, the correct corresponding index is returned. """
-
-            start_time_1 = "00:00:00"  # First correct time
-            start_time_2 = "23:00:00"  # Last correct time
-            start_time_3 = "25:00:00"  # Erroneous time
-            start_time_4 = "a"  # Erroneous value
-
-            self.assertEqual(self.power_source._get_start_time_index(start_time_1), 0)
-            self.assertEqual(self.power_source._get_start_time_index(start_time_2), 23)
-            with self.assertRaises(ValueError):
-                self.power_source._get_start_time_index(start_time_3)
-                self.power_source._get_start_time_index(start_time_4)
-
         def test_get_current_power(self):
             """ Test that a power source can retrieve the current power. """
 
@@ -325,20 +283,6 @@ class TestGridPower(unittest.TestCase):
         self.assertEqual(self.power_source.powerType, PowerType.MIXED)
         self.assertEqual(self.power_source.carbon_intensity, 0)
         self.assertEqual(self.power_source.next_update_time, "00:00:00")
-
-    def test_get_start_time_index(self):
-        """ Test that when provided a string time, the correct corresponding index is returned. """
-
-        start_time_1 = "00:00:00"  # First correct time
-        start_time_2 = "23:00:00"  # Last correct time
-        start_time_3 = "25:00:00"  # Erroneous time
-        start_time_4 = "a"  # Erroneous value
-
-        self.assertEqual(self.power_source._get_start_time_index(start_time_1), 0)
-        self.assertEqual(self.power_source._get_start_time_index(start_time_2), 23)
-        with self.assertRaises(ValueError):
-            self.power_source._get_start_time_index(start_time_3)
-            self.power_source._get_start_time_index(start_time_4)
 
     def test_get_current_power(self):
         """ Test that the power available is infinite. """
