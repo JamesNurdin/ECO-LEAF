@@ -319,16 +319,12 @@ class PowerSource(ABC):
         if power_domain is None:
             raise AttributeError(f"No power domain was supplied")
         self.power_domain = power_domain
+        self.powered_infrastructure = []
 
         if self.power_domain.powered_infrastructure_distributor.static_powered_infrastructure:
-            if powered_infrastructure is None:
-                self.powered_infrastructure = []
-            else:
-                self.powered_infrastructure = powered_infrastructure
-                for entity in self.powered_infrastructure:
-                    entity.power_model.power_source = self
+            for entity in powered_infrastructure:
+                self.add_entity(entity)
         else:
-            self.powered_infrastructure = []
             if powered_infrastructure is not None:
                 raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have the "
                                      f"powered infrastructure be dynamically distributed between the power sources but "
@@ -367,12 +363,14 @@ class PowerSource(ABC):
             raise ValueError(f"Error: {entity.name} not present in powered_infrastructure.")
         entity.power_model.power_source = None
         self.powered_infrastructure.remove(entity)
+        entity.paused = True
 
     def add_entity(self, entity):
         if entity in self.powered_infrastructure:
             raise ValueError(f"Error: {entity.name} already present in powered_infrastructure.")
         entity.power_model.power_source = self
         self.powered_infrastructure.append(entity)
+        entity.paused = False
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str):
         """Reads the data concerning the power source from file, and formats it according to the start time
@@ -598,11 +596,10 @@ class PowerDomain:
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
+        self.powered_infrastructure = []
         if not self.powered_infrastructure_distributor.static_powered_infrastructure:
-            if powered_infrastructure is None:
-                self.powered_infrastructure = []
-            else:
-                self.powered_infrastructure = powered_infrastructure
+            for entity in powered_infrastructure:
+                self.add_entity(entity)
         else:
             if powered_infrastructure is not None:
                 raise AttributeError(f"Error: Powered Infrastructure Distributor has been configured to handle static"

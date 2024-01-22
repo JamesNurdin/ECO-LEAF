@@ -6,7 +6,6 @@ import matplotlib
 
 from src.extended_Examples.precision_agriculture.infrastructure import *
 from src.extendedLeaf.mobility import Location
-from src.extended_Examples.precision_agriculture.mobility import MobilityManager
 from src.extended_Examples.precision_agriculture.orchestrator import FarmOrchestrator
 from src.extended_Examples.precision_agriculture.power import PowerDomain, SolarPower, GridPower,\
     PoweredInfrastructureDistributor, PowerSource

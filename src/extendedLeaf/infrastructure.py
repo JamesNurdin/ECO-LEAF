@@ -43,7 +43,7 @@ class Node(PowerAware):
 
         self.location = location
 
-        self.paused = False
+        self.paused = True
         self.recover_task_power = 0
 
     def __repr__(self):
@@ -63,8 +63,6 @@ class Node(PowerAware):
 
         Private as this is only called by leaf.application.Task and not part of the public interface.
         """
-        if self.paused is True:
-            raise AttributeError(f"Error, node {self.name} is paused and unable to have tasks added.")
         self._reserve_cu(task.cu)
         self.tasks.append(task)
 
@@ -168,7 +166,7 @@ class Link(PowerAware):
         self.power_model.set_parent(self)
         self.data_flows: List["DataFlow"] = []
 
-        self.paused = False
+        self.paused = True
         self.recover_task_power = 0
 
     def __repr__(self):
