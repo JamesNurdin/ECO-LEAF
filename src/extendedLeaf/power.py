@@ -632,6 +632,11 @@ class PowerDomain:
 
         while True:
             yield env.timeout(self.update_interval)
+            for current_power_source in [power_source for power_source in self.power_sources if
+                                         power_source is not None]:
+                """Update the power available to the power source"""
+                current_power_source.update_power_available()
+
             """Execute any pre-planned commands at the current moment of time"""
             self.run_events()
 
@@ -643,8 +648,6 @@ class PowerDomain:
             current_carbon_intensities = {}
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
-                """Update the power available to the power source"""
-                current_power_source.update_power_available()
 
                 """distribute entities among power sources"""
                 self.powered_infrastructure_distributor.powered_infrastructure_distributor_method(current_power_source,
@@ -795,10 +798,11 @@ class PowerDomain:
         for event in self.power_domain_events:
             if (self.env.now + self.start_time_index) >= self.get_current_time(event.time):
                 if event.repeat:
-                    if event.counter < event.repeat_counter:
-                        event.counter += 1
-                    if event.counter == event.repeat_counter:
+                    if event.current_counter < event.repeat_counter:
+                        event.current_counter += 1
+                    if event.current_counter == event.repeat_counter:
                         event.ran = False
+                        event.current_counter = 0
                 if not event.ran:
                     event(*event.args)
                     event.ran = True
@@ -811,6 +815,7 @@ class PowerDomain:
 
     @classmethod
     def convert_to_time_string(cls, time):
+        time = time % 1440
         if not isinstance(time, int):
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:
@@ -962,6 +967,8 @@ class BatteryPower(PowerSource):
 
     def recharge_battery(self, power_source):
         power_to_recharge = self.total_power - self.remaining_power
+        print(f"power to recharge:{power_to_recharge}")
+        print(f"power in solar :{power_source.get_current_power()}")
         if power_source.get_current_power() < power_to_recharge:
             raise ValueError(f"Error, power source {power_source} failed to charge battery.")
         power_source.consume_power(power_to_recharge)

@@ -57,6 +57,7 @@ class FileHandler:
     def __init__(self):
         self.creation_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.results_dir = None
+
     def create_results_dir(self) -> str:
         """ Creates a directory for the results. """
         results_dir = self.get_results_dir()
@@ -158,7 +159,8 @@ class FileHandler:
         keys = power_domain.captured_data.keys()
         start_time = power_domain.get_current_time(list(keys)[0])
         end_time = power_domain.get_current_time(list(keys)[-1])
-
+        if end_time < start_time:
+            end_time += 1440
         offset = start_time
         data = self.retrieve_select_data_entities(power_domain.captured_data, entities)
         time = list(range(end_time-start_time+1))
@@ -171,7 +173,8 @@ class FileHandler:
             # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
             n = 6
-
+        print([power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)])
+        print([int(value) - int(start_time) for value in np.linspace(start_time, end_time, n)])
         # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
@@ -213,6 +216,8 @@ class FileHandler:
         keys = power_domain.captured_data.keys()
         start_time = power_domain.get_current_time(list(keys)[0])
         end_time = power_domain.get_current_time(list(keys)[-1])
+        if end_time < start_time:
+            end_time += 1440
 
         offset = start_time
         data = self.retrieve_select_data_power_sources(power_domain.captured_data, power_sources)
@@ -266,6 +271,9 @@ class FileHandler:
         keys = power_domain.captured_data.keys()
         start_time = power_domain.get_current_time(list(keys)[0])
         end_time = power_domain.get_current_time(list(keys)[-1])
+        if end_time < start_time:
+            end_time += 1440
+
         global n
         offset = start_time
 
