@@ -831,8 +831,17 @@ class PowerDomainEvent:
         self.time = time
         self.repeat = repeat
         self.ran = False
-        self.repeat_counter = repeat_counter
-        self.current_counter = 0
+        if repeat is True:
+            if isinstance(repeat_counter, str):
+                if validate_str_time(repeat_counter):
+                    self.repeat_counter = PowerDomain.get_current_time(repeat_counter)
+            elif isinstance(repeat_counter, int):
+                if repeat_counter > 0:
+                    self.repeat_counter = repeat_counter
+            else:
+                raise ValueError(f"Error: invalid time increment provided")
+
+            self.current_counter = 0
 
     def __call__(self, *args, **kwargs):
         self.event(*args)
