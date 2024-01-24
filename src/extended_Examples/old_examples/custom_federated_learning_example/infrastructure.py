@@ -1,8 +1,6 @@
-import simpy
-
 from src.extended_Examples.custom_federated_learning_example.settings import *
 from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask, Task
-from src.extendedLeaf.infrastructure import Link, Node, Infrastructure
+from src.extendedLeaf.infrastructure import Link, Node
 from src.extendedLeaf.mobility import Location
 from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
 

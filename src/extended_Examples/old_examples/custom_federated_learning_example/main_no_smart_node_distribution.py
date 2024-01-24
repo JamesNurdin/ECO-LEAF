@@ -5,7 +5,7 @@ from src.extended_Examples.custom_federated_learning_example.mobility import Mob
 from src.extended_Examples.custom_federated_learning_example.university import City
 import simpy
 from src.extended_Examples.custom_federated_learning_example.settings import *
-from src.extendedLeaf.power import PowerMeter, GridPower, SolarPower, PowerDomain, NodeDistributor
+from src.extendedLeaf.power import PowerMeter, GridPower, PowerDomain
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')

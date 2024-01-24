@@ -255,5 +255,6 @@ Holiday break
 * *3 Hours* Continued work on introducing new ideas as discussed where the goal for the next meeting is to produce and brainstorm new example ideas, finished with the small ones and introduced the idea of heuristics where nodes can have preferred power sources based on properties of either i.e. uncapped power nodes must be assigned to the grid.
 ### 19th January
 * *2.5 Hours* Fixed mistake in event counters, moved the updating of power source to start of the discrete event and fixed an issue with the plotting of figures when a new day starts.
-* 1 Hour* Introduced the last small example along with the necessary documentation to describe it.
-* 
+* *1 Hour* Introduced the last small example along with the necessary documentation to describe it.
+### 20th January
+* *1 Hour* Introduced the code for the second medium example along with the necessary documentation and explanation for it.

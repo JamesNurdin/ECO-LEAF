@@ -1,5 +1,4 @@
 import math
-from abc import ABC
 
 from src.extendedLeaf.application import Application, ProcessingTask
 from src.extended_Examples.custom_federated_learning_example.infrastructure import Server, Client, ClusteredClient
