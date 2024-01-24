@@ -815,11 +815,11 @@ class PowerDomain:
 
     @classmethod
     def convert_to_time_string(cls, time):
-        time = time % 1440
         if not isinstance(time, int):
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:
             raise ValueError("Error: Invalid input. Please provide a non-negative integer.")
+        time = time % 1440
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
 
