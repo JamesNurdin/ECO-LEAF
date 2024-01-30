@@ -1,11 +1,12 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, PowerDomainEvent
+    GridPower, PowerDomain
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -34,8 +35,8 @@ def main():
         DEBUG	149: application_meter: PowerMeasurement(dynamic=10.73W, static=20.00W)
         DEBUG	149: infrastructure_meter: PowerMeasurement(dynamic=65.73W, static=40.00W)
         INFO	Total application power usage: 4609.563000000004 Ws
-        INFO	Total infrastructure power usage: 15859.499999999964 Ws
-        INFO	Total carbon emitted: 24.922497796000034 gCo2
+        INFO	Total infrastructure power usage: 9034.499999999996 Ws
+        INFO	Total carbon emitted: 24.905265005333366 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -64,13 +65,12 @@ def main():
     wind_power = WindPower(env, power_domain=power_domain, priority=0)
     power_domain.add_power_source(wind_power)
     power_domain.add_power_source(grid1)
-    events = [
-        PowerDomainEvent(event=power_domain.remove_power_source, args=[wind_power], time="19:20:00", repeat=False),
-        PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time="19:40:00", repeat=False),
-        PowerDomainEvent(event=power_domain.add_entity, args=[node4], time="20:30:00", repeat=False),
-        PowerDomainEvent(event=power_domain.remove_entity, args=[node4], time="21:15:00", repeat=False)]
 
-    power_domain.power_source_events = events
+    event_domain = EventDomain(env, update_interval=1, start_time_str="19:00:00")
+    event_domain.add_event(PowerDomainEvent(event=power_domain.remove_power_source, args=[wind_power], time_str="19:20:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time_str="19:40:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=power_domain.add_entity, args=[node4], time_str="20:30:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=power_domain.remove_entity, args=[node4], time_str="21:15:00", repeat=False))
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
@@ -99,6 +99,7 @@ def main():
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
 
     env.process(power_domain.run(env))  # registering power metering process 2
+    env.process(event_domain.run())  # registering power metering process 2
 
     # Run simulation
     env.process(application_pm.run(env))  # registering power metering process 2
@@ -109,19 +110,18 @@ def main():
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
-    #print(power_domain.captured_data)
-
     file_handler = FileHandler()
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=all_entities)
-    fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events, power_sources=[solar_power, grid1, wind_power])
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Available", events=events, power_sources=[solar_power, grid1, wind_power])
-    fig4 = file_handler.subplot_time_series_power_sources(power_domain, "Carbon Released", events=events, power_sources=[solar_power, grid1, wind_power])
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=all_entities)
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, grid1, wind_power])
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[solar_power, grid1, wind_power])
+    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released", power_sources=[solar_power, grid1, wind_power])
 
     figs = [fig1, fig2, fig3, fig4]
-    main_fig = file_handler.aggregate_subplots(figs)
+    main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

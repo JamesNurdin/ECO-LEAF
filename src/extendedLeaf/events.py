@@ -25,11 +25,16 @@ class PowerDomainEvent:
 
 
 class EventDomain:
-    def __init__(self, env, update_interval=1, start_time_str="00:00:00"):
+    def __init__(self, env=None, update_interval=1, start_time_str="00:00:00"):
+        if env is None:
+            raise ValueError(f"Error: No environment was provided.")
         self.env = env
+        if update_interval < 1:
+            raise ValueError(f"Error: invalid update interval provided.")
         self.update_interval = update_interval
         self.events = []
         self.event_history = []
+        validate_str_time(start_time_str)
         self.start_time_index = PowerDomain.get_current_time(start_time_str)
 
     def add_event(self, power_domain_event):
@@ -37,8 +42,8 @@ class EventDomain:
 
     def run(self):
         while True:
-            yield self.env.timeout(self.update_interval)
             self.run_events()
+            yield self.env.timeout(self.update_interval)
 
     def run_events(self):
         current_time = self.env.now + self.start_time_index

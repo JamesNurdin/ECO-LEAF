@@ -2,7 +2,7 @@ import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.events import EventDomain, PowerDomainEvent
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
@@ -42,9 +42,9 @@ def main():
         DEBUG	149: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
         DEBUG	149: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	149: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        INFO	Total application power usage: 2825.244580000006 Ws
-        INFO	Total infrastructure power usage: 6302.000000000013 Ws
-        INFO	Total carbon emitted: 6.2369292893333075 gCo2
+        INFO	Total application power usage: 2774.9438600000058 Ws
+        INFO	Total infrastructure power usage: 6284.500000000012 Ws
+        INFO	Total carbon emitted: 6.265203955999975 gCo2
 
     """
     env = simpy.Environment()  # creating SimPy simulation environment
@@ -119,11 +119,12 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=all_entities,events=event_domain.event_history)
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", power_sources=[solar_power, battery_power])
-    fig4 = file_handler.subplot_time_series_power_meter(power_domain, power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used", entities=all_entities)
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, battery_power])
+    fig4 = figure_plotter.subplot_time_series_power_meter(power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
     figs = [fig2, fig3, fig4]
-    main_fig = file_handler.aggregate_subplots(figs)
+    main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

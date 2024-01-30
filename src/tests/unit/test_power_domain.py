@@ -3,8 +3,9 @@ import os
 import unittest
 from unittest.mock import MagicMock
 
+from src.extendedLeaf.events import PowerDomainEvent, EventDomain
 from src.extendedLeaf.file_handler import FileHandler
-from src.extendedLeaf.power import PowerDomain, SolarPower, PowerDomainEvent
+from src.extendedLeaf.power import PowerDomain, SolarPower
 
 
 class TestPowerDomain(unittest.TestCase):
@@ -28,8 +29,7 @@ class TestPowerDomain(unittest.TestCase):
 
         # Provided valid entry data
         self.power_domain = PowerDomain(self.mock_env, "Test power domain", self.mock_powered_infrastructure_distributor,
-                                        "12:00:00", [self.mock_entity], 15,
-                                        [("19:40:00", False, (self.mock_power_domain.remove_entity, [self.mock_entity]))])
+                                        "12:00:00", [self.mock_entity], 15)
 
     def test_constructor(self):
         """ Test that the power domain class can be correctly created. """
@@ -37,19 +37,17 @@ class TestPowerDomain(unittest.TestCase):
         string_start_time = "12:00:00"
         powered_infrastructure = [self.mock_entity]
         update_interval = 15
-        events = [
-            PowerDomainEvent(event=self.mock_power_domain.remove_entity, args=[self.mock_entity], time="19:40:00", repeat=False)]
 
         # Provided valid entry data
         power_domain = PowerDomain(self.mock_env, name, self.mock_powered_infrastructure_distributor, string_start_time,
-                                   powered_infrastructure, update_interval, events)
+                                   powered_infrastructure, update_interval)
+
         self.assertEqual(power_domain.env, self.mock_env)
         self.assertEqual(power_domain.name, name)
         self.assertEqual(power_domain.powered_infrastructure_distributor, self.mock_powered_infrastructure_distributor)
         self.assertEqual(power_domain.start_time_string, string_start_time)
         self.assertEqual(power_domain.powered_infrastructure, powered_infrastructure)
         self.assertEqual(power_domain.update_interval, update_interval)
-        self.assertEqual(power_domain.power_domain_events, events)
 
         # Assert attributes constructed automatically
         self.assertEqual(power_domain.carbon_emitted, [])
@@ -59,16 +57,16 @@ class TestPowerDomain(unittest.TestCase):
         with self.assertRaises(ValueError):
             # invalid env
             PowerDomain(None, name, self.mock_powered_infrastructure_distributor, string_start_time,
-                        powered_infrastructure, update_interval, events)
+                        powered_infrastructure, update_interval)
             # invalid name
             PowerDomain(self.mock_env, None, self.mock_powered_infrastructure_distributor, string_start_time,
-                        powered_infrastructure, update_interval, events)
+                        powered_infrastructure, update_interval)
             # invalid start time
             PowerDomain(self.mock_env, None, self.mock_powered_infrastructure_distributor, "Invalid start time",
-                        powered_infrastructure, update_interval, events)
+                        powered_infrastructure, update_interval)
             # invalid update interval
             PowerDomain(self.mock_env, None, self.mock_powered_infrastructure_distributor, "Invalid start time",
-                        powered_infrastructure, -15, events)
+                        powered_infrastructure, -15)
 
     def test_run(self):
         """ PowerDomain.run() is the main driver for the carbon capture process, side effects will be explored in
@@ -289,6 +287,70 @@ class TestPowerDomain(unittest.TestCase):
 
         self.assertEqual(expected_data, data_written)
         self.assertEqual(expected_filepath, filepath_written_to)
+
+
+class TestEventDomain(unittest.TestCase):
+    """ Given a power domain.
+
+    NOTE: The run method will be fully tested in the integration testing as the side effects are the main
+          desire of the method being run. """
+
+    def setUp(self):
+        # Create a mock environment for testing
+        self.mock_env = MagicMock()
+        self.start_time_string = "11:00:00"
+        self.update_interval = 1
+        self.mock_powered_infrastructure_distributor = MagicMock()
+        self.mock_powered_infrastructure_distributor.static_powered_infrastructure = False
+        # Create a mock power domain for testing
+        self.mock_power_domain = MagicMock()
+        self.mock_power_domain.start_time_string = "00:00:00"
+        # Create a mock associated entity for testing
+        self.mock_entity = MagicMock()
+        self.mock_entity.power_model = MagicMock()
+
+        # Provided valid entry data
+        self.power_domain = PowerDomain(self.mock_env, "Test power domain",
+                                        self.mock_powered_infrastructure_distributor,
+                                        "12:00:00", [self.mock_entity], 15)
+
+    def test_constructor(self):
+        """ Test that the power domain class can be correctly created. """
+        string_start_time = "11:00:00"
+        update_interval = 1
+
+
+        # Provided valid entry data
+        event_domain = EventDomain(self.mock_env, update_interval=update_interval, start_time_str="11:00:00")
+        self.assertEqual(event_domain.env, self.mock_env)
+        self.assertEqual(event_domain.update_interval, update_interval)
+        self.assertEqual(event_domain.start_time_index, PowerDomain.get_current_time(self.start_time_string))
+
+        # Provide invalid data
+        with self.assertRaises(ValueError):
+            # invalid env
+            EventDomain(None, update_interval=update_interval, start_time_str=string_start_time)
+            # invalid start time
+            EventDomain(self.mock_env, update_interval=update_interval, start_time_str="Invalid start time")
+            # invalid update interval
+            EventDomain(self.mock_env, update_interval=-1, start_time_str=string_start_time)
+
+    def test_run(self):
+        """ PowerDomain.run() is the main driver for the carbon capture process, side effects will be explored in
+            integration testing."""
+        pass
+
+    def test_add_event(self):
+        """ Test that the power sources can be correctly added to the power domain. """
+        event = PowerDomainEvent(event=self.mock_power_domain.remove_entity, args=[self.mock_entity],
+                                 time_str="19:40:00", repeat=False)
+        event_domain = EventDomain(self.mock_env, update_interval=self.update_interval, start_time_str=self.start_time_string)
+
+        event_domain.power_sources = []
+
+        event_domain.add_event(event)
+
+        self.assertEqual(event_domain.events, [event])
 
 
 if __name__ == '__main__':

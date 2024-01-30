@@ -632,9 +632,8 @@ class PowerDomain:
         if not self.powered_infrastructure_distributor.static_powered_infrastructure and not self.powered_infrastructure:
             raise AttributeError(f"Error: No powered infrastructure was provided to the power domain, despite"
                                  f" being configured dynamically.")
-
+        yield env.timeout(self.update_interval)
         while True:
-            yield env.timeout(self.update_interval)
             """Execute any pre-planned commands at the current moment of time"""
             for index, (time, ran, (event, args)) in enumerate(self.power_source_events):
                 if (self.env.now + self.start_time_index) >= self.get_current_time(time):
@@ -673,6 +672,7 @@ class PowerDomain:
             self.update_carbon_intensity(current_carbon_intensities)
             self.update_recorded_data(self.get_current_time_string(), current_carbon_intensities)
             self.update_logs()
+            yield env.timeout(self.update_interval)
 
     def get_current_time_string(self):
         return self.convert_to_time_string((self.env.now + self.start_time_index) % 1440)

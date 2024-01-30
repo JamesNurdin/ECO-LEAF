@@ -44,22 +44,35 @@ class FogNode(Node):
 
 
 class Drone(Node):
-    def __init__(self, plot, location, env, power_domain, drone_path):
+    def __init__(self, plot, location, env, power_domain, infrastructure, drone_path):
         super().__init__(name=f"{plot.name}_Drone",
                          cu=DRONE_CU,
                          power_model=PowerModelNode(max_power=DRONE_MAX_POWER, static_power=DRONE_STATIC_POWER),
                          location=location)
-
-        self.application = self._create_drone_application()
+        cloud = infrastructure.nodes(type_filter=Cloud)[0]
+        self.application = self._create_drone_application(cloud)
+        print(self.application)
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
         self.battery_power = BatteryPower(env, power_domain=power_domain, priority=1,
                                           total_power_available=TAXI_BATTERY_SIZE)
         power_domain.add_power_source(self.battery_power)
         self.locations_iterator = drone_path
 
-    # TODO create application
-    def _create_drone_application(self) -> Application:
-        return None
+    # TODO properly create application
+    def _create_drone_application(self, cloud) -> Application:
+        # Initialise three tasks
+        source_task = SourceTask(cu=9, bound_node=self)
+        processing_task = ProcessingTask(cu=5)
+        sink_task = SinkTask(cu=10, bound_node=cloud)
+        print(source_task.node)
+
+        # Build Application
+        application = Application()
+        application.add_task(source_task)
+        application.add_task(processing_task, incoming_data_flows=[(source_task, 100)])
+        application.add_task(sink_task, incoming_data_flows=[(processing_task, 500)])
+
+        return application
 
 
 

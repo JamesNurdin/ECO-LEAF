@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+
+from src.extendedLeaf.events import EventDomain
 from src.extendedLeaf.power import PowerDomain, PowerMeter
 import tkinter as tk
 ExperimentResults = Dict[str, Tuple[pd.DataFrame, pd.DataFrame]]
@@ -24,10 +26,9 @@ def base_figure(fig: go.Figure = None) -> go.Figure:
     return fig
 
 
-def timeline_figure(fig: go.Figure = None, y_axes_title: str = "Power Usage (Watt)") -> go.Figure:
+def timeline_figure(fig: go.Figure = None) -> go.Figure:
     fig = base_figure(fig)
     fig.update_yaxes(
-        title=dict(text=y_axes_title, standoff=0),
         rangemode="nonnegative",
     )
     fig.update_layout(
@@ -57,26 +58,6 @@ class FileHandler:
     def __init__(self):
         self.creation_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.results_dir = None
-
-    def get_unique_events(self, events) -> dict:
-        sorted_events = {}
-        for event in events:
-            event_name = f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})"
-            if event_name in sorted_events.keys():
-                sorted_events[event_name].append(event)
-            else:
-                sorted_events[event_name] = [event]
-        return sorted_events
-
-    def get_unique_event_times(self, events) -> dict:
-        event_times = {}
-        for event in events:
-            event_time = event.time_int
-            if event_time in event_times.keys():
-                event_times[event_time].append(event)
-            else:
-                event_times[event_time] = [event]
-        return event_times
 
     def create_results_dir(self) -> str:
         """ Creates a directory for the results. """
@@ -124,7 +105,7 @@ class FileHandler:
         pattern = re.compile(r'^[a-zA-Z0-9_-]+\.json$')
         return bool(pattern.match(filename))
 
-    def write_figure_to_file(self, fig, number_of_figs):
+    def write_figure_to_file(self, figure, number_of_figs):
         # Set the size of the PDF dynamically based on the number of plots
         pdf_height = 300 + (100 * number_of_figs)  # Adjust the multiplier as needed
         root = tk.Tk()
@@ -133,30 +114,78 @@ class FileHandler:
         pdf_width = screen_width
 
         # Create and save the figure as a PDF
-        fig.update_layout(height=pdf_height, width=pdf_width)  # Adjust the height and width as needed
+        figure.update_layout(height=pdf_height, width=pdf_width)  # Adjust the height and width as needed
         if self.results_dir is None:
             self.results_dir = self.create_results_dir()
         if os.path.exists(self.results_dir):
-            fig.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
+            figure.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
+
+
+class FigurePlotter:
+    def __init__(self, power_domain: PowerDomain = None, event_domain: EventDomain = None, show_event_lines=False,
+                 number_of_divisions: int = 6):
+        if power_domain is None:
+            raise ValueError(f"Error: No power domain was provided.")
+        else:
+            self.power_domain = power_domain
+        if event_domain is None:
+            self.event_domain = None
+            if show_event_lines is True:
+                raise ValueError(f"Error: No event domain was provided.")
+            else:
+                self.show_event_lines = False
+        else:
+            self.event_domain = event_domain
+            self.events = self.event_domain.event_history
+            self.show_event_lines = show_event_lines
+            if self.show_event_lines:
+                if event_domain.event_history:
+                    self.unique_event_times = self.get_unique_event_times(self.events)
+                    self.unique_events = self.get_unique_events(self.events)
+                else:
+                    raise AttributeError(f"Error: No event history was provided in event domain.")
+        self.number_of_divisions = number_of_divisions
+
+    def get_unique_events(self, events) -> dict:
+        sorted_events = {}
+        for event in events:
+            event_name = f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})"
+            if event_name in sorted_events.keys():
+                sorted_events[event_name].append(event)
+            else:
+                sorted_events[event_name] = [event]
+        return sorted_events
+
+    def get_unique_event_times(self, events) -> dict:
+        event_times = {}
+        for event in events:
+            event_time = event.time_int
+            if event_time in event_times.keys():
+                event_times[event_time].append(event)
+            else:
+                event_times[event_time] = [event]
+        return event_times
 
     def aggregate_subplots(self, plots) -> go.Figure:
         # Create a subplot with one column and as many rows as the number of plots
-        main_fig = make_subplots(rows=len(plots), cols=1, subplot_titles=[fig.layout.title.text for fig in plots])
-
+        main_fig = make_subplots(rows=len(plots),
+                                 cols=1,
+                                 subplot_titles=[fig.layout.title.text for fig in plots],
+                                 shared_xaxes=True)
         # Iterate through the plots and add traces to the main subplot
         for plot_index, (plot, layout) in enumerate(zip(plots, [fig.layout for fig in plots])):
             figure_data = plot.to_dict()['data']
             # Add traces to the main subplot
             for trace in figure_data:
-                main_fig.add_trace(trace, row=plot_index + 1, col=1,)
+                main_fig.add_trace(trace, row=plot_index + 1, col=1)
 
-            # Update xaxis properties
+            # Update x-axis properties
             main_fig.update_xaxes(title_text=layout.xaxis.title.text, row=plot_index+1, col=1)
             main_fig.update_yaxes(title_text=layout.yaxis.title.text, row=plot_index+1, col=1)
             xaxis_ticks = layout.xaxis.tickvals
             xaxis_ticktext = layout.xaxis.ticktext
 
-            # Apply xaxis tick information to the main subplot
+            # Apply x-axis tick information to the main subplot
             main_fig.update_xaxes(tickvals=xaxis_ticks, ticktext=xaxis_ticktext, row=plot_index+1, col=1)
             for shape in layout.shapes:
                 main_fig.add_shape(shape, row=plot_index+1, col=1)
@@ -168,55 +197,119 @@ class FileHandler:
 
         return main_fig
 
-    def add_events(self, fig, offset, events) -> go.Figure:
-        if events is not None:
-            max_y = 0
-            for data in fig.data:
-                if max(data.y) > max_y:
-                    max_y = max(data.y)
-            unique_events = self.get_unique_events(events)
+    def add_events_updated(self, fig, offset) -> go.Figure:
+        # iterate through all the unique event types
+        for name, unique_events in self.unique_events.items():
+            x_values = []
+            middle_value = 0
+            y_values = []
+            scaling_factor = 0.3
+            # go through each time and check if they only occur at that point (if not offset)
+            for event in unique_events:
+                event_time = event.time_int
+                x_values.append(event_time - offset)
+                if len(self.unique_event_times[event_time]) == 1:
+                    y_values.append(middle_value)
+                else:
+                    total_events = len(self.unique_event_times[event_time])
+                    index = self.unique_event_times[event_time].index(event)
+                    # Adjust the normalized index to center the events and reduce distance
+                    normalized_index = (index + 0.5) / total_events * scaling_factor
+                    # Center around the fixed middle value
+                    y_values.append(middle_value - (normalized_index - 0.5* scaling_factor))
 
-            for name, unique_events in unique_events.items():
-                x_values = [event_time.time_int - offset for event_time in unique_events]
-                print(x_values)
-                middle_value = max_y /2
-                y_values = [middle_value for i in range(len(unique_events))]
-                fig.add_trace(go.Scatter(
-                    x=x_values,
-                    y=y_values,
-                    mode='markers',
-                    marker=dict(color="blue",size=5),
-                    name=name,
-                ))
-
-            unique_event_times = self.get_unique_event_times(events)
-            for time, events in unique_event_times.items():
-                time_x_value = events[0].time_int
-                fig.add_vrect(
-                    x0=time_x_value - offset,
-                    x1=time_x_value - offset,
-                    fillcolor="red", opacity=0.5,
-                    layer="above", line_width=1,
+            fig.add_trace(go.Scatter(
+                x=x_values,
+                y=y_values,
+                mode='markers',
+                marker=dict(size=5),
+                name=name)
                 )
+
         return fig
 
-    def subplot_time_series_entities(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None,
-                                     entities=None) -> go.Figure:
-        if entities is None:
-            entities = power_domain.powered_infrastructure
+    def add_events(self, fig, offset) -> go.Figure:
+        max_y = 0
+        for data in fig.data:
+            if max(data.y) > max_y:
+                max_y = max(data.y)
 
-        global n
+        for name, unique_events in self.unique_events.items():
+            x_values = [event_time.time_int - offset for event_time in unique_events]
+            middle_value = max_y / 2
+            y_values = [middle_value for i in range(len(unique_events))]
+            fig.add_trace(go.Scatter(
+                x=x_values,
+                y=y_values,
+                mode='markers',
+                marker=dict(size=5),
+                name=name)
+            )
+
+        return fig
+
+    def add_event_lines(self, fig, offset):
+        if self.show_event_lines:
+            if self.show_event_lines:
+                for time, events in self.unique_event_times.items():
+                    time_x_value = events[0].time_int
+                    fig.add_vrect(
+                        x0=time_x_value - offset,
+                        x1=time_x_value - offset,
+                        xref='x',
+                        fillcolor="red", opacity=0.3,
+                        layer="above", line_width=1,
+                        row="all"
+                    )
+        return fig
+
+    def subplot_events(self, events) -> go.Figure:
+
         fig = subplot_figure()
-
-        keys = power_domain.captured_data.keys()
-        start_time = power_domain.get_current_time(list(keys)[0])
-        end_time = power_domain.get_current_time(list(keys)[-1])
+        keys = self.power_domain.captured_data.keys()
+        start_time = int(list(keys)[0])
+        end_time = int(list(keys)[-1])
         if end_time < start_time:
             end_time += 1440
-        offset = start_time -1
-        print(offset)
-        data = self.retrieve_select_data_entities(power_domain.captured_data, entities)
-        time = list(range(end_time-start_time+1))
+        offset = start_time
+
+        fig = self.add_events_updated(fig, offset)
+
+        fig = self.add_event_lines(fig, offset)
+
+        # Update layout and show the figure
+        fig.update_layout(
+            showlegend=True,
+            xaxis=dict(
+                title=dict(text="Time", standoff=0),
+                ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in
+                          np.linspace((start_time), end_time, self.number_of_divisions)],
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
+        )
+
+        # Update layout to add a title
+        fig.update_layout(
+            title_text=f"Timeseries of events.",
+            title_x=0.5,  # Adjust the horizontal position of the title
+            title_font=dict(size=16),  # Adjust the font size of the title
+        )
+        return fig
+
+    def subplot_time_series_entities(self, captured_attribute="Carbon Released",
+                                     entities=None) -> go.Figure:
+        if entities is None:
+            raise ValueError(f"Error: No entities provided to plot.")
+
+        fig = subplot_figure()
+
+        keys = self.power_domain.captured_data.keys()
+        start_time = int(list(keys)[0])
+        end_time = int(list(keys)[-1])
+        if end_time < start_time:
+            end_time += 1440
+        offset = start_time
+        data = self.retrieve_select_data_entities(self.power_domain.captured_data, entities)
+        time = list(range(end_time-start_time))
 
         # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
@@ -225,20 +318,19 @@ class FileHandler:
 
             # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
-            n = 6
+
+        fig = self.add_event_lines(fig, offset)
+
         # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
-                ticktext=[power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, n)]),
+                ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
             yaxis=dict(
                 title=dict(text=captured_attribute, standoff=0))
         )
-
-        # add event lines
-        fig = self.add_events(fig, offset, events)
 
         # Update layout to add a title
         fig.update_layout(
@@ -248,45 +340,40 @@ class FileHandler:
         )
         return fig
 
-
-    def subplot_time_series_power_sources(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None, power_sources=None) -> go.Figure:
+    def subplot_time_series_power_sources(self, captured_attribute="Carbon Released", power_sources=None) -> go.Figure:
         if power_sources is None:
-            power_sources = power_domain.power_sources
+            raise ValueError(f"Error: No power sources were provided.")
 
-        global n
         fig = subplot_figure()
 
-        keys = power_domain.captured_data.keys()
-        start_time = power_domain.get_current_time(list(keys)[0])
-        end_time = power_domain.get_current_time(list(keys)[-1])
+        keys = self.power_domain.captured_data.keys()
+        start_time = int(list(keys)[0])
+        end_time = int(list(keys)[-1])
         if end_time < start_time:
             end_time += 1440
 
         offset = start_time
-        data = self.retrieve_select_data_power_sources(power_domain.captured_data, power_sources)
-        time = list(range(end_time-start_time+1))
+        data = self.retrieve_select_data_power_sources(self.power_domain.captured_data, power_sources)
+        time = list(range(end_time-start_time))
 
-
-        # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
             x = time
             y = data[node][captured_attribute]
             # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
-            n = 6
+
+        fig = self.add_event_lines(fig, offset)
 
         # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
-                ticktext=[power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, n)]),
+                ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
             yaxis=dict(
                 title=dict(text=captured_attribute, standoff=0))
         )
-
-        fig = self.add_events(fig, offset, events)
 
         # Update layout to add a title
         fig.update_layout(
@@ -296,19 +383,18 @@ class FileHandler:
         )
         return fig
 
-    def subplot_time_series_power_meter(self, power_domain: PowerDomain, power_meters: [PowerMeter], events=None) -> go.Figure:
+    def subplot_time_series_power_meter(self, power_meters: [PowerMeter]) -> go.Figure:
         if power_meters is None:
-            raise ValueError(f"Error, no power meter provided")
+            raise ValueError(f"Error, no power meter was provided")
 
         fig = subplot_figure()
 
-        keys = power_domain.captured_data.keys()
-        start_time = power_domain.get_current_time(list(keys)[0])
-        end_time = power_domain.get_current_time(list(keys)[-1])
+        keys = self.power_domain.captured_data.keys()
+        start_time = int(list(keys)[0])
+        end_time = int(list(keys)[-1])
         if end_time < start_time:
             end_time += 1440
 
-        global n
         offset = start_time
 
         for power_meter in power_meters:
@@ -316,20 +402,19 @@ class FileHandler:
             x = list(range(end_time-start_time))
             # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{power_meter.name}", line=dict(width=1)))
-            n = 6
+
+        fig = self.add_event_lines(fig, offset)
 
         # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
-                ticktext=[power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, n)]),
+                ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
             yaxis=dict(
                 title=dict(text="Power Used", standoff=0))
         )
-
-        fig = self.add_events(fig, offset, events)
 
         # Update layout to add a title
         fig.update_layout(

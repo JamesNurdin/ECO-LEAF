@@ -1,7 +1,8 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, \
@@ -35,7 +36,7 @@ def main():
         DEBUG	49: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
         INFO	Total application power usage: 1536.5209999999997 Ws
         INFO	Total infrastructure power usage: 8036.499999999993 Ws
-        INFO	Total carbon emitted: 28.081839558000002 gCo2
+        INFO	Total carbon emitted: 28.32829286866667 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -63,9 +64,9 @@ def main():
     sol = SolarPower(env, power_domain=power_domain, priority=1)
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(sol)
-    events = [
-        ("10:40:00", False, (battery_power.recharge_battery, [sol]))]
-    power_domain.power_source_events = events
+    event_domain = EventDomain(env, update_interval=1, start_time_str="10:00:00")
+    event_domain.add_event(
+        PowerDomainEvent(event=battery_power.recharge_battery, args=[sol], time_str="10:40:00", repeat=False))
 
     # Initialise three tasks
     source_task = SourceTask(cu=0.4, bound_node=node1)
@@ -91,6 +92,7 @@ def main():
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
 
     env.process(power_domain.run(env))  # registering power metering process 2
+    env.process(event_domain.run())  # registering power metering process 2
 
     # Run simulation
     env.process(application_pm.run(env))  # registering power metering process 2
@@ -102,11 +104,11 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
     file_handler = FileHandler()
-    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", events=events, entities=power_domain.powered_infrastructure)
-    fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events,
-                                                   power_sources=[sol,battery_power])
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=power_domain.powered_infrastructure)
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[sol, battery_power])
     figs = [fig1, fig2]
-    main_fig = file_handler.aggregate_subplots(figs)
+    main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

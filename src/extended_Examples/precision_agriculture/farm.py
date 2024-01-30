@@ -41,7 +41,7 @@ class Plot:
                                         update_interval=1)
         self.power_sources = [self._choose_power_source(power_source_type) for power_source_type in power_sources_types]
 
-        self.drone = Drone(self, self.fog_location, self.env, self.power_domain, self.get_drone_path(self.fog_location))
+        self.drone = Drone(self, self.fog_location, self.env, self.power_domain, infrastructure, self.get_drone_path(self.fog_location))
         self.all_entities = self.sensors
 
         for sensor in self.sensors:

@@ -3,11 +3,12 @@ import logging
 import numpy as np
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, PowerSource, PoweredInfrastructureDistributor, PowerDomainEvent
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerSource
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -15,19 +16,37 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 
 def main():
     """
-
-        """
-    env = simpy.Environment()
+    Log Output:
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=5.50W)
+        DEBUG	0: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=5.50W)
+        DEBUG	1: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        ...
+        DEBUG	1440: application_meter: PowerMeasurement(dynamic=0.32W, static=5.50W)
+        DEBUG	1440: infrastructure_meter: PowerMeasurement(dynamic=0.30W, static=5.50W)
+        DEBUG	1440: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1440: Processing Task: PowerMeasurement(dynamic=0.25W, static=0.50W)
+        DEBUG	1440: Sink Task: PowerMeasurement(dynamic=0.05W, static=5.00W)
+        INFO	Total application power usage: 4022.0069600000547 Ws
+        INFO	Total infrastructure power usage: 8133.19286000021 Ws
+        INFO	Total carbon emitted: 21.418545013333418 gCo2
+    """
+    env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
+    # Source task node
+    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.5e-3, static_power=0.1e-3))
+    # Processing task node
+    microprocessor = Node("microprocessor", cu=40,power_model=PowerModelNode(max_power=2.5, static_power=0.5))
+    # Sink task node
+    server = Node("server", power_model=PowerModelNode(power_per_cu=5e-3, static_power=5))
 
-    # Initializing infrastructure and workload
-    # Three nodes 1,2,3
-    sensor = Node("node1", cu=10, power_model=PowerModelNode(max_power=0.5e-3, static_power=0.1e-3))  # source
-    microprocessor = Node("node2", cu=40,
-                          power_model=PowerModelNode(max_power=2.5, static_power=0.5))  # processing task
-    server = Node("node3", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))  # sink
-
-    # #two Wi-Fi links between 1 -> 2 and 2 -> 3
+    # #two Wi-Fi links between Source -> Microprocessor and Microprocessor -> Server
     wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=10e6,
                                   power_model=PowerModelLink(200e-6))
     wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=5e6,
@@ -36,14 +55,13 @@ def main():
     infrastructure.add_link(wired_link_from_source)
     entities = infrastructure.nodes() + infrastructure.links()
 
-    power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,
-                               start_time_str="19:00:00", update_interval=1, powered_infrastructure_distributor=
-                               PoweredInfrastructureDistributor(custom_distribution_method))
+    power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,powered_infrastructure_distributor=PoweredInfrastructureDistributor(custom_distribution_method),
+                               start_time_str="11:00:00", update_interval=1)
     grid = GridPower(env, power_domain=power_domain, priority=5)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
-    wind_power = WindPower(env, power_domain=power_domain, priority=1)
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=1)
     power_domain.add_power_source(solar_power)
-    power_domain.add_power_source(wind_power)
+    power_domain.add_power_source(battery_power)
     power_domain.add_power_source(grid)
 
     # Initialise three tasks
@@ -59,17 +77,36 @@ def main():
 
     # Place over Infrastructure
     orchestrator = SimpleOrchestrator(infrastructure, power_domain)
-    orchestrator.place(application)
+
+    event_domain = EventDomain(env, update_interval=1, start_time_str="11:00:00")
+    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="11:00:00", repeat=True,
+                         repeat_counter=1440))
+    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application], time_str="12:00:00", repeat=True,
+                         repeat_counter=60))
+    event_domain.add_event(PowerDomainEvent(event=application.deallocate, args=[], time_str="12:30:00", repeat=True,
+                         repeat_counter=60))
 
     # Early power meters when exploring isolated power measurements
     application_pm = PowerMeter(application, name="application_meter")
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
 
+    source_task_pm = PowerMeter(source_task, name="Source Task")
+    processing_task_pm = PowerMeter(processing_task, name="Processing Task")
+    sink_task_pm = PowerMeter(sink_task, name="Sink Task")
+
     # Run simulation
     env.process(power_domain.run(env))
+    env.process(event_domain.run())
+
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
-    env.run(until=120)  # run simulation for 10 seconds
+
+    env.process(source_task_pm.run(env))
+    env.process(processing_task_pm.run(env))
+    env.process(sink_task_pm.run(env))
+
+    env.run(until=1441)
+    print(len(power_domain.captured_data))
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
@@ -79,16 +116,13 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig1 = file_handler.subplot_time_series_entities(power_domain, "Carbon Released", entities=entities)
-    fig2 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used",
-                                                          power_sources=[solar_power, grid, wind_power])
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Available",
-                                                          power_sources=[solar_power, grid, wind_power])
-    fig4 = file_handler.subplot_time_series_power_sources(power_domain, "Carbon Released",
-                                                          power_sources=[solar_power, grid, wind_power])
-
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    fig1 = figure_plotter.subplot_events(event_domain.event_history)
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used", entities=entities)
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, battery_power])
+    fig4 = figure_plotter.subplot_time_series_power_meter(power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
     figs = [fig1, fig2, fig3, fig4]
-    main_fig = file_handler.aggregate_subplots(figs)
+    main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 
@@ -130,7 +164,6 @@ def custom_distribution_method(current_power_source: PowerSource, power_domain):
 
             if current_entity_power_requirement < current_power_source.get_current_power():
                 if isinstance(entity.power_model, PowerModelNode) and entity.power_model.max_power is None:
-                    print(current_power_source.remaining_power)
                     if current_power_source.remaining_power == np.inf:
                         entity.power_model.power_source.remove_entity(entity)
                         current_power_source.add_entity(entity)
@@ -144,9 +177,11 @@ def custom_distribution_method(current_power_source: PowerSource, power_domain):
                 current_power_source.add_entity(entity)
                 current_power_source.consume_power(current_entity_power_requirement)
 
+
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
-        return self.infrastructure.node("node2")
+        return self.infrastructure.node("microprocessor")
+
 
 if __name__ == '__main__':
     main()

@@ -123,7 +123,7 @@ class PowerModelNode(PowerModel):
         if self.max_power is not None:
             dynamic_power = (self.max_power - self.static_power) * self.node.utilization()
         elif self.power_per_cu is not None:
-            dynamic_power = self.power_per_cu * self.node.used_cu * update_interval/60
+            dynamic_power = self.power_per_cu * self.node.used_cu
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
         return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power * update_interval/60)
@@ -577,8 +577,7 @@ class PowerDomain:
     """
     def __init__(self, env: Environment = None, name: str = None,
                  powered_infrastructure_distributor: PoweredInfrastructureDistributor = None,
-                 start_time_str: str = "00:00:00", powered_infrastructure=None, update_interval: int = 1,
-                 power_source_events = None):
+                 start_time_str: str = "00:00:00", powered_infrastructure=None, update_interval: int = 1):
         if env is None:
             raise ValueError(f"Error: Power Domain was not supplied an environment. ")
         else:
@@ -628,7 +627,6 @@ class PowerDomain:
                                  f" being configured dynamically.")
 
         while True:
-            yield env.timeout(self.update_interval)
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
                 """Update the power available to the power source"""
@@ -661,8 +659,9 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
-            self.update_recorded_data(self.get_current_time_string(), current_carbon_intensities)
+            self.update_recorded_data(str(self.env.now + self.start_time_index), current_carbon_intensities)
             self.update_logs()
+            yield env.timeout(self.update_interval)
 
     def get_current_time_string(self):
         return self.convert_to_time_string((self.env.now + self.start_time_index) % 1440)
@@ -691,7 +690,7 @@ class PowerDomain:
         return current_power_source_dictionary
 
     def update_logs(self):
-        time = self.get_current_time_string()
+        time = str(self.env.now + self.start_time_index)
         for power_source in self.logging_data:
             for node in self.logging_data[power_source]:
                 self.insert_power_reading(time, power_source, node, self.logging_data[power_source][node])
@@ -932,7 +931,7 @@ class BatteryPower(PowerSource):
         pass
 
     def get_power_at_time(self, time_int) -> float:
-        return self.power_log[time_int+1]
+        return self.power_log[time_int]
 
     def recharge_battery(self, power_source):
         power_to_recharge = self.total_power - self.remaining_power

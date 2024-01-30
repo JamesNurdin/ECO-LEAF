@@ -28,7 +28,7 @@ def main():
         DEBUG	8: PowerMeter1: PowerMeasurement(dynamic=0.00W, static=10.00W)
         DEBUG	9: PowerMeter1: PowerMeasurement(dynamic=0.00W, static=10.00W)
         INFO	Total power usage: 200.0 Ws
-        INFO	Total carbon emitted: 0.14566666666666664 gCo2
+        INFO	Total carbon emitted: 0.1533333333333333 gCo2
     """
     # Initializing infrastructure and workload
     node = Node("node1", cu=100, power_model=PowerModelNode(max_power=30, static_power=10))
@@ -40,7 +40,8 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=[node], start_time_str="19:00:00",
                                update_interval=1)  # Creating Power domain to run at 7pm
-    solar_power = SolarPower(env, name="Solar", power_domain=power_domain, priority=0)  # Solar power with the highest priority
+    solar_power = SolarPower(env, name="Solar", power_domain=power_domain,
+                             priority=0)  # Solar power with the highest priority
     power_domain.add_power_source(solar_power)  # Attaching solar power to power domain
 
     env.process(placement(env, node, task))  # registering workload placement process

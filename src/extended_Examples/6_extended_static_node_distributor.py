@@ -1,7 +1,7 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, \
@@ -31,9 +31,9 @@ def main():
         DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	120: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        INFO	Total application power usage: 1843.8508199999972 Ws
+        INFO	Total application power usage: 1843.8000000000006 Ws
         INFO	Total infrastructure power usage: 1843.8000000000006 Ws
-        INFO	Total carbon emitted: 1.3900203333333325 gCo2
+        INFO	Total carbon emitted: 1.4135799999999992 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -85,7 +85,9 @@ def main():
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
     file_handler = FileHandler()
-    file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=solar_power.powered_infrastructure)
+    figure_plotter = FigurePlotter(power_domain, show_event_lines=False)
+
+    figure_plotter.subplot_time_series_entities("Power Used", entities=solar_power.powered_infrastructure)
 
 
 class SimpleOrchestrator(Orchestrator):

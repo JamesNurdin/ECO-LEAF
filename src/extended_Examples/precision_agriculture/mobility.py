@@ -26,7 +26,7 @@ class MobilityManager:
                 else:
                     self.move_drone(drone, plot, self.get_next_location(drone, plot))
                 if drone.power_model.location == plot.recharge_station.location:
-                    drone.application.dealocate()
+                    drone.application.deallocate()
 
             yield env.timeout(UPDATE_MOBILITY_INTERVAL)
 

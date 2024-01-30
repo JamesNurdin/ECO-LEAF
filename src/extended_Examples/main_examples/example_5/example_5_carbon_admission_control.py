@@ -4,19 +4,17 @@ import networkx as nx
 import simpy
 import random as rnd
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerDomainEvent
-from src.extended_Examples.main_examples.medium_2_example.settings import *
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor
+from src.extended_Examples.main_examples.example_5.settings import *
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 rnd.seed(100)
-
-""""""
 
 def create_sensors():
     sensors = []
@@ -76,7 +74,19 @@ def create_applications(sensors, server):
 
 def main():
     """
-
+    Log Output:
+    INFO	Placing Application(tasks=3):
+    INFO	- SourceTask(id=0, cu=0.0005104397994248056) on Node('Sensor0', cu=0/11.018082741964426).
+    INFO	- ProcessingTask(id=1, cu=3) on Node('Microprocessor1', cu=0/44.006079736990166).
+    INFO	- SinkTask(id=2, cu=12) on Node('Server', cu=0/inf).
+    INFO	- DataFlow(bit_rate=1000) on [Link('Sensor0' -> 'Microprocessor1', bandwidth=0/10421472.128457459)].
+    INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor1' -> 'Server', bandwidth=0/5394186.8144884575)].
+    ...
+    DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=6.60W, static=103.43W)
+    DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=6.60W, static=103.43W)
+    DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=6.60W, static=103.43W)
+    INFO	Total infrastructure power usage: 64078.38291228373 Ws
+    INFO	Total carbon emitted: 188.86352324645424 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -109,19 +119,17 @@ def main():
     for application in applications:
         orchestrator.place(application)
 
-    events = [
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="10:30:00", repeat=True, repeat_counter=500)]
-
-
+    event_domain = EventDomain(env, update_interval=1, start_time_str="10:00:00")
+    event_domain.add_event(
+        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="10:30:00", repeat=True, repeat_counter=500))
 
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
 
     # Run simulation
     env.process(power_domain.run(env))
+    env.process(event_domain.run())
 
     env.process(infrastructure_pm.run(env))
-
-
 
     env.run(until=600)
 
@@ -132,12 +140,14 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", events=events, entities=entities)
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events, power_sources=[solar_power, battery_power])
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Available", events=events, power_sources=[battery_power])
-    figs = [fig2, fig3]
-    main_fig = file_handler.aggregate_subplots(figs)
-    file_handler.write_figure_to_file(main_fig, len(figs))
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    event_figure = figure_plotter.subplot_events(event_domain.event_history)
+    fig1 = figure_plotter.subplot_time_series_entities("Power Used", entities=entities)
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, battery_power])
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[battery_power])
+    figs = [event_figure, fig1, fig2, fig3]
+    main_fig = figure_plotter.aggregate_subplots(figs)
+    file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
 
 

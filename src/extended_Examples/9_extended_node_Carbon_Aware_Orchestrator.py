@@ -4,11 +4,12 @@ import networkx as nx
 import numpy as np
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerDomainEvent
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -17,36 +18,23 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
 def main():
     """
     Log Output:
-        INFO	Placing Application(tasks=3):
-        INFO	- SourceTask(id=0, cu=0.4) on Node('node1', cu=0/10).
-        INFO	- ProcessingTask(id=1, cu=5) on Node('node2', cu=0/40).
-        INFO	- SinkTask(id=2, cu=12) on Node('node3', cu=0/20).
-        INFO	- DataFlow(bit_rate=1000) on [Link('node1' -> 'node2', bandwidth=0/30000000.0, latency=10)].
-        INFO	- DataFlow(bit_rate=300) on [Link('node2' -> 'node3', bandwidth=0/50000000.0, latency=12)].
-        DEBUG	0: application_meter: PowerMeasurement(dynamic=34.38W, static=20.00W)
-        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=34.38W, static=20.00W)
-        DEBUG	0: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	0: Processing Task: PowerMeasurement(dynamic=7.50W, static=10.00W)
-        DEBUG	0: Sink Task: PowerMeasurement(dynamic=25.80W, static=7.00W)
-        DEBUG	1: application_meter: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=26.88W, static=10.00W)
-        DEBUG	1: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	1: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	1: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=24.00W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=24.00W)
         ...
-        DEBUG	148: application_meter: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	148: infrastructure_meter: PowerMeasurement(dynamic=26.88W, static=10.00W)
-        DEBUG	148: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	148: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	148: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	149: application_meter: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	149: infrastructure_meter: PowerMeasurement(dynamic=26.88W, static=10.00W)
-        DEBUG	149: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	149: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	149: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        INFO	Total application power usage: 2825.244580000006 Ws
-        INFO	Total infrastructure power usage: 6302.000000000013 Ws
-        INFO	Total carbon emitted: 6.2369292893333075 gCo2
+        DEBUG	148: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	148: application_meter: PowerMeasurement(dynamic=13.77W, static=3.00W)
+        DEBUG	148: infrastructure_meter: PowerMeasurement(dynamic=34.89W, static=24.00W)
+        DEBUG	149: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	149: application_meter: PowerMeasurement(dynamic=13.77W, static=3.00W)
+        DEBUG	149: infrastructure_meter: PowerMeasurement(dynamic=34.89W, static=24.00W)
+        INFO	Total application power usage: 5334.118215384617 Ws
+        INFO	Total application power usage: 6149.721237948734 Ws
+        INFO	Total infrastructure power usage: 14544.43333333332 Ws
+        INFO	Total carbon emitted: 35.62215131399992 gCo2
 
     """
     env = simpy.Environment()  # creating SimPy simulation environment
@@ -114,15 +102,14 @@ def main():
     orchestrator = SimpleOrchestrator(infrastructure, power_domain)
     # orchestrator.place(application2)
 
-    events = [
-        PowerDomainEvent(event=orchestrator.place, args=[application1], time="15:10:00", repeat=False),
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="15:30:00", repeat=False),
-        PowerDomainEvent(event=orchestrator.place, args=[application2], time="15:40:00", repeat=False),
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="16:00:00", repeat=False),
-        PowerDomainEvent(event=application1.deallocate, args=[], time="16:30:00", repeat=False),
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="17:00:00", repeat=False)]
+    event_domain = EventDomain(env, update_interval=1, start_time_str="15:00:00")
 
-    power_domain.power_domain_events = events
+    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application1], time_str="15:10:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="15:30:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application2], time_str="15:40:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="16:00:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=application1.deallocate, args=[], time_str="16:30:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="17:00:00", repeat=False))
 
     # Early power meters when exploring isolated power measurements
     application1_pm = PowerMeter(application1, name="application_meter")
@@ -131,6 +118,7 @@ def main():
 
     # Run simulation
     env.process(power_domain.run(env))
+    env.process(event_domain.run())
     env.process(application1_pm.run(env))
     env.process(application2_pm.run(env))
 
@@ -147,11 +135,12 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", events=events, entities=all_entities)
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Available", events=events, power_sources=[solar_power, battery_power])
-    fig4 = file_handler.subplot_time_series_power_meter(power_domain, power_meters=[application1_pm,application2_pm,infrastructure_pm], events=events)
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used", entities=all_entities)
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[solar_power, battery_power])
+    fig4 = figure_plotter.subplot_time_series_power_meter(power_meters=[application1_pm,application2_pm,infrastructure_pm])
     figs = [fig2, fig3, fig4]
-    main_fig = file_handler.aggregate_subplots(figs)
+    main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

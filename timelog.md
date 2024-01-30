@@ -264,7 +264,11 @@ Holiday break
 ## Week 19
 ### 23rd January
 * *4.5 Hours* Introduced a new class called event domain that runs the events separately from the power domain, these are logged to the event domain event history that keeps track of which events have been called, from this we have also changed the figure plotter to allow for each event to be plotted correctly.
-Things to do following this:
+### 24th January
+* *3.5 Hours* Made changes to the figure plotter now the figure plotter is its own class and the events occur on their own figure, this is to prevent the nodes being repeated on the legend and looks more presentable.
+* *1 Hour* Carried out the changes to all existing examples to allow them to run, also moved the update interval back to the end of the while loop so all events and actions of the discrete event occur before the time updates.
+### 25th January
+* *3.5 Hours* Went through and fixed all the examples, also identified and fixed an issue with the dictionary with recorded results where the key being used for every time interval was the string version of the time and was being overwritten when simulations longer than 24 hours occurred, fix was to change to the env.now+start index instead as that is unique.
+* Things to do following this:
 - go through examples and change to follow small4/medium 2
-- see to why timings appear off i.e. recharge battery in small4 starts at -1
-- fix issue with any extra events occur after the simulation terminates
+- fix issue with application and task allocation with source node for the drone

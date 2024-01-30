@@ -1,7 +1,7 @@
 import logging
 import simpy
 
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extended_Examples.precision_agriculture.farm import Farm
 from src.extended_Examples.precision_agriculture.mobility import MobilityManager
 
@@ -28,15 +28,13 @@ def main():
         file_handler = FileHandler()
         filename = f"Results_{plot.plot_index}.Json"
         file_handler.write_out_results(filename=filename, power_domain=plot.power_domain)
+        figure_plotter = FigurePlotter(plot.power_domain)
 
-        fig1 = file_handler.subplot_time_series_entities(plot.power_domain, "Carbon Released", events=None,
-                                                         entities=plot.all_entities)
-        fig2 = file_handler.subplot_time_series_power_sources(plot.power_domain, "Power Used", events=None,
-                                                              power_sources=plot.power_sources)
-        fig3 = file_handler.subplot_time_series_power_sources(plot.power_domain, "Power Available", events=None,
-                                                              power_sources=plot.power_sources)
+        fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=plot.all_entities)
+        fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=plot.power_sources)
+        fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=plot.power_sources)
         figs = [fig1, fig2, fig3]
-        main_fig = file_handler.aggregate_subplots(figs)
+        main_fig = figure_plotter.aggregate_subplots(figs)
         file_handler.write_figure_to_file(main_fig, len(figs))
         main_fig.show()
 

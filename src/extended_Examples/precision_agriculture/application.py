@@ -4,7 +4,7 @@ from typing import List, Tuple, Type, Optional, TypeVar, Union
 import networkx as nx
 
 from src.extendedLeaf.infrastructure import Node, Link
-from src.extended_Examples.precision_agriculture.power import PowerAware, PowerMeasurement
+from src.extendedLeaf.power import PowerAware, PowerMeasurement
 
 
 class Task(PowerAware):
@@ -23,6 +23,7 @@ class Task(PowerAware):
         self.id: Optional[int] = None
         self.cu = cu
         self.node: Optional[Node] = None
+        self.application = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id}, cu={self.cu})"
@@ -42,22 +43,23 @@ class Task(PowerAware):
         self.node = None
 
     def measure_power(self) -> PowerMeasurement:
+        if self.paused:
+            return PowerMeasurement(0, 0)
         try:
             return self.node.measure_power().multiply(self.cu / self.node.used_cu)
-        except ZeroDivisionError:
+        except (ZeroDivisionError, AttributeError) as e:
             return PowerMeasurement(0, 0)
 
-    def pause_task(self):
+    def pause(self):
         if self.paused:
             raise ValueError(f"Error, task already paused")
-        else:
-            self.paused = True
+        self.paused = True
 
-    def unpause_task(self):
+    def unpause(self):
         if not self.paused:
             raise ValueError(f"Error, task not paused")
-        else:
-            self.paused = False
+        self.paused = False
+
 
 
 class SourceTask(Task):
@@ -103,7 +105,7 @@ class SinkTask(Task):
 
 
 class DataFlow(PowerAware):
-    def __init__(self, bit_rate: float):
+    def __init__(self, bit_rate: float, application):
         """Data flow between two tasks of an application.
 
         Args:
@@ -111,6 +113,9 @@ class DataFlow(PowerAware):
         """
         self.bit_rate = bit_rate
         self.links: Optional[List[Link]] = None
+        self.paused = False
+        self.application = application
+
 
     def __repr__(self):
         return f"{self.__class__.__name__}(bit_rate={self.bit_rate})"
@@ -132,10 +137,24 @@ class DataFlow(PowerAware):
         self.links = None
 
     def measure_power(self) -> PowerMeasurement:
-        if self.links is None:
-            raise RuntimeError("Cannot measure power: DataFlow was not placed on any links.")
-        return PowerMeasurement.sum(link.measure_power().multiply(self.bit_rate / link.used_bandwidth)
-                                    for link in self.links)
+        try:
+            if self.paused:
+                return PowerMeasurement(0, 0)
+            if self.links is None:
+                return PowerMeasurement(0, 0)
+            return PowerMeasurement.sum(link.measure_power().multiply(self.bit_rate / link.used_bandwidth) for link in self.links)
+        except AttributeError:
+            return PowerMeasurement(0, 0)
+
+    def pause(self):
+        if self.paused:
+            raise ValueError(f"Error, data flow already paused")
+        self.paused = True
+
+    def unpause(self):
+        if not self.paused:
+            raise ValueError(f"Error, data flow not paused")
+        self.paused = False
 
 
 class Application(PowerAware):
@@ -145,9 +164,9 @@ class Application(PowerAware):
     _TaskTypeFilter = Union[Type[_TTask], Tuple[Type[_TTask], ...]]
     _DataFlowTypeFilter = Union[Type[_TDataFlow], Tuple[Type[_TDataFlow], ...]]
 
-    def __init__(self):
+    def __init__(self, name: str = "Application"):
         self.graph = nx.DiGraph()
-
+        self.name = name
     def __repr__(self):
         return f"{self.__class__.__name__}(tasks={len(self.tasks())})"
 
@@ -159,6 +178,7 @@ class Application(PowerAware):
             incoming_data_flows: List of tuples (`src_task`, `bit_rate`) where every `src_task` is the source of a
                 :class:`DataFlow` with a certain `bit_rate` to the added `task`
         """
+        task.application = self
         task.id = len(self.tasks())
         if isinstance(task, SourceTask):
             assert not incoming_data_flows, f"Source task '{task}' cannot have incoming_data_flows"
@@ -168,13 +188,13 @@ class Application(PowerAware):
             self.graph.add_node(task.id, data=task)
             for src_task, bit_rate in incoming_data_flows:
                 assert not isinstance(src_task, SinkTask), f"Sink task '{task}' cannot have outgoing data flows"
-                self.graph.add_edge(src_task.id, task.id, data=DataFlow(bit_rate))
+                self.graph.add_edge(src_task.id, task.id, data=DataFlow(bit_rate,self))
         elif isinstance(task, SinkTask):
             assert len(incoming_data_flows) > 0, f"Sink task '{task}' has no incoming_data_flows"
             self.graph.add_node(task.id, data=task)
             for src_task, bit_rate in incoming_data_flows:
                 assert not isinstance(src_task, SinkTask), f"Sink task '{task}' cannot have outgoing data flows"
-                self.graph.add_edge(src_task.id, task.id, data=DataFlow(bit_rate))
+                self.graph.add_edge(src_task.id, task.id, data=DataFlow(bit_rate,self))
             assert nx.is_directed_acyclic_graph(self.graph), f"Application '{self}' is no DAG"
         else:
             raise ValueError(f"Unknown task type '{type(task)}'")
@@ -203,3 +223,16 @@ class Application(PowerAware):
     def measure_power(self) -> PowerMeasurement:
         measurements = [t.measure_power() for t in self.tasks()] + [df.measure_power() for df in self.data_flows()]
         return PowerMeasurement.sum(measurements)
+
+    def get_application_paths(self, source_task, dest_tasks=None):
+        all_paths = []
+        if source_task is None:
+            raise ValueError(f"Error: No start task was provided.")
+        if dest_tasks is None:
+            dest_tasks = self.tasks(type_filter=SinkTask)
+
+        for dest_task in dest_tasks:
+            paths = list(nx.all_simple_paths(self.graph, source=source_task.id, target=dest_task.id))
+            all_paths = all_paths + paths
+        return all_paths
+
