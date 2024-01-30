@@ -3,11 +3,12 @@ import logging
 import numpy as np
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerDomainEvent, PowerSource
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerSource
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -23,7 +24,7 @@ def main():
     sensor = Node("node1", cu=10, power_model=PowerModelNode(max_power=0.5e-3, static_power=0.1e-3))  # source
     microprocessor = Node("node2", cu=40,
                           power_model=PowerModelNode(max_power=2.5, static_power=0.5))  # processing task
-    server = Node("node3", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))  # sink
+    server = Node("node3", power_model=PowerModelNode(power_per_cu=5e-3, static_power=5))  # sink
 
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
     wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=10e6,
@@ -36,6 +37,7 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,powered_infrastructure_distributor=PoweredInfrastructureDistributor(custom_distribution_method),
                                start_time_str="11:00:00", update_interval=1)
+    event_domain = EventDomain(env, update_interval=2, start_time_str="11:00:00")
     grid = GridPower(env, power_domain=power_domain, priority=5)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
     battery_power = BatteryPower(env, power_domain=power_domain, priority=1)
@@ -56,15 +58,12 @@ def main():
 
     # Place over Infrastructure
     orchestrator = SimpleOrchestrator(infrastructure, power_domain)
-    events = [
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="11:00:00", repeat=True,
-                         repeat_counter=1440),
-        PowerDomainEvent(event=orchestrator.place, args=[application], time="12:00:00", repeat=True,
-                         repeat_counter=60),
-        PowerDomainEvent(event=application.deallocate, args=[], time="12:30:00", repeat=True,
-                         repeat_counter=60)
-    ]
-    power_domain.power_domain_events = events
+    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="11:00:00", repeat=True,
+                         repeat_counter=1440))
+    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application], time_str="12:00:00", repeat=True,
+                         repeat_counter=60))
+    event_domain.add_event(PowerDomainEvent(event=application.deallocate, args=[], time_str="12:30:00", repeat=True,
+                         repeat_counter=60))
 
     # Early power meters when exploring isolated power measurements
     application_pm = PowerMeter(application, name="application_meter")
@@ -76,6 +75,7 @@ def main():
 
     # Run simulation
     env.process(power_domain.run(env))
+    env.process(event_domain.run())
 
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
@@ -94,7 +94,7 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=entities)
+    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=entities, events=event_domain.event_history)
     fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", power_sources=[solar_power, battery_power])
     fig4 = file_handler.subplot_time_series_power_meter(power_domain, power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
     figs = [fig2, fig3, fig4]

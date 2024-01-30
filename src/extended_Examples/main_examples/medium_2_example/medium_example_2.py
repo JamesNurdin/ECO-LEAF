@@ -4,6 +4,7 @@ import networkx as nx
 import simpy
 import random as rnd
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
+from src.extendedLeaf.events import EventDomain
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -110,7 +111,6 @@ def main():
 
     events = [
         PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="10:30:00", repeat=True, repeat_counter=500)]
-    power_domain.power_domain_events = events
 
 
 

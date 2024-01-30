@@ -58,6 +58,26 @@ class FileHandler:
         self.creation_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.results_dir = None
 
+    def get_unique_events(self, events) -> dict:
+        sorted_events = {}
+        for event in events:
+            event_name = f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})"
+            if event_name in sorted_events.keys():
+                sorted_events[event_name].append(event)
+            else:
+                sorted_events[event_name] = [event]
+        return sorted_events
+
+    def get_unique_event_times(self, events) -> dict:
+        event_times = {}
+        for event in events:
+            event_time = event.time_int
+            if event_time in event_times.keys():
+                event_times[event_time].append(event)
+            else:
+                event_times[event_time] = [event]
+        return event_times
+
     def create_results_dir(self) -> str:
         """ Creates a directory for the results. """
         results_dir = self.get_results_dir()
@@ -148,6 +168,38 @@ class FileHandler:
 
         return main_fig
 
+    def add_events(self, fig, offset, events) -> go.Figure:
+        if events is not None:
+            max_y = 0
+            for data in fig.data:
+                if max(data.y) > max_y:
+                    max_y = max(data.y)
+            unique_events = self.get_unique_events(events)
+
+            for name, unique_events in unique_events.items():
+                x_values = [event_time.time_int - offset for event_time in unique_events]
+                print(x_values)
+                middle_value = max_y /2
+                y_values = [middle_value for i in range(len(unique_events))]
+                fig.add_trace(go.Scatter(
+                    x=x_values,
+                    y=y_values,
+                    mode='markers',
+                    marker=dict(color="blue",size=5),
+                    name=name,
+                ))
+
+            unique_event_times = self.get_unique_event_times(events)
+            for time, events in unique_event_times.items():
+                time_x_value = events[0].time_int
+                fig.add_vrect(
+                    x0=time_x_value - offset,
+                    x1=time_x_value - offset,
+                    fillcolor="red", opacity=0.5,
+                    layer="above", line_width=1,
+                )
+        return fig
+
     def subplot_time_series_entities(self, power_domain: PowerDomain, captured_attribute="Carbon Released", events=None,
                                      entities=None) -> go.Figure:
         if entities is None:
@@ -161,7 +213,8 @@ class FileHandler:
         end_time = power_domain.get_current_time(list(keys)[-1])
         if end_time < start_time:
             end_time += 1440
-        offset = start_time
+        offset = start_time -1
+        print(offset)
         data = self.retrieve_select_data_entities(power_domain.captured_data, entities)
         time = list(range(end_time-start_time+1))
 
@@ -173,8 +226,6 @@ class FileHandler:
             # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
             n = 6
-        print([power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time-1), end_time, n)])
-        print([int(value) - int(start_time) for value in np.linspace(start_time, end_time, n)])
         # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
@@ -187,16 +238,8 @@ class FileHandler:
         )
 
         # add event lines
-        if events is not None:
-            for event in events:
-                time_x_value = power_domain.get_current_time(event.time)
-                fig.add_vrect(
-                    x0=time_x_value - offset,
-                    x1=time_x_value - offset,
-                    fillcolor="red", opacity=0.5,
-                    layer="above", line_width=1,
-                    label=dict(text=f"{event.event.__name__}({', '.join(arg.name for arg in event.args if arg is not None)})")
-                )
+        fig = self.add_events(fig, offset, events)
+
         # Update layout to add a title
         fig.update_layout(
             title_text=f"Timeseries of {captured_attribute} for Powered Infrastructure.",
@@ -243,17 +286,8 @@ class FileHandler:
                 title=dict(text=captured_attribute, standoff=0))
         )
 
-        # add event lines
-        if events is not None:
-            for event in events:
-                time_x_value = power_domain.get_current_time(event.time)
-                fig.add_vrect(
-                    x0=time_x_value - offset,
-                    x1=time_x_value - offset,
-                    fillcolor="red", opacity=0.5,
-                    layer="above", line_width=1,
-                    label=dict(text=f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})")
-                )
+        fig = self.add_events(fig, offset, events)
+
         # Update layout to add a title
         fig.update_layout(
             title_text=f"Timeseries of {captured_attribute} for Power Sources.",
@@ -295,17 +329,8 @@ class FileHandler:
                 title=dict(text="Power Used", standoff=0))
         )
 
-        # add event lines
-        if events is not None:
-            for event in events:
-                time_x_value = power_domain.get_current_time(event.time)
-                fig.add_vrect(
-                    x0=time_x_value - offset,
-                    x1=time_x_value - offset,
-                    fillcolor="red", opacity=0.5,
-                    layer="above", line_width=1,
-                    label=dict(text=f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})")
-                )
+        fig = self.add_events(fig, offset, events)
+
         # Update layout to add a title
         fig.update_layout(
             title_text=f"Timeseries of power used for Power Meters.",

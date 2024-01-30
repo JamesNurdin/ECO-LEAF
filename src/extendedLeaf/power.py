@@ -1,3 +1,4 @@
+import bisect
 import csv
 import logging
 import math
@@ -608,10 +609,6 @@ class PowerDomain:
         if update_interval < 1:
             raise ValueError(f"Error update interval should be positive.")
         self.update_interval = update_interval
-        if power_source_events is None:
-            self.power_domain_events = []
-        else:
-            self.power_domain_events = power_source_events
 
     def run(self, env):
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
@@ -638,7 +635,6 @@ class PowerDomain:
                 current_power_source.update_power_available()
 
             """Execute any pre-planned commands at the current moment of time"""
-            self.run_events()
 
             self.assign_power_source_priority()
 
@@ -794,19 +790,6 @@ class PowerDomain:
         else:
             raise ValueError(f"Error: unable to append entities when entities are static")
 
-    def run_events(self):
-        for event in self.power_domain_events:
-            if (self.env.now + self.start_time_index) >= self.get_current_time(event.time):
-                if event.repeat:
-                    if event.current_counter < event.repeat_counter:
-                        event.current_counter += 1
-                    if event.current_counter == event.repeat_counter:
-                        event.ran = False
-                        event.current_counter = 0
-                if not event.ran:
-                    event(*event.args)
-                    event.ran = True
-
     @classmethod
     def get_current_time(cls, time):
         validate_str_time(time)
@@ -822,29 +805,6 @@ class PowerDomain:
         time = time % 1440
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
-
-
-class PowerDomainEvent:
-    def __init__(self, event, args, time, repeat=False, repeat_counter=30):
-        self.event = event
-        self.args = args
-        self.time = time
-        self.repeat = repeat
-        self.ran = False
-        if repeat is True:
-            if isinstance(repeat_counter, str):
-                if validate_str_time(repeat_counter):
-                    self.repeat_counter = PowerDomain.get_current_time(repeat_counter)
-            elif isinstance(repeat_counter, int):
-                if repeat_counter > 0:
-                    self.repeat_counter = repeat_counter
-            else:
-                raise ValueError(f"Error: invalid time increment provided")
-
-            self.current_counter = 0
-
-    def __call__(self, *args, **kwargs):
-        self.event(*args)
 
 
 class SolarPower(PowerSource):

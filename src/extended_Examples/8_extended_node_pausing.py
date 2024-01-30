@@ -1,11 +1,12 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerDomainEvent
+    GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -68,10 +69,8 @@ def main():
                                  powered_infrastructure=[wifi_link_from_source, node2])
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(solar_power)
-
-    events = [
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time="15:20:00", repeat=False)]
-    power_domain.power_domain_events = events
+    event_domain = EventDomain(env, start_time_str="15:00:00", update_interval=1)
+    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="15:20:00", repeat=False))
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
@@ -101,6 +100,7 @@ def main():
 
     # Run simulation
     env.process(power_domain.run(env))
+    env.process(event_domain.run())
 
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
@@ -119,9 +119,9 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", events=events, entities=all_entities)
-    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", events=events, power_sources=[solar_power, battery_power])
-    fig4 = file_handler.subplot_time_series_power_meter(power_domain, power_meters=[source_task_pm, processing_task_pm, sink_task_pm], events=events)
+    fig2 = file_handler.subplot_time_series_entities(power_domain, "Power Used", entities=all_entities,events=event_domain.event_history)
+    fig3 = file_handler.subplot_time_series_power_sources(power_domain, "Power Used", power_sources=[solar_power, battery_power])
+    fig4 = file_handler.subplot_time_series_power_meter(power_domain, power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
     figs = [fig2, fig3, fig4]
     main_fig = file_handler.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))

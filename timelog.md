@@ -258,3 +258,13 @@ Holiday break
 * *1 Hour* Introduced the last small example along with the necessary documentation to describe it.
 ### 20th January
 * *1 Hour* Introduced the code for the second medium example along with the necessary documentation and explanation for it.
+### 21st January
+* *1.5 Hours* Continued work with document along with finishing the diagrams
+
+## Week 19
+### 23rd January
+* *4.5 Hours* Introduced a new class called event domain that runs the events separately from the power domain, these are logged to the event domain event history that keeps track of which events have been called, from this we have also changed the figure plotter to allow for each event to be plotted correctly.
+Things to do following this:
+- go through examples and change to follow small4/medium 2
+- see to why timings appear off i.e. recharge battery in small4 starts at -1
+- fix issue with any extra events occur after the simulation terminates

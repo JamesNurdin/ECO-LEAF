@@ -1,11 +1,12 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
+from src.extendedLeaf.events import PowerDomainEvent, EventDomain
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
-    GridPower, PowerDomain, PowerDomainEvent
+    GridPower, PowerDomain
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
@@ -63,11 +64,11 @@ def main():
     wind_power = WindPower(env, power_domain=power_domain, priority=0)
     power_domain.add_power_source(wind_power)
     power_domain.add_power_source(grid1)
-    events = [
-        PowerDomainEvent(event=power_domain.remove_power_source, args=[wind_power], time="19:20:00", repeat=False),
-        PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time="19:40:00", repeat=False),
-        PowerDomainEvent(event=power_domain.add_entity, args=[node4], time="20:30:00", repeat=False)]
-    power_domain.power_source_events = events
+
+    event_domain = EventDomain(env, update_interval=1, start_time_str="19:00:00")
+    event_domain.add_event(PowerDomainEvent(event=power_domain.remove_power_source, args=[wind_power], time_str="19:20:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time_str="19:40:00", repeat=False))
+    event_domain.add_event(PowerDomainEvent(event=power_domain.add_entity, args=[node4], time_str="20:30:00", repeat=False))
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
@@ -96,12 +97,12 @@ def main():
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
 
     env.process(power_domain.run(env))  # registering power metering process 2
+    env.process(event_domain.run())  # registering power metering process 2
 
     # Run simulation
     env.process(application_pm.run(env))  # registering power metering process 2
     env.process(infrastructure_pm.run(env))  # registering power metering process 2
     env.run(until=121)  # run simulation for 10 seconds
-
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
