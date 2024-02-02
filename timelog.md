@@ -269,6 +269,8 @@ Holiday break
 * *1 Hour* Carried out the changes to all existing examples to allow them to run, also moved the update interval back to the end of the while loop so all events and actions of the discrete event occur before the time updates.
 ### 25th January
 * *3.5 Hours* Went through and fixed all the examples, also identified and fixed an issue with the dictionary with recorded results where the key being used for every time interval was the string version of the time and was being overwritten when simulations longer than 24 hours occurred, fix was to change to the env.now+start index instead as that is unique.
+### 28th January
+* *2.5 Hours* Introduced a visualiser for the simulation showing how nodes move between power sources.
 * Things to do following this:
 - go through examples and change to follow small4/medium 2
 - fix issue with application and task allocation with source node for the drone
