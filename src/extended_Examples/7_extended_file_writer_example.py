@@ -1,5 +1,7 @@
 import logging
 import simpy
+
+from src.extendedLeaf.animate import Animation
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.events import EventDomain, PowerDomainEvent
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
@@ -115,16 +117,19 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    event_fig = figure_plotter.subplot_events(event_domain.event_history)
     fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=all_entities)
     fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, grid1, wind_power])
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[solar_power, grid1, wind_power])
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released", power_sources=[solar_power, grid1, wind_power])
 
-    figs = [fig1, fig2, fig3, fig4]
+    figs = [event_fig,fig1, fig2, fig3, fig4]
     main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 
+    animation = Animation([power_domain], env)
+    animation.run_animation()
 
 class SimpleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
