@@ -1,7 +1,7 @@
 import logging
 import simpy
 
-from src.extendedLeaf.animate import Animation
+from src.extendedLeaf.animate import Animation, AllowCertainDebugFilter
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.events import EventDomain, PowerDomainEvent
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
@@ -10,9 +10,10 @@ from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
     GridPower, PowerDomain
 
+handler = logging.StreamHandler()
+handler.addFilter(AllowCertainDebugFilter())
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
-
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s',handlers=[handler])
 
 def main():
     """

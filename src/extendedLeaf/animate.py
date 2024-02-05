@@ -1,3 +1,5 @@
+import logging
+
 import networkx as nx
 import matplotlib
 matplotlib.use('TkAgg')  # You can replace 'TkAgg' with another backend that works for you
@@ -30,6 +32,24 @@ class Animation:
         self.play_pause_ax = self.fig.add_axes([0.85, 0.01, 0.1, 0.03])
         self.play_pause_button = Button(self.play_pause_ax, 'Play')
         self.play_pause_button.on_clicked(self.toggle_play_pause)
+
+        # Create a logger
+        logger = logging.getLogger('matplotlib')
+
+        # Set the logging level to DEBUG
+        logger.setLevel(logging.DEBUG)
+
+        # Create a handler and set the formatter
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(levelname)s: %(message)s')
+        handler.setFormatter(formatter)
+
+        # Add the filter to the handler
+        filter_allow_certain_debug = AllowCertainDebugFilter()
+        handler.addFilter(filter_allow_certain_debug)
+
+        # Add the handler to the logger
+        logger.addHandler(handler)
 
 
     def update_time_step(self, val):
@@ -74,3 +94,12 @@ class Animation:
 
     def run_animation(self):
         plt.show()
+
+class AllowCertainDebugFilter(logging.Filter):
+    def filter(self, record):
+        not_allowed = ["TkAgg", "findfont", "STREAM b'IHDR'", "STREAM b'sBIT'", "b'sBIT'",
+                       "STREAM b'pHYs'", "STREAM b'IDAT'"]
+        for avoid in not_allowed:
+            if avoid in record.getMessage():
+                return False
+        return True
