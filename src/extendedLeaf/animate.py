@@ -1,10 +1,7 @@
 import networkx as nx
 import matplotlib
-from matplotlib import ticker
-
 matplotlib.use('TkAgg')  # You can replace 'TkAgg' with another backend that works for you
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 from matplotlib.widgets import Slider, Button
 from src.extendedLeaf.power import PowerDomain, validate_str_time
 
@@ -27,9 +24,7 @@ class Animation:
 
         # Slider for controlling time steps
         slider_ax = self.fig.add_axes([0.15, 0.01, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-        convert_to_time_string = lambda value: PowerDomain.convert_to_time_string(int(value))
         self.slider = Slider(slider_ax, 'Time Step', 0, len(self.time_series_data) - 1, valinit=0, valstep=1)
-        self.slider.formatter = ticker.FuncFormatter(PowerDomain.convert_to_time_string)
         self.slider.on_changed(self.update_time_step)
 
         self.play_pause_ax = self.fig.add_axes([0.85, 0.01, 0.1, 0.03])
@@ -75,7 +70,6 @@ class Animation:
             self.slider.set_val(self.current_time_increment-self.start_time_increment)
             self.fig.canvas.manager.window.after(2500, self.update, frame + 1)
         else:
-
             self.play_pause_button.label.set_text('Play')
 
     def run_animation(self):
