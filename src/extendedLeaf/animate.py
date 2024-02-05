@@ -1,46 +1,82 @@
 import networkx as nx
 import matplotlib
+from matplotlib import ticker
+
 matplotlib.use('TkAgg')  # You can replace 'TkAgg' with another backend that works for you
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Slider, Button
 from src.extendedLeaf.power import PowerDomain, validate_str_time
 
 
 class Animation:
     def __init__(self, power_domains, env):
+
         self.power_domains: [PowerDomain] = power_domains
         self.env = env
         self.time_series_data = self.power_domains[0].captured_data
 
-        g = nx.DiGraph()
-        self.fig, ax = plt.subplots()
-        pos = nx.spring_layout(g)
-        nx.draw(g, pos, with_labels=True, font_weight='bold', node_size=700, node_color='skyblue', font_size=8,
-                arrowsize=15)
-        self.time_increment = self.power_domains[0].start_time_index
+        self.g = nx.DiGraph()
+        self.fig, self.ax = plt.subplots()
+        self.pos = nx.spring_layout(self.g)
+        nx.draw(self.g, self.pos, with_labels=True, font_weight='bold', node_size=700,
+                                       node_color='skyblue', font_size=8, arrowsize=15)
+        self.start_time_increment = self.power_domains[0].start_time_index
+        self.current_time_increment = self.start_time_increment
+        self.is_playing = False
 
-        # Animation update function
-        def update(frame):
-            ax.clear()
-            g.clear()
+        # Slider for controlling time steps
+        slider_ax = self.fig.add_axes([0.15, 0.01, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+        convert_to_time_string = lambda value: PowerDomain.convert_to_time_string(int(value))
+        self.slider = Slider(slider_ax, 'Time Step', 0, len(self.time_series_data) - 1, valinit=0, valstep=1)
+        self.slider.formatter = ticker.FuncFormatter(PowerDomain.convert_to_time_string)
+        self.slider.on_changed(self.update_time_step)
+
+        self.play_pause_ax = self.fig.add_axes([0.85, 0.01, 0.1, 0.03])
+        self.play_pause_button = Button(self.play_pause_ax, 'Play')
+        self.play_pause_button.on_clicked(self.toggle_play_pause)
+
+
+    def update_time_step(self, val):
+        new_time_increment = self.start_time_increment + val
+        if new_time_increment != self.current_time_increment:
+            self.current_time_increment = new_time_increment
+            self.update(self.current_time_increment)
+            self.fig.canvas.draw_idle()
+
+    def toggle_play_pause(self, event):
+        self.is_playing = not self.is_playing
+        if self.is_playing:
+            self.play_pause_button.label.set_text('Pause')
+            self.update(self.current_time_increment)
+        else:
+            self.play_pause_button.label.set_text('Play')
+
+    def update(self, frame):
+        plt.sca(self.ax)
+        if self.is_playing and self.current_time_increment < (len(self.time_series_data) + self.start_time_increment - 1):
+            self.ax.clear()
+            self.g.clear()
             # Move nodes between power sources (simplified for demonstration)
-            data = self.time_series_data[str(self.time_increment)]
+            data = self.time_series_data[str(self.current_time_increment)]
             for power_source_key, power_source_values in data.items():
-                g.add_node(power_source_key)
+                self.g.add_node(power_source_key)
                 for node in data[power_source_key]:
                     if node == "Total Carbon Released":
                         continue
-                    g.add_node(node)
-                    g.add_edge(power_source_key, node)
-            new_pos = nx.spring_layout(g)
-            nx.draw(g, new_pos, with_labels=True, font_weight='bold', node_size=700, node_color='skyblue', font_size=8,
-                    arrowsize=15)
-            ax.set_title(f'Time Step: {PowerDomain.convert_to_time_string(self.time_increment)}')
-            self.time_increment = self.time_increment + 1
-            return []
+                    self.g.add_node(node)
+                    self.g.add_edge(power_source_key, node)
+            self.pos = nx.spring_layout(self.g)
+            nx.draw(self.g, self.pos, with_labels=True, font_weight='bold', node_size=700,
+                                           node_color='skyblue', font_size=8, arrowsize=15)
+            self.ax.set_title(f'Time Step: {PowerDomain.convert_to_time_string(self.current_time_increment)}')
 
-        self.update = update
+            self.current_time_increment += 1
+            self.slider.set_val(self.current_time_increment-self.start_time_increment)
+            self.fig.canvas.manager.window.after(2500, self.update, frame + 1)
+        else:
+
+            self.play_pause_button.label.set_text('Play')
 
     def run_animation(self):
-        anim = FuncAnimation(fig=self.fig, func=self.update, interval=2500, repeat=False)
         plt.show()
