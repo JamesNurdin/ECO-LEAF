@@ -1,5 +1,7 @@
 import logging
 import simpy
+
+from src.extendedLeaf.animate import Animation
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
@@ -81,11 +83,14 @@ def main():
     env.process(power_domain.run(env))
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
-    env.run(until=120)  # run simulation for 10 seconds
+    env.run(until=121)  # run simulation for 10 seconds
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
+
+    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
+    animation.run_animation()
 
 
 class SimpleOrchestrator(Orchestrator):
