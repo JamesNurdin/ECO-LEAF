@@ -2,6 +2,8 @@ import logging
 
 import networkx as nx
 import matplotlib
+import numpy as np
+
 matplotlib.use('TkAgg')  # You can replace 'TkAgg' with another backend that works for you
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
@@ -33,8 +35,7 @@ class Animation:
         self.slider.valtext.set_text("")  # Set initial tick label
 
         self.fig.add_axes([0.15, 0.05, 0.65, 0.02])
-        self.tick_positions = [0, 25, 50, 75, 100]
-        self.tick_labels = self.get_axis_labels(self.tick_positions)
+        self.tick_labels, self.tick_positions = self.get_axis_labels()
         for i, (position, label) in enumerate(zip(self.tick_positions, self.tick_labels)):
             plt.annotate(label, xy=(position, -0.1), xytext=(position, -0.2), ha='center', va='center', color='blue',
                          arrowprops=dict(arrowstyle='->', color='blue'))
@@ -48,11 +49,21 @@ class Animation:
         self.play_pause_button = Button(self.play_pause_ax, 'Play')
         self.play_pause_button.on_clicked(self.toggle_play_pause)
 
-    def get_axis_labels(self, tick_pos) -> [str]:
+    def get_axis_labels(self) -> [str]:
         label_list = []
-        for pos in tick_pos:
-            label_list.append(PowerDomain.convert_to_time_string((int(((pos / 100) * len(self.time_series_data))) + self.start_time_increment)))
-        return label_list
+        if len(self.time_series_data) % 2 == 0:
+            num_ticks = min(5, len(self.time_series_data))
+            tick_pos = np.linspace(0, num_ticks-1, num_ticks)
+            print(tick_pos)
+        else:
+            num_ticks = min(6, len(self.time_series_data))
+            tick_pos = np.linspace(0, num_ticks, num_ticks)
+
+        indexes = np.linspace(0, len(self.time_series_data) - 1, num_ticks, dtype=int)
+        for index in indexes:
+            time_index = list(self.time_series_data.keys())[index]
+            label_list.append(PowerDomain.convert_to_time_string(int(time_index)))
+        return label_list, tick_pos
 
     def update_time_step(self, val):
         self.current_time_increment = self.start_time_increment + val

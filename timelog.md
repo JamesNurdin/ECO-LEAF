@@ -274,9 +274,12 @@ Holiday break
 
 ## Week 20
 ### 29th January 
-* *3 Hours* Continuing on with the animation, reworked it to allow for basic controlls of the timeseries including a play/pause button along with a slider to quickly access specific points of time.
+* *3 Hours* Continuing on with the animation, reworked it to allow for basic controls of the timeseries including a play/pause button along with a slider to quickly access specific points of time.
 ### 30th January
 * *2 Hours* Went back and reworked the diagrams for the smaller examples to a higher quality by including the application that would lie on top of aspects of the infrastructure, also created a new class to allow for the debug print trace to remove irrelevant info.
+### 31st January
+* *1.5 Hours* Included improvements to the controls to the animation and playback controls along with including ticks on the slider.
+* *1 Hour* Attempted to improve the x-axis tick terms.
 * Things to do following this:
 - go through examples and change to follow small4/medium 2
 - fix issue with application and task allocation with source node for the drone
