@@ -280,6 +280,8 @@ Holiday break
 ### 31st January
 * *1.5 Hours* Included improvements to the controls to the animation and playback controls along with including ticks on the slider.
 * *1 Hour* Attempted to improve the x-axis tick terms.
+### 1st February
+* *4 Hours* Made big revisions to the values used in the examples by researching more appropriate values and implemented them, along with finishing example 5.
 * Things to do following this:
 - go through examples and change to follow small4/medium 2
 - fix issue with application and task allocation with source node for the drone
