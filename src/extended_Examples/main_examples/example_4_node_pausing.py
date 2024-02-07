@@ -2,6 +2,8 @@ import logging
 
 import numpy as np
 import simpy
+
+from src.extendedLeaf.animate import Animation, AllowCertainDebugFilter
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.events import EventDomain, PowerDomainEvent
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
@@ -10,47 +12,49 @@ from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
     GridPower, PowerDomain, BatteryPower, PoweredInfrastructureDistributor, PowerSource
 
+handler = logging.StreamHandler()
+handler.addFilter(AllowCertainDebugFilter())
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s',handlers=[handler])
 
 
 def main():
     """
     Log Output:
         DEBUG	0: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=5.50W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=24.81W)
         DEBUG	0: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	0: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	0: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	1: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=5.50W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=24.81W)
         DEBUG	1: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	1: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	1: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         ...
-        DEBUG	1440: application_meter: PowerMeasurement(dynamic=0.32W, static=5.50W)
-        DEBUG	1440: infrastructure_meter: PowerMeasurement(dynamic=0.30W, static=5.50W)
-        DEBUG	1440: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	1440: Processing Task: PowerMeasurement(dynamic=0.25W, static=0.50W)
-        DEBUG	1440: Sink Task: PowerMeasurement(dynamic=0.05W, static=5.00W)
-        INFO	Total application power usage: 4022.0069600000547 Ws
-        INFO	Total infrastructure power usage: 8133.19286000021 Ws
-        INFO	Total carbon emitted: 21.418545013333418 gCo2
+        DEBUG	1440: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
+        DEBUG	1440: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
+        DEBUG	1440: Source Task: PowerMeasurement(dynamic=0.13W, static=0.01W)
+        DEBUG	1440: Processing Task: PowerMeasurement(dynamic=0.18W, static=4.80W)
+        DEBUG	1440: Sink Task: PowerMeasurement(dynamic=0.20W, static=20.00W)
+        INFO	Total application power usage: 17494.150650000203 Ws
+        INFO	Total infrastructure power usage: 36099.26245000072 Ws
+        INFO	Total carbon emitted: 79.30067750000022 gCo2
     """
-    env = simpy.Environment()  # creating SimPy simulation environment
+    env = simpy.Environment()
     infrastructure = Infrastructure()
     # Source task node
-    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.5e-3, static_power=0.1e-3))
+    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
     # Processing task node
-    microprocessor = Node("microprocessor", cu=40,power_model=PowerModelNode(max_power=2.5, static_power=0.5))
+    microprocessor = Node("microprocessor", cu=40, power_model=PowerModelNode(max_power=6.25, static_power=4.8))
     # Sink task node
-    server = Node("server", power_model=PowerModelNode(power_per_cu=5e-3, static_power=5))
+    server = Node("server", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
 
-    # #two Wi-Fi links between Source -> Microprocessor and Microprocessor -> Server
-    wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=10e6,
-                                  power_model=PowerModelLink(200e-6))
-    wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=5e6,
-                               power_model=PowerModelLink(200e-9))
+    # #two Wi-Fi links between (Wired WAN) Source -> Microprocessor and (Wireless WIFI) Microprocessor -> Server
+    wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
+                                  power_model=PowerModelLink(0))
+    wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=30e6,
+                               power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_server)
     infrastructure.add_link(wired_link_from_source)
     entities = infrastructure.nodes() + infrastructure.links()
@@ -105,7 +109,7 @@ def main():
     env.process(processing_task_pm.run(env))
     env.process(sink_task_pm.run(env))
 
-    env.run(until=1441)
+    env.run(until=1441)  # run simulation for a day
     print(len(power_domain.captured_data))
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
@@ -125,6 +129,9 @@ def main():
     main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
+
+    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
+    animation.run_animation()
 
 def custom_distribution_method(current_power_source: PowerSource, power_domain):
     """Update renewable sources"""

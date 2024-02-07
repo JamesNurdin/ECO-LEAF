@@ -1,8 +1,6 @@
 import logging
-
 import simpy
 
-from src.extendedLeaf.animate import Animation
 from src.extendedLeaf.application import Task
 from src.extendedLeaf.infrastructure import Node
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, SolarPower
@@ -49,13 +47,10 @@ def main():
     env.process(power_meter.run(env))  # registering power metering process
     env.process(power_domain.run(env))  # registering power domain process
 
-    env.run(until=50)  # run simulation for 10 seconds
+    env.run(until=10)  # run simulation for 10 seconds
 
     logger.info(f"Total power usage: {float(PowerMeasurement.sum(power_meter.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
-
-    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
-    animation.run_animation()
 
 def placement(env, node, task):
     """Places the task after 3 seconds and removes it after 8 seconds."""

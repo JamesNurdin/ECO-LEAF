@@ -64,15 +64,15 @@ class Plot:
         """ def __init__(self, env: Environment, name: str = "Grid", data_set_filename: str = GRID_DATASET_FILENAME,
                      power_domain: PowerDomain = None, priority: int = 0, powered_entities=None):"""
         if power_source == SolarPower:
-            return_power_source = SolarPower(self.env,name=f"plot_{self.plot_index}_solar_power", power_domain=self.power_domain, priority=0)
+            return_power_source = SolarPower(self.env, name=f"plot_{self.plot_index}_solar_power", power_domain=self.power_domain, priority=0)
             self.power_domain.add_power_source(return_power_source)
             return return_power_source
         elif power_source == GridPower:
-            return_power_source = GridPower(self.env,name=f"plot_{self.plot_index}_grid_power", power_domain=self.power_domain, priority=5)
+            return_power_source = GridPower(self.env, name=f"plot_{self.plot_index}_grid_power", power_domain=self.power_domain, priority=5)
             self.power_domain.add_power_source(return_power_source)
             return return_power_source
         elif power_source == WindPower:
-            return_power_source = WindPower(self.env,name=f"plot_{self.plot_index}_wind_power", power_domain=self.power_domain, priority=2)
+            return_power_source = WindPower(self.env, name=f"plot_{self.plot_index}_wind_power", power_domain=self.power_domain, priority=2)
             self.power_domain.add_power_source(return_power_source)
             return return_power_source
 

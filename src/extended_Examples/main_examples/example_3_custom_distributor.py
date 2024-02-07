@@ -2,6 +2,8 @@ import logging
 
 import numpy as np
 import simpy
+
+from src.extendedLeaf.animate import AllowCertainDebugFilter, Animation
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
@@ -9,8 +11,10 @@ from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
     GridPower, PowerDomain, PowerSource, PoweredInfrastructureDistributor
 
+handler = logging.StreamHandler()
+handler.addFilter(AllowCertainDebugFilter())
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s',handlers=[handler])
 
 
 def main():
@@ -20,36 +24,37 @@ def main():
         INFO	- SourceTask(id=0, cu=9) on Node('sensor', cu=0/10).
         INFO	- ProcessingTask(id=1, cu=5) on Node('server', cu=0/inf).
         INFO	- SinkTask(id=2, cu=10) on Node('server', cu=5/inf).
-        INFO	- DataFlow(bit_rate=100) on [Link('sensor' -> 'microprocessor', bandwidth=0/10000000.0), Link('microprocessor' -> 'server', bandwidth=0/5000000.0, latency=10)].
+        INFO	- DataFlow(bit_rate=100) on [Link('sensor' -> 'microprocessor', bandwidth=0/50000000.0), Link('microprocessor' -> 'server', bandwidth=0/30000000.0, latency=10)].
         INFO	- DataFlow(bit_rate=500) on [].
-        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.32W, static=20.00W)
-        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.30W, static=20.50W)
-        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.32W, static=20.00W)
-        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.30W, static=20.50W)
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
         ...
-        DEBUG	118: application_meter: PowerMeasurement(dynamic=0.32W, static=20.00W)
-        DEBUG	118: infrastructure_meter: PowerMeasurement(dynamic=0.30W, static=20.50W)
-        DEBUG	119: application_meter: PowerMeasurement(dynamic=0.32W, static=20.00W)
-        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.30W, static=20.50W)
-        INFO	Total application power usage: 2438.4576000000015 Ws
-        INFO	Total infrastructure power usage: 2496.055200000002 Ws
-        INFO	Total carbon emitted: 8.809932680000008 gCo2    """
+        DEBUG	118: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
+        DEBUG	118: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
+        DEBUG	119: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
+        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
+        DEBUG	120: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
+        DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
+        INFO	Total application power usage: 2472.724540000003 Ws
+        INFO	Total infrastructure power usage: 3053.519699999993 Ws
+        INFO	Total carbon emitted: 9.139072739999985 gCo2
+        """
     env = simpy.Environment()
     infrastructure = Infrastructure()
-
-    # Initializing infrastructure and workload
     # Source task node
-    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.5e-3, static_power=0.1e-3))
+    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
     # Processing task node
-    microprocessor = Node("microprocessor", cu=40, power_model=PowerModelNode(max_power=2.5, static_power=0.5))
+    microprocessor = Node("microprocessor", cu=40, power_model=PowerModelNode(max_power=6.25, static_power=4.8))
     # Sink task node
     server = Node("server", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
 
-    # #two Wi-Fi links between Source -> Microprocessor and Microprocessor -> Server
-    wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=10e6,
-                                  power_model=PowerModelLink(200e-6))
-    wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=5e6,
-                               power_model=PowerModelLink(200e-9))
+    # #two Wi-Fi links between (Wired WAN) Source -> Microprocessor and (Wireless WIFI) Microprocessor -> Server
+    wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
+                                  power_model=PowerModelLink(0))
+    wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=30e6,
+                               power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_server)
     infrastructure.add_link(wired_link_from_source)
     entities = infrastructure.nodes() + infrastructure.links()
@@ -87,7 +92,7 @@ def main():
     env.process(power_domain.run(env))
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
-    env.run(until=120)  # run simulation for 10 seconds
+    env.run(until=121)  # run simulation until 21:00:00
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
@@ -110,6 +115,9 @@ def main():
     main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
+
+    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
+    animation.run_animation()
 
 
 def custom_distribution_method(current_power_source: PowerSource, power_domain):

@@ -149,7 +149,7 @@ class FigurePlotter:
     def get_unique_events(self, events) -> dict:
         sorted_events = {}
         for event in events:
-            event_name = f"{event.event.__name__}({', '.join(arg.name for arg in event.args)})"
+            event_name = f"{event.event.__name__}({', '.join(arg.name if hasattr(arg, 'name') else 'arg' for arg in event.args)})"
             if event_name in sorted_events.keys():
                 sorted_events[event_name].append(event)
             else:

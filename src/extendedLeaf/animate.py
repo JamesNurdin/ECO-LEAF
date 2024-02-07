@@ -53,7 +53,7 @@ class Animation:
         label_list = []
         if len(self.time_series_data) % 2 == 0:
             num_ticks = min(5, len(self.time_series_data))
-            tick_pos = np.linspace(0, num_ticks-1, num_ticks)
+            tick_pos = np.linspace(0, num_ticks, num_ticks)
             print(tick_pos)
         else:
             num_ticks = min(6, len(self.time_series_data))
