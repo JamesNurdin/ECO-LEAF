@@ -278,10 +278,10 @@ Holiday break
 ### 30th January
 * *2 Hours* Went back and reworked the diagrams for the smaller examples to a higher quality by including the application that would lie on top of aspects of the infrastructure, also created a new class to allow for the debug print trace to remove irrelevant info.
 ### 31st January
+* *0.5 Hours* Meeting with Lauritz
 * *1.5 Hours* Included improvements to the controls to the animation and playback controls along with including ticks on the slider.
 * *1 Hour* Attempted to improve the x-axis tick terms.
 ### 1st February
 * *4 Hours* Made big revisions to the values used in the examples by researching more appropriate values and implemented them, along with finishing example 5.
-* Things to do following this:
-- go through examples and change to follow small4/medium 2
-- fix issue with application and task allocation with source node for the drone
+### 3rd February
+* *5 Hours* Worked on main example and identified that a slight rework to static power domains will be needed where power sources should be seen as static and not the domain itself

@@ -84,10 +84,7 @@ def main():
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
-    file_handler = FileHandler()
-    figure_plotter = FigurePlotter(power_domain, show_event_lines=False)
 
-    figure_plotter.subplot_time_series_entities("Power Used", entities=solar_power.powered_infrastructure)
 
 
 class SimpleOrchestrator(Orchestrator):
