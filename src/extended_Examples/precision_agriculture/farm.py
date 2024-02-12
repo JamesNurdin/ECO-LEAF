@@ -45,7 +45,10 @@ class Plot:
 
         if DRONE_DISTRIBUTION[self.plot_index]:
             self.drone = Drone(self, self.fog_location, self.env, self.power_domain, infrastructure, self.get_drone_path())
-            self.all_entities.append(self.drone.battery_power)
+            self.all_entities.append(self.drone)
+            infrastructure.add_node(self.drone)
+            self.power_domain.add_power_source(self.drone.battery_power)
+            self.power_sources.append(self.drone.battery_power)
         else:
             self.drone = None
 
@@ -125,12 +128,12 @@ def _create_plot_graph(current_plot_index):
 
 
 class Farm:
-    def __init__(self, env: simpy.Environment, start_time="12:00:00"):
+    def __init__(self, env: simpy.Environment):
         self.env = env
         self.infrastructure = Infrastructure()
         self.cloud = Cloud()
         self.infrastructure.add_node(self.cloud)
-        self.plots: [Plot] = self._create_farm_plots(start_time)
+        self.plots: [Plot] = self._create_farm_plots(START_TIME)
 
     def run(self, env):
         for plot in self.plots:

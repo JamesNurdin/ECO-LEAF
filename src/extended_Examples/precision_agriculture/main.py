@@ -18,10 +18,6 @@ def main():
     # run any drone cycles
     mobility_model = MobilityManager()
 
-    # Early power meters when exploring isolated power measurements
-    for plot in farm.plots:
-        env.process(plot.power_domain.run(env))
-
     env.process(mobility_model.run(env, farm))
     event_domain = EventDomain(env, update_interval=1, start_time_str="15:00:00")
 
@@ -38,9 +34,10 @@ def main():
         figure_plotter = FigurePlotter(plot.power_domain)
 
         fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=plot.all_entities)
-        fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=plot.power_sources)
-        fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=plot.power_sources)
-        figs = [fig1, fig2, fig3]
+        fig2 = figure_plotter.subplot_time_series_entities("Power Used", entities=plot.all_entities)
+        fig3 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=plot.power_sources)
+        fig4 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=plot.power_sources)
+        figs = [fig1, fig2, fig3, fig4]
         main_fig = figure_plotter.aggregate_subplots(figs)
         file_handler.write_figure_to_file(main_fig, len(figs), filename)
         main_fig.show()

@@ -634,6 +634,30 @@ class PowerDomain:
             self.update_logs()
             yield env.timeout(self.update_interval)
 
+    def record_power_consumption(self, entity, power_source, power_consumed, time_to_recharge=1):
+        carbon_released = 0
+        carbon_intensity = 0
+        for time_offset in range(time_to_recharge):
+            carbon_intensity = power_source.get_current_carbon_intensity(time_offset)
+            carbon_released += power_source.power_domain.calculate_carbon_released(power_consumed, carbon_intensity)
+        recharge_data = {"Power Used": power_consumed,
+                         "Carbon Intensity": carbon_intensity,
+                         "Carbon Released": carbon_released}
+
+        """ Update the logs of the power source"""
+        power_source.power_domain.logging_data[power_source.name] = {entity.name: recharge_data}
+        power_source.power_domain.carbon_emitted.append(carbon_released)
+
+    def get_best_power_source(self, power_to_consume):
+        """
+        Finds the best power source to provide the power, takes advantage of the priority ordering to choose best
+        """
+        for current_power_source in [power_source for power_source in self.power_sources if
+                                     power_source is not None]:
+            if power_to_consume < current_power_source.get_current_power():
+                return current_power_source
+        return None
+
     def get_current_time_string(self):
         return self.convert_to_time_string((self.env.now + self.start_time_index) % 1440)
 
@@ -669,7 +693,12 @@ class PowerDomain:
 
     def insert_power_reading(self, time, power_source, node, reading):
         if power_source in self.captured_data[time]:
-            self.captured_data[time][power_source][node] = reading
+            if node in self.captured_data[time][power_source]:
+                self.captured_data[time][power_source][node]["Power Used"] = self.captured_data[time][power_source][node]["Power Used"] + reading["Power Used"]
+                self.captured_data[time][power_source][node]["Carbon Intensity"] = self.captured_data[time][power_source][node]["Carbon Intensity"] + reading["Carbon Intensity"]
+                self.captured_data[time][power_source][node]["Carbon Released"] = self.captured_data[time][power_source][node]["Carbon Released"] + reading["Carbon Released"]
+            else:
+                self.captured_data[time][power_source][node] = reading
             self.captured_data[time][power_source]["Total Carbon Released"] = \
                 self.captured_data[time][power_source]["Total Carbon Released"] + reading["Carbon Released"]
         else:
@@ -900,39 +929,36 @@ class BatteryPower(PowerSource):
     def get_power_at_time(self, time_int) -> float:
         return self.power_log[time_int]
 
+    def find_and_recharge_battery(self):
+        power_source = self.power_domain.get_best_power_source(self.total_power - self.remaining_power)
+        time_to_recharge = self.recharge_battery(power_source)
+        self.power_domain.record_power_consumption(self, power_source, self.recharge_rate, time_to_recharge)
+        return time_to_recharge
+
     def recharge_battery(self, power_source):
         power_to_recharge = self.total_power - self.remaining_power
-        print(f"power to recharge:{power_to_recharge}")
-        print(f"power in solar :{power_source.get_current_power()}")
         if power_source.get_current_power() < power_to_recharge:
             raise ValueError(f"Error, power source {power_source} failed to charge battery.")
         power_source.consume_power(power_to_recharge)
         time_to_recharge = math.ceil(power_to_recharge / self.recharge_rate)
         self.remaining_power = self.total_power
-
-        """Calculate how much carbon was released by charging the battery"""
-        carbon_released = 0
-        carbon_intensity = 0
-        for time_offset in range(time_to_recharge):
-            carbon_intensity = power_source.get_current_carbon_intensity(time_offset)
-            carbon_released += self.power_domain.calculate_carbon_released(self.recharge_rate, carbon_intensity)
-        recharge_data = {"Power Used": power_to_recharge,
-                         "Carbon Intensity": carbon_intensity,
-                         "Carbon Released": carbon_released}
-
-        """ Update the logs of the power source"""
-        power_source.power_domain.logging_data[power_source.name] = {self.name: recharge_data}
-        power_source.power_domain.carbon_emitted.append(carbon_released)
+        self.power_domain.record_power_consumption(self, power_source, self.recharge_rate, time_to_recharge)
 
         return time_to_recharge
 
     def consume_battery_power(self, power_consumed):
+        """
+        Method called when manually consuming power outside the power domain scope
+        """
         if power_consumed < 0:
             raise ValueError(f"Error: Power consumed cant be negative")
         if power_consumed > self.remaining_power:
             raise ValueError(f"Error: {self.name} does not have enough power for to carry out task")
         else:
             self.remaining_power -= power_consumed
+
+
+
 
     def update_carbon_intensity(self):
         #  Only produced from recharging the battery

@@ -14,11 +14,11 @@ class MobilityManager:
         while True:
             for plot in farm.plots:
                 if plot.drone is not None:
-                    if (env.now % 1440) >= PowerDomain.get_current_time(DRONE_RUN_TIMES[plot.plot_index]):
-                        if plot.drone.last_execution_time != env.now // 1440:
-                            print(f"Running drone path at {PowerDomain.convert_to_time_string(env.now)}")
+                    if ((env.now+ plot.power_domain.start_time_index) % 1440) >= PowerDomain.get_current_time(DRONE_RUN_TIMES[plot.plot_index]):
+                        if plot.drone.last_execution_time != (env.now + plot.power_domain.start_time_index) // 1440:
+                            print(f"Running drone path at {PowerDomain.convert_to_time_string(env.now+ plot.power_domain.start_time_index)}")
                             env.process(self.run_drone(env, plot))
-                            plot.drone.last_execution_time = env.now // 1440
+                            plot.drone.last_execution_time = (env.now + plot.power_domain.start_time_index) // 1440
             yield env.timeout(1)
 
     def run_drone(self, env: simpy.Environment, plot):
@@ -35,7 +35,7 @@ class MobilityManager:
                 deallocate application
         """
         drone = plot.drone
-        while (env.now % 1440) < PowerDomain.get_current_time(END_OF_DAY):
+        while ((env.now + plot.power_domain.start_time_index) % 1440) < PowerDomain.get_current_time(END_OF_DAY):
             if drone.battery_power.get_current_power() < drone.battery_power.total_power * DRONE_BATTERY_THRESHOLD:
                 self.move_drone(drone, plot, location=plot.recharge_station.location)
                 # # check carbon state
@@ -56,7 +56,10 @@ class MobilityManager:
             # move to next location
         distance = drone.location.distance(location)
         drone.battery_power.consume_battery_power(distance * drone.power_per_unit_traveled)
+        print(distance * drone.power_per_unit_traveled)
+        plot.power_domain.record_power_consumption(drone, drone.battery_power, distance * drone.power_per_unit_traveled)
         drone.location = location
+
 
     def get_next_location(self, drone, plot):
         try:

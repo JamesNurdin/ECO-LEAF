@@ -288,4 +288,4 @@ Holiday break
 
 ## Week 21
 ### 5th February 
-* *1 Hour* Identified the issue with the power domain and removed the static nature from that and moved it to the power sources, here power sources declare whether they are static or not, the same logic occurs.
+* *1.5 Hour* Identified the issue with the power domain and removed the static nature from that and moved it to the power sources, here power sources declare whether they are static or not, the same logic occurs.

@@ -53,11 +53,9 @@ class Drone(Node):
         self.application = self._create_drone_application(cloud)
         self.last_execution_time = -1
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
-        power_domain.add_entity(self)
         self.battery_power = BatteryPower(env, power_domain=power_domain, priority=1,
-                                          total_power_available=TAXI_BATTERY_SIZE)
+                                          total_power_available=TAXI_BATTERY_SIZE, static=True, powered_infrastructure=[self])
         self.locations_iterator = drone_path
-        print(self.location)
 
     # TODO properly create application
     def _create_drone_application(self, cloud) -> Application:
