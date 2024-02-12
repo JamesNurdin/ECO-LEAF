@@ -368,26 +368,6 @@ class TestBatteryPower(unittest.TestCase):
         self.power_source.recharge_battery(other_power_source)
         self.assertEqual(self.power_source.get_current_power(), self.power_source.total_power)
 
-    def test_consume_battery_power(self):
-        """ Test to check that power can be correctly taken away from the battery. """
-        starting_power = 100
-        self.power_source.set_current_power(starting_power)
-
-        # Test: remove valid amount
-        valid_amount_of_power = 50
-        self.power_source.consume_battery_power(valid_amount_of_power)
-
-        self.assertEqual(self.power_source.get_current_power(), starting_power-valid_amount_of_power)
-
-        with self.assertRaises(ValueError):
-            self.power_source.set_current_power(starting_power)
-            # Test: remove too large amount
-            invalid_amount_of_power = 200
-            self.power_source.consume_battery_power(invalid_amount_of_power)
-            # Test: remove negative amount
-            invalid_amount_of_power = -100
-            self.power_source.consume_battery_power(invalid_amount_of_power)
-
     def test_get_current_carbon_intensity(self):
         """ Test to ensure that no carbon intensity is being given off, given off through recharge instead. """
         self.assertEqual(self.power_source.get_current_carbon_intensity(0), 0)

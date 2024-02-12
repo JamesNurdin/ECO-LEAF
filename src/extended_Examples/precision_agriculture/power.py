@@ -946,20 +946,6 @@ class BatteryPower(PowerSource):
 
         return time_to_recharge
 
-    def consume_battery_power(self, power_consumed):
-        """
-        Method called when manually consuming power outside the power domain scope
-        """
-        if power_consumed < 0:
-            raise ValueError(f"Error: Power consumed cant be negative")
-        if power_consumed > self.remaining_power:
-            raise ValueError(f"Error: {self.name} does not have enough power for to carry out task")
-        else:
-            self.remaining_power -= power_consumed
-
-
-
-
     def update_carbon_intensity(self):
         #  Only produced from recharging the battery
         pass

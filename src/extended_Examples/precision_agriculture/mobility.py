@@ -55,8 +55,7 @@ class MobilityManager:
             location = self.get_next_location(drone, plot)
             # move to next location
         distance = drone.location.distance(location)
-        drone.battery_power.consume_battery_power(distance * drone.power_per_unit_traveled)
-        print(distance * drone.power_per_unit_traveled)
+        drone.battery_power.consume_power(distance * drone.power_per_unit_traveled)
         plot.power_domain.record_power_consumption(drone, drone.battery_power, distance * drone.power_per_unit_traveled)
         drone.location = location
 
