@@ -15,7 +15,7 @@ MEASURE_APPLICATIONS = True
 """Simulation duration and intervals in simulated seconds"""
 SIMULATION_TIME = 360
 CARBON_AWARE = True
-UPDATE_MOBILITY_INTERVAL = 1
+UPDATE_MOBILITY_INTERVAL = 3
 POWER_MEASUREMENT_INTERVAL = 1
 UPDATE_WIFI_CONNECTIONS_INTERVAL = 60
 
@@ -26,8 +26,10 @@ NUMBER_OF_PLOTS = 4
 PLOT_NAMES = ["Plot_1", "Plot_2", "Plot_3", "Plot_4"]
 PLOT_SIZES = [(500, 500), (500, 500), (500, 500), (500, 500)]  # Length height
 POWER_SOURCES_AVAILABLE = [[SolarPower,WindPower,GridPower],[WindPower,GridPower],[SolarPower,GridPower],[GridPower]]
+DRONE_DISTRIBUTION = [True, True, False, False]
+DRONE_RUN_TIMES = ["12:00:00", "13:00:00", "00:00:00", "00:00:00"]
 SENSORS_PER_AXIS = 5  # Accounts for scrutiny of measurements, more sensors = more detail, more power
-
+END_OF_DAY = "19:00:00" #  time in which drones will stop carrying out applications
 
 """ Plot attributes """
 

@@ -51,12 +51,13 @@ class Drone(Node):
                          location=location)
         cloud = infrastructure.nodes(type_filter=Cloud)[0]
         self.application = self._create_drone_application(cloud)
-        print(self.application)
+        self.last_execution_time = -1
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
+        power_domain.add_entity(self)
         self.battery_power = BatteryPower(env, power_domain=power_domain, priority=1,
                                           total_power_available=TAXI_BATTERY_SIZE)
-        power_domain.add_power_source(self.battery_power)
         self.locations_iterator = drone_path
+        print(self.location)
 
     # TODO properly create application
     def _create_drone_application(self, cloud) -> Application:
@@ -64,7 +65,6 @@ class Drone(Node):
         source_task = SourceTask(cu=9, bound_node=self)
         processing_task = ProcessingTask(cu=5)
         sink_task = SinkTask(cu=10, bound_node=cloud)
-        print(source_task.node)
 
         # Build Application
         application = Application()
@@ -80,10 +80,6 @@ class RechargeStation(Node):
     def __init__(self, location: Location, application_sink: Node, _recharge_station_counter):
         super().__init__(name=f"Recharge Station {_recharge_station_counter}", location=location,
                          power_model=PowerModelNode(power_per_cu=0, static_power=RECHARGE_STATION_STATIC_POWER))
-        self.application = self._create_recharge_station_application(application_sink)
-
-    def _create_recharge_station_application(self, application_sink):
-        pass
 
 class LinkEthernet(Link):
     def __init__(self, src: Node, dst: Node, name: str):

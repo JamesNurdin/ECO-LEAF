@@ -130,9 +130,6 @@ def main():
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 
-    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
-    animation.run_animation()
-
 def custom_distribution_method(current_power_source: PowerSource, power_domain):
     """Update renewable sources"""
     for entity in power_domain.powered_infrastructure:

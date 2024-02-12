@@ -1,3 +1,4 @@
+import bisect
 import csv
 import logging
 import math
@@ -59,7 +60,6 @@ class PowerMeasurement:
 
     def total(self) -> float:
         return float(self)
-
 
 class PowerModel(ABC):
     """Abstract base class for power models."""
@@ -123,7 +123,7 @@ class PowerModelNode(PowerModel):
         if self.max_power is not None:
             dynamic_power = (self.max_power - self.static_power) * self.node.utilization()
         elif self.power_per_cu is not None:
-            dynamic_power = self.power_per_cu * self.node.used_cu * update_interval/60
+            dynamic_power = self.power_per_cu * self.node.used_cu
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
         return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power * update_interval/60)
@@ -319,16 +319,13 @@ class PowerSource(ABC):
         if power_domain is None:
             raise AttributeError(f"No power domain was supplied")
         self.power_domain = power_domain
+        self.powered_infrastructure = []
 
         if self.power_domain.powered_infrastructure_distributor.static_powered_infrastructure:
-            if powered_infrastructure is None:
-                self.powered_infrastructure = []
-            else:
-                self.powered_infrastructure = powered_infrastructure
-                for entity in self.powered_infrastructure:
-                    entity.power_model.power_source = self
+            if powered_infrastructure:
+                for entity in powered_infrastructure:
+                    self.add_entity(entity)
         else:
-            self.powered_infrastructure = []
             if powered_infrastructure is not None:
                 raise AttributeError(f"Error: Power domain {self.power_domain.name} has been configured to have the "
                                      f"powered infrastructure be dynamically distributed between the power sources but "
@@ -367,12 +364,14 @@ class PowerSource(ABC):
             raise ValueError(f"Error: {entity.name} not present in powered_infrastructure.")
         entity.power_model.power_source = None
         self.powered_infrastructure.remove(entity)
+        entity.paused = True
 
     def add_entity(self, entity):
         if entity in self.powered_infrastructure:
             raise ValueError(f"Error: {entity.name} already present in powered_infrastructure.")
         entity.power_model.power_source = self
         self.powered_infrastructure.append(entity)
+        entity.paused = False
 
     def _retrieve_power_data(self, data_set_filename: str, start_time: str):
         """Reads the data concerning the power source from file, and formats it according to the start time
@@ -578,14 +577,13 @@ class PowerDomain:
     """
     def __init__(self, env: Environment = None, name: str = None,
                  powered_infrastructure_distributor: PoweredInfrastructureDistributor = None,
-                 start_time_str: str = "00:00:00", powered_infrastructure=None, update_interval: int = 1,
-                 power_source_events: [(str, bool, (Callable[[], None], []))] = None):
+                 start_time_str: str = "00:00:00", powered_infrastructure=None, update_interval: int = 1):
         if env is None:
-            raise ValueError(f"Error: Power  Domain was not supplied an environment. ")
+            raise ValueError(f"Error: Power Domain was not supplied an environment. ")
         else:
             self.env = env
         if name is None:
-            raise ValueError(f"Error: Power  Domain was not supplied a name. ")
+            raise ValueError(f"Error: Power Domain was not supplied a name. ")
         else:
             self.name = name
         self.power_sources = []
@@ -593,16 +591,15 @@ class PowerDomain:
         self.captured_data = {}  # data to be potentially written to file
         self.logging_data = {}  # any data that needs to be logged which is captured in events
 
-        self.powered_infrastructure_distributor = powered_infrastructure_distributor or \
-            PoweredInfrastructureDistributor()
+        self.powered_infrastructure_distributor = powered_infrastructure_distributor or PoweredInfrastructureDistributor()
 
         self.start_time_string = start_time_str
         self.start_time_index = self.get_current_time(start_time_str)
+        self.powered_infrastructure = []
         if not self.powered_infrastructure_distributor.static_powered_infrastructure:
-            if powered_infrastructure is None:
-                self.powered_infrastructure = []
-            else:
-                self.powered_infrastructure = powered_infrastructure
+            if powered_infrastructure:
+                for entity in powered_infrastructure:
+                    self.add_entity(entity)
         else:
             if powered_infrastructure is not None:
                 raise AttributeError(f"Error: Powered Infrastructure Distributor has been configured to handle static"
@@ -611,10 +608,6 @@ class PowerDomain:
         if update_interval < 1:
             raise ValueError(f"Error update interval should be positive.")
         self.update_interval = update_interval
-        if power_source_events is None:
-            self.power_source_events = []
-        else:
-            self.power_source_events = power_source_events
 
     def run(self, env):
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
@@ -632,16 +625,14 @@ class PowerDomain:
         if not self.powered_infrastructure_distributor.static_powered_infrastructure and not self.powered_infrastructure:
             raise AttributeError(f"Error: No powered infrastructure was provided to the power domain, despite"
                                  f" being configured dynamically.")
-        yield env.timeout(self.update_interval)
+
         while True:
+            for current_power_source in [power_source for power_source in self.power_sources if
+                                         power_source is not None]:
+                """Update the power available to the power source"""
+                current_power_source.update_power_available()
+
             """Execute any pre-planned commands at the current moment of time"""
-            for index, (time, ran, (event, args)) in enumerate(self.power_source_events):
-                if (self.env.now + self.start_time_index) >= self.get_current_time(time):
-                    if not ran:
-                        event(*args)
-                        updated_event = list(self.power_source_events[index])
-                        updated_event[1] = True
-                        self.power_source_events[index] = tuple(updated_event)
 
             self.assign_power_source_priority()
 
@@ -651,8 +642,6 @@ class PowerDomain:
             current_carbon_intensities = {}
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
-                """Update the power available to the power source"""
-                current_power_source.update_power_available()
 
                 """distribute entities among power sources"""
                 self.powered_infrastructure_distributor.powered_infrastructure_distributor_method(current_power_source,
@@ -670,9 +659,19 @@ class PowerDomain:
 
             """log the carbon released since the last update"""
             self.update_carbon_intensity(current_carbon_intensities)
-            self.update_recorded_data(self.get_current_time_string(), current_carbon_intensities)
+            self.update_recorded_data(str(self.env.now + self.start_time_index), current_carbon_intensities)
             self.update_logs()
             yield env.timeout(self.update_interval)
+
+    def get_best_power_source(self, power_to_consume):
+        """
+        Finds the best power source to provide the power, takes advantage of the priority ordering to choose best
+        """
+        for current_power_source in [power_source for power_source in self.power_sources if
+                                     power_source is not None]:
+            if power_to_consume < current_power_source.get_current_power():
+                return current_power_source
+        return None
 
     def get_current_time_string(self):
         return self.convert_to_time_string((self.env.now + self.start_time_index) % 1440)
@@ -701,7 +700,7 @@ class PowerDomain:
         return current_power_source_dictionary
 
     def update_logs(self):
-        time = self.get_current_time_string()
+        time = str(self.env.now + self.start_time_index)
         for power_source in self.logging_data:
             for node in self.logging_data[power_source]:
                 self.insert_power_reading(time, power_source, node, self.logging_data[power_source][node])
@@ -812,6 +811,7 @@ class PowerDomain:
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:
             raise ValueError("Error: Invalid input. Please provide a non-negative integer.")
+        time = time % 1440
         hours, minutes = divmod(time, 60)
         return f"{hours:02d}:{minutes:02d}:00"
 
@@ -831,13 +831,6 @@ class SolarPower(PowerSource):
                          remaining_power=0)
         self.inherent_carbon_intensity = 46
         self.powerType = PowerType.RENEWABLE
-
-    def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
 
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
@@ -873,13 +866,6 @@ class WindPower(PowerSource):
         self.powerType = PowerType.RENEWABLE
         self.finite_power = True
 
-    def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
-
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
 
@@ -912,13 +898,6 @@ class GridPower(PowerSource):
                          remaining_power=np.inf)
         self.carbon_intensity = 0
         self.powerType = PowerType.MIXED
-
-    def _get_start_time_index(self, start_time_str):
-        if self.power_data is None:
-            raise ValueError(f"Error: no data set has been provided")
-        times = list(self.power_data.keys())
-        start_time = times.index(start_time_str)
-        return start_time
 
     def update_carbon_intensity(self):
         self.carbon_intensity = self.get_current_carbon_intensity(0)
@@ -962,9 +941,16 @@ class BatteryPower(PowerSource):
         pass
 
     def get_power_at_time(self, time_int) -> float:
-        return self.power_log[time_int+1]
+        return self.power_log[time_int]
+
+    def find_and_recharge_battery(self):
+        power_source = self.power_domain.get_best_power_source(self.total_power - self.remaining_power)
+        print(f"This", power_source.name)
+        time_to_recharge = self.recharge_battery(power_source)
+        return time_to_recharge
 
     def recharge_battery(self, power_source):
+        print(f"RECHARGE EVENT at {self.env.now}")
         power_to_recharge = self.total_power - self.remaining_power
         if power_source.get_current_power() < power_to_recharge:
             raise ValueError(f"Error, power source {power_source} failed to charge battery.")

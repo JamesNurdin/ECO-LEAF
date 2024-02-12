@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sys
 from datetime import datetime
 from typing import Dict, Tuple
 
@@ -58,11 +59,15 @@ class FileHandler:
     def __init__(self):
         self.creation_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.results_dir = None
+        main_module_name = sys.argv[0]
+        self.filename = os.path.basename(main_module_name)[:-3]
+        self.repeated_files = 0
+        self.repeated_figures = 0
 
     def create_results_dir(self) -> str:
         """ Creates a directory for the results. """
         results_dir = self.get_results_dir()
-        dir_name = f"{self.creation_time}_results"
+        dir_name = f"{self.filename}_{self.creation_time}"
         absolute_path = os.path.join(results_dir, dir_name)
         if os.path.exists(absolute_path):
             return absolute_path
@@ -80,18 +85,19 @@ class FileHandler:
         filepath = os.path.join(dir_path, "src", "results")
         return filepath
 
-    def write_out_results(self, power_domain: PowerDomain, dir_path: str = None, filename: str = "output.json"):
+    def write_out_results(self, power_domain: PowerDomain, dir_path: str = None, filename: str = "output"):
         """ Allows user to write raw data to file, allows for a desired filepath and filename
             if either are absent the missing aspects are defaulted, """
         if self.results_dir is None:
             self.results_dir = self.create_results_dir()
         if not self.is_valid_filename(filename):
-            filename = "output.json"
+            filename = "output_" + str(self.repeated_files)
+            self.repeated_files = self.repeated_files + 1
 
         if dir_path is None or not os.path.exists(dir_path):
             dir_path = self.results_dir
 
-        filepath = os.path.join(dir_path, filename)
+        filepath = os.path.join(dir_path, f"{filename}.json",)
 
         # Convert dictionary to JSON format
         json_data = json.dumps(power_domain.captured_data, indent=2)
@@ -102,23 +108,25 @@ class FileHandler:
         return filepath, json_data
 
     def is_valid_filename(self, filename):
-        pattern = re.compile(r'^[a-zA-Z0-9_-]+\.json$')
+        pattern = re.compile(r'^[a-zA-Z0-9_-]+(?!\.)$')
         return bool(pattern.match(filename))
 
-    def write_figure_to_file(self, figure, number_of_figs):
+    def write_figure_to_file(self, figure, number_of_figs, filename="figure"):
         # Set the size of the PDF dynamically based on the number of plots
         pdf_height = 300 + (100 * number_of_figs)  # Adjust the multiplier as needed
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         root.destroy()
         pdf_width = screen_width
-
+        if not self.is_valid_filename(filename):
+            filename = "figure_" + str(self.repeated_figures)
+            self.repeated_figures = self.repeated_figures + 1
         # Create and save the figure as a PDF
         figure.update_layout(height=pdf_height, width=pdf_width)  # Adjust the height and width as needed
         if self.results_dir is None:
             self.results_dir = self.create_results_dir()
         if os.path.exists(self.results_dir):
-            figure.write_image(os.path.join(self.results_dir, "fig.pdf"), "pdf")
+            figure.write_image(os.path.join(self.results_dir, f"{filename}.pdf"), "pdf")
 
 
 class FigurePlotter:

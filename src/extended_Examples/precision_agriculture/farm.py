@@ -7,8 +7,7 @@ import matplotlib
 from src.extended_Examples.precision_agriculture.infrastructure import *
 from src.extendedLeaf.mobility import Location
 from src.extended_Examples.precision_agriculture.orchestrator import FarmOrchestrator
-from src.extended_Examples.precision_agriculture.power import PowerDomain, SolarPower, GridPower,\
-    PoweredInfrastructureDistributor, PowerSource
+from src.extended_Examples.precision_agriculture.power import PowerDomain, PowerSource
 from src.extended_Examples.precision_agriculture.settings import *
 from src.extendedLeaf.infrastructure import Infrastructure, Node
 
@@ -22,6 +21,7 @@ class Plot:
             raise ValueError(f"Error: No power sources provided")
         self.env = env
         self.graph, self.sensor_locations, self.fog_location = _create_plot_graph(plot_index)
+        self.recharge_station_location = self.fog_location
         self.name = name
         self.plot_index = plot_index
 
@@ -34,22 +34,27 @@ class Plot:
         infrastructure.add_link(LinkEthernet(self.fog_node, cloud, f"Link_{self.fog_node.name}_to_{cloud.name}"))
 
         global _recharge_station_counter
-        self.recharge_station = RechargeStation(self.fog_location, cloud, _recharge_station_counter)
+        self.recharge_station = RechargeStation(self.recharge_station_location, cloud, _recharge_station_counter)
         _recharge_station_counter += 1
 
         self.power_domain = PowerDomain(self.env, name=f"{self.name}_power_domain", start_time_str=start_time,
                                         update_interval=1)
         self.power_sources = [self._choose_power_source(power_source_type) for power_source_type in power_sources_types]
 
-        self.drone = Drone(self, self.fog_location, self.env, self.power_domain, infrastructure, self.get_drone_path(self.fog_location))
-        self.all_entities = self.sensors
+        self.all_entities = self.sensors + [self.fog_node]
+
+        if DRONE_DISTRIBUTION[self.plot_index]:
+            self.drone = Drone(self, self.fog_location, self.env, self.power_domain, infrastructure, self.get_drone_path())
+            self.all_entities.append(self.drone.battery_power)
+        else:
+            self.drone = None
 
         for sensor in self.sensors:
             self.power_domain.add_entity(sensor)
         self.power_domain.add_entity(self.fog_node)
 
         self.orchestrator = FarmOrchestrator(infrastructure, self.power_domain)
-        for entity in self.all_entities:
+        for entity in self.sensors:
             self.orchestrator.place(entity.application)
 
     def _add_fog_node(self, infrastructure: Infrastructure, location: Location) -> FogNode:
@@ -76,7 +81,7 @@ class Plot:
             self.power_domain.add_power_source(return_power_source)
             return return_power_source
 
-    def get_drone_path(self, recharge_location):
+    def get_drone_path(self):
         path: [Location]
 
         n_points = int(SENSORS_PER_AXIS * DRONE_MEASURE_DENSITY) - 1
@@ -90,7 +95,7 @@ class Plot:
             for y in range(n_points):
                 location = Location(((x + 1) * step_size_x) + offset_x, (y * step_size_y) + offset_y)
                 path.append(location)
-        path.append(recharge_location)
+        path.append(self.recharge_station_location)
         return iter(path)
 
 
@@ -126,19 +131,6 @@ class Farm:
         self.cloud = Cloud()
         self.infrastructure.add_node(self.cloud)
         self.plots: [Plot] = self._create_farm_plots(start_time)
-        self._DEBUG_show_farm()
-
-    def _DEBUG_show_farm(self):
-        main_graph = nx.Graph()
-        for plot_index, plot in enumerate(self.plots, start=1):
-            mapping = {node: f'G{plot_index}_{node}' for node in plot.graph.nodes}
-            plot.graph = nx.relabel_nodes(plot.graph, mapping)
-            main_graph = nx.union(plot.graph, main_graph)
-
-        pos = nx.spring_layout(main_graph)
-        nx.draw(main_graph, pos, with_labels=False, node_size=500, node_color="skyblue", font_size=8, font_color="black", font_weight="bold", edge_color="gray", width=0.5)
-        plt.title('Combined Graph')
-        plt.show()
 
     def run(self, env):
         for plot in self.plots:
