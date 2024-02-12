@@ -49,9 +49,8 @@ def main():
     infrastructure.add_link(wifi_link_from_source)
 
     power_domain = PowerDomain(env, name="Power Domain 1",
-                               start_time_str="19:00:00", update_interval=1,
-                               powered_infrastructure_distributor=PoweredInfrastructureDistributor(static_powered_infrastructure=True))
-    solar_power = SolarPower(env, power_domain=power_domain, priority=0, powered_infrastructure=[node1, node2, node3])
+                               start_time_str="19:00:00", update_interval=1)
+    solar_power = SolarPower(env, power_domain=power_domain, priority=0, powered_infrastructure=[node1, node2, node3], static=True)
     power_domain.add_power_source(solar_power)
 
     # Initialise three tasks

@@ -63,10 +63,11 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1",
                                start_time_str="15:00:00", update_interval=1, powered_infrastructure_distributor=
-                               PoweredInfrastructureDistributor(static_powered_infrastructure=True))
-    solar_power = SolarPower(env, power_domain=power_domain, priority=1, powered_infrastructure=[node1, node3, wifi_link_to_sink])
+                               PoweredInfrastructureDistributor())
+    solar_power = SolarPower(env, power_domain=power_domain, priority=1, powered_infrastructure=[node1, node3, wifi_link_to_sink],
+                             static=True)
     battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=30,
-                                 powered_infrastructure=[wifi_link_from_source, node2])
+                                 powered_infrastructure=[wifi_link_from_source, node2], static=True)
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(solar_power)
     event_domain = EventDomain(env, start_time_str="15:00:00", update_interval=1)

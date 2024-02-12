@@ -285,3 +285,7 @@ Holiday break
 * *4 Hours* Made big revisions to the values used in the examples by researching more appropriate values and implemented them, along with finishing example 5.
 ### 3rd February
 * *5 Hours* Worked on main example and identified that a slight rework to static power domains will be needed where power sources should be seen as static and not the domain itself
+
+## Week 21
+### 5th February 
+* *1 Hour* Identified the issue with the power domain and removed the static nature from that and moved it to the power sources, here power sources declare whether they are static or not, the same logic occurs.

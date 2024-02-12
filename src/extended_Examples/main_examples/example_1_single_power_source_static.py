@@ -65,9 +65,9 @@ def main():
     entities = infrastructure.nodes()+infrastructure.links()
 
     power_domain = PowerDomain(env, name="Power Domain 1",
-                               powered_infrastructure_distributor=PoweredInfrastructureDistributor(static_powered_infrastructure=True),
+                               powered_infrastructure_distributor=PoweredInfrastructureDistributor(),
                                start_time_str="19:00:00", update_interval=1)
-    grid = GridPower(env, power_domain=power_domain, priority=5, powered_infrastructure=entities)
+    grid = GridPower(env, power_domain=power_domain, priority=5, powered_infrastructure=entities, static=True)
     power_domain.add_power_source(grid)
 
     # Initialise three tasks

@@ -63,12 +63,15 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1",
                                start_time_str="15:00:00", update_interval=1, powered_infrastructure_distributor=
-                               PoweredInfrastructureDistributor(static_powered_infrastructure=True))
+                               PoweredInfrastructureDistributor())
 
-    grid_power = GridPower(env, power_domain=power_domain, priority=5, powered_infrastructure=[grid_node, sink_node, grid_link_to_sink])
-    solar_power = SolarPower(env, power_domain=power_domain, priority=1, powered_infrastructure=[source_node, solar_node, source_link_to_solar, source_link_to_battery, source_link_to_grid])
+    grid_power = GridPower(env, power_domain=power_domain, priority=5,
+                           powered_infrastructure=[grid_node, sink_node, grid_link_to_sink], static=True)
+    solar_power = SolarPower(env, power_domain=power_domain, priority=1,
+                             powered_infrastructure=[source_node, solar_node, source_link_to_solar,
+                                                     source_link_to_battery, source_link_to_grid], static=True)
     battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=30,
-                                 powered_infrastructure=[battery_node, battery_link_to_sink])
+                                 powered_infrastructure=[battery_node, battery_link_to_sink], static=True)
     power_domain.add_power_source(grid_power)
     power_domain.add_power_source(solar_power)
     power_domain.add_power_source(battery_power)

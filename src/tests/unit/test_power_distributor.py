@@ -16,8 +16,7 @@ class MyTestCase(unittest.TestCase):
 
         # Provided valid entry data
         self.powered_infrastructure_distributor = \
-            PoweredInfrastructureDistributor(powered_infrastructure_distributor_method=None, smart_distribution=True,
-                                             static_powered_infrastructure=False)
+            PoweredInfrastructureDistributor(powered_infrastructure_distributor_method=None, smart_distribution=True)
         self.mock_env.now = 600
         self.power_domain = PowerDomain(self.mock_env, name="Power Domain 1", powered_infrastructure=[self.mock_entity],
                                         start_time_str="00:00:00", update_interval=1,
@@ -40,7 +39,7 @@ class MyTestCase(unittest.TestCase):
         self.mock_entity.power_model.update_sensitive_measure.return_value = 30.0
 
         # Mock the get_current_time method to return a specific value (600 in this case).
-        self.powered_infrastructure_distributor.default_powered_infrastructure_distribution_method_dynamic(
+        self.powered_infrastructure_distributor.default_powered_infrastructure_distribution_method(
             self.high_priority_power_source, self.power_domain)
 
         # Assert that the entity is now associated with the higher priority power source.
@@ -58,7 +57,7 @@ class MyTestCase(unittest.TestCase):
         self.powered_infrastructure_distributor.smart_distribution = False
 
         # Mock the get_current_time method to return a specific value (600 in this case).
-        self.powered_infrastructure_distributor.default_powered_infrastructure_distribution_method_dynamic(
+        self.powered_infrastructure_distributor.default_powered_infrastructure_distribution_method(
             self.high_priority_power_source, self.power_domain)
 
         # Assert that the entity is now associated with the higher priority power source.

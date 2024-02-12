@@ -59,18 +59,18 @@ def create_application_type_2(sensor, server):
 def main():
     """
     Log Output:
-        INFO	Placing Application(tasks=3):
-        INFO	- SourceTask(id=0, cu=0.15313193982744164) on Node('Sensor0', cu=0/11.018082741964426).
-        INFO	- ProcessingTask(id=1, cu=3) on Node('Microprocessor1', cu=0/44.006079736990166).
-        INFO	- SinkTask(id=2, cu=12) on Node('Server', cu=0/inf).
-        INFO	- DataFlow(bit_rate=1000) on [Link('Sensor0' -> 'Microprocessor1', bandwidth=0/54214721.2845746)].
-        INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor1' -> 'Server', bandwidth=0/30394186.81448846)].
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=29.60W)
+        DEBUG	0: application_1_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	0: application_2_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=34.41W)
+        DEBUG	1: application_1_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	1: application_2_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         ...
-        DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=6.25W, static=121.27W)
-        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=6.25W, static=121.27W)
-        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=6.25W, static=121.27W)
-        INFO	Total infrastructure power usage: 73607.19502847278 Ws
-        INFO	Total carbon emitted: 201.0099958668859 gCo2
+        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=29.61W)
+        DEBUG	599: application_1_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	599: application_2_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        INFO	Total infrastructure power usage: 19353.39299999997 Ws
+        INFO	Total carbon emitted: 142.81519929999982 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -113,18 +113,16 @@ def main():
 
     entities = infrastructure.nodes() + infrastructure.links()
 
-    power_domain = PowerDomain(env, name="Power Domain 1", start_time_str="15:00:00", update_interval=1,
-                               powered_infrastructure_distributor=PoweredInfrastructureDistributor(
-                                   static_powered_infrastructure=True))
+    power_domain = PowerDomain(env, name="Power Domain 1", start_time_str="15:00:00", update_interval=1)
     solar_power = SolarPower(env, power_domain=power_domain, priority=1,
                              powered_infrastructure=[solar_microprocessor, solar_wired_link_from_source,
-                                                     solar_wifi_link_to_server])
+                                                     solar_wifi_link_to_server], static=True)
     grid_power = GridPower(env, power_domain=power_domain, priority=5,
                            powered_infrastructure=[grid_microprocessor, grid_wired_link_from_source,
-                                                   grid_wifi_link_to_server,server])
+                                                   grid_wifi_link_to_server,server], static=True)
     battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=500,
                                  powered_infrastructure=[sensor, battery_microprocessor, bat_wired_link_from_source,
-                                                         bat_wifi_link_to_grid])
+                                                         bat_wifi_link_to_grid], static=True)
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(grid_power)
 
@@ -162,7 +160,7 @@ def main():
     env.process(application1_pm.run(env))
     env.process(application2_pm.run(env))
 
-    env.run(until=300)  # run the simulation for 10 hours (until the battery is fully drained)
+    env.run(until=600)  # run the simulation for 10 hours (until the battery is fully drained)
 
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")

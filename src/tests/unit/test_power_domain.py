@@ -265,10 +265,10 @@ class TestPowerDomain(unittest.TestCase):
     def test_write_out_results(self):
         file_handler = FileHandler()
         """ Test the write out function to ensure that side effect is a json file. """
-        filename = "test_output.json"
+        filename = "test_output"
         current_script_path = os.path.abspath(__file__)
         parent_directory = os.path.dirname(os.path.dirname(os.path.dirname(current_script_path)))
-        expected_filepath = os.path.join(parent_directory, "results", f"{file_handler.creation_time}_results", filename)
+        expected_filepath = os.path.join(parent_directory, "results", f"_jb_unittest_runner_{file_handler.creation_time}", f"{filename}.json")
         mocked_data = {"01:00:00": {'Wind': {'node2': {'Power Used': 0.1,
                                                        'Carbon Intensity': 1,
                                                        'Carbon Released': 0.1},

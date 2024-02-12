@@ -59,8 +59,8 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,
                                start_time_str="19:00:00", update_interval=1)
-    grid = GridPower(env, power_domain=power_domain, priority=5)
-    solar_power = SolarPower(env, power_domain=power_domain, priority=0)
+    grid = GridPower(env, power_domain=power_domain, priority=5, static=False)
+    solar_power = SolarPower(env, power_domain=power_domain, priority=0, static=False)
     power_domain.add_power_source(solar_power)
     power_domain.add_power_source(grid)
 
