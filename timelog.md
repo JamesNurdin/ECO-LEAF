@@ -291,3 +291,4 @@ Holiday break
 * *1.5 Hour* Identified the issue with the power domain and removed the static nature from that and moved it to the power sources, here power sources declare whether they are static or not, the same logic occurs.
 ### 6th Feb
 * *3.5 Hours* Encountered an issue with the main example where the power consumption for the drone traversing the plot was not being recorded, introduced a more streamline way for the user to integrate power consumption, also identified an issue where the power domain run method was being called twice clearing results also
+* *1 Hour* Applied the application to the drone, had an issue were I could not see a change in the power consumption after realising that the compute units for the source task where negligible and made no difference to the final value so changed them.
