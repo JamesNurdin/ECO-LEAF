@@ -14,9 +14,8 @@ class MobilityManager:
         while True:
             for plot in farm.plots:
                 if plot.drone is not None:
-                    if ((env.now+ plot.power_domain.start_time_index) % 1440) >= PowerDomain.get_current_time(DRONE_RUN_TIMES[plot.plot_index]):
+                    if ((env.now + plot.power_domain.start_time_index) % 1440) >= PowerDomain.get_current_time(DRONE_RUN_TIMES[plot.plot_index]):
                         if plot.drone.last_execution_time != (env.now + plot.power_domain.start_time_index) // 1440:
-                            print(f"Running drone path at {PowerDomain.convert_to_time_string(env.now+ plot.power_domain.start_time_index)}")
                             env.process(self.run_drone(env, plot))
                             plot.drone.last_execution_time = (env.now + plot.power_domain.start_time_index) // 1440
             yield env.timeout(1)
@@ -47,8 +46,10 @@ class MobilityManager:
                 yield env.timeout(recharge_time)
             else:
                 self.move_drone(drone, plot, self.get_next_location(drone, plot))
-
+                plot.orchestrator.place(drone.application)
+                print(drone.utilization())
                 yield env.timeout(UPDATE_MOBILITY_INTERVAL)
+                drone.application.deallocate()
 
     def move_drone(self, drone, plot, location=None):
         if location is None:
@@ -58,7 +59,6 @@ class MobilityManager:
         drone.battery_power.consume_power(distance * drone.power_per_unit_traveled)
         plot.power_domain.record_power_consumption(drone, drone.battery_power, distance * drone.power_per_unit_traveled)
         drone.location = location
-
 
     def get_next_location(self, drone, plot):
         try:

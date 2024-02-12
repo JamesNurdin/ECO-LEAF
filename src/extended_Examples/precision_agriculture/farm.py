@@ -45,8 +45,10 @@ class Plot:
 
         if DRONE_DISTRIBUTION[self.plot_index]:
             self.drone = Drone(self, self.fog_location, self.env, self.power_domain, infrastructure, self.get_drone_path())
+
             self.all_entities.append(self.drone)
             infrastructure.add_node(self.drone)
+            infrastructure.add_link(LinkWanUp(self.drone, self.fog_node, f"Link_{self.drone.name}_to_{self.fog_node.name}"))
             self.power_domain.add_power_source(self.drone.battery_power)
             self.power_sources.append(self.drone.battery_power)
         else:

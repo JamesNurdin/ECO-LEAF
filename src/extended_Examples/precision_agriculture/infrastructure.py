@@ -53,14 +53,14 @@ class Drone(Node):
         self.application = self._create_drone_application(cloud)
         self.last_execution_time = -1
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
-        self.battery_power = BatteryPower(env, power_domain=power_domain, priority=1,
+        self.battery_power = BatteryPower(env, name=f"{plot.name}_Battery", power_domain=power_domain, priority=1,
                                           total_power_available=TAXI_BATTERY_SIZE, static=True, powered_infrastructure=[self])
         self.locations_iterator = drone_path
 
     # TODO properly create application
     def _create_drone_application(self, cloud) -> Application:
         # Initialise three tasks
-        source_task = SourceTask(cu=9, bound_node=self)
+        source_task = SourceTask(cu=900000, bound_node=self)
         processing_task = ProcessingTask(cu=5)
         sink_task = SinkTask(cu=10, bound_node=cloud)
 
