@@ -1,13 +1,10 @@
-import logging
 import simpy
 
-from src.extendedLeaf.events import PowerDomainEvent, EventDomain
+from src.extendedLeaf.events import EventDomain, PowerDomainEvent
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
-from src.extended_Examples.precision_agriculture.farm import Farm
-from src.extended_Examples.precision_agriculture.mobility import MobilityManager
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
+from src.extended_Examples.main_examples.example7.farm import Farm
+from src.extended_Examples.main_examples.example7.mobility import MobilityManager
+from src.extended_Examples.main_examples.example7.settings import START_TIME
 
 
 def main():
@@ -15,18 +12,26 @@ def main():
     env = simpy.Environment()
     farm = Farm(env)
     farm.run(env)
+
     # run any drone cycles
     mobility_model = MobilityManager()
-
     env.process(mobility_model.run(env, farm))
-    event_domain = EventDomain(env, update_interval=1, start_time_str="15:00:00")
 
-    """event_domain.add_event(
-        PowerDomainEvent(event=orchestrator.place, args=[application1], time_str="15:10:00", repeat=False))"""
+    event_domain = EventDomain(env, update_interval=1, start_time_str=START_TIME)
+
+    event_domain.add_event(
+        PowerDomainEvent(event=farm.deploy_sensor_applications, args=[], time_str="12:00:00", repeat=True, repeat_counter= 120))
+    event_domain.add_event(
+        PowerDomainEvent(event=farm.terminate_sensor_applications, args=[], time_str="13:00:00", repeat=True, repeat_counter= 120))
+
+    env.process(event_domain.run())
+
+
 
     # Run simulation
-    env.run(until=1400)  # run simulation for 10 seconds
+    env.run(until=2800)  # run simulation for 2 days.
 
+    # Plot results
     file_handler = FileHandler()
     for plot in farm.plots:
         filename = f"Plot_Results_{plot.plot_index}"

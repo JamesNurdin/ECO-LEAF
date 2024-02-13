@@ -1,13 +1,8 @@
-from typing import List
-
-import simpy
-
-from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.mobility import Location
-from src.extended_Examples.precision_agriculture.power import PowerDomain, PoweredInfrastructureDistributor, BatteryPower
-from src.extended_Examples.precision_agriculture.settings import *
+from src.extended_Examples.main_examples.example7.application import SensorApplication, DroneApplication
+from src.extended_Examples.main_examples.example7.settings import *
 from src.extendedLeaf.infrastructure import Link, Node
-from src.extendedLeaf.power import PowerModelLink, PowerModelNode, PowerMeasurement
+from src.extendedLeaf.power import PowerModelLink, PowerModelNode, BatteryPower
 
 
 class Cloud(Node):
@@ -23,17 +18,8 @@ class CropSensor(Node):
                          location=location)
         infrastructure.add_node(self)
         cloud = infrastructure.nodes(type_filter=Cloud)[0]
-        self.application = self._create_sensor_node_application(cloud)
+        self.application = SensorApplication(f"Plot_{plot.plot_index}_Sensor_Application", self, cloud)
 
-    def _create_sensor_node_application(self, application_sink) -> Application:
-        application = Application()
-        source_task = SourceTask(cu=SENSOR_TASK_CU, bound_node=self)
-        application.add_task(source_task)
-        processing_task = ProcessingTask(cu=FOG_PROCESSOR_CU)
-        application.add_task(processing_task, incoming_data_flows=[(source_task, SENSOR_SOURCE_TO_FOG_BIT_RATE)])
-        sink_task = SinkTask(cu=0, bound_node=application_sink)
-        application.add_task(sink_task, incoming_data_flows=[(processing_task, FOG_TO_CLOUD_BIT_RATE)])
-        return application
 
 class FogNode(Node):
     def __init__(self, plot, location):
@@ -44,34 +30,17 @@ class FogNode(Node):
 
 
 class Drone(Node):
-    def __init__(self, plot, location, env, power_domain, infrastructure, drone_path):
+    def __init__(self, plot, location, env, power_domain, infrastructure):
         super().__init__(name=f"{plot.name}_Drone",
                          cu=DRONE_CU,
                          power_model=PowerModelNode(max_power=DRONE_MAX_POWER, static_power=DRONE_STATIC_POWER),
                          location=location)
         cloud = infrastructure.nodes(type_filter=Cloud)[0]
-        self.application = self._create_drone_application(cloud)
-        self.last_execution_time = -1
+        self.application = DroneApplication(f"Plot_{plot.plot_index}_Drone_Application", self, cloud)
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
         self.battery_power = BatteryPower(env, name=f"{plot.name}_Battery", power_domain=power_domain, priority=1,
-                                          total_power_available=TAXI_BATTERY_SIZE, static=True, powered_infrastructure=[self])
-        self.locations_iterator = drone_path
-
-    # TODO properly create application
-    def _create_drone_application(self, cloud) -> Application:
-        # Initialise three tasks
-        source_task = SourceTask(cu=900000, bound_node=self)
-        processing_task = ProcessingTask(cu=5)
-        sink_task = SinkTask(cu=10, bound_node=cloud)
-
-        # Build Application
-        application = Application()
-        application.add_task(source_task)
-        application.add_task(processing_task, incoming_data_flows=[(source_task, 100)])
-        application.add_task(sink_task, incoming_data_flows=[(processing_task, 500)])
-
-        return application
-
+                                          total_power_available=DRONE_BATTERY_SIZE, static=True, powered_infrastructure=[self])
+        self.locations_iterator = plot.get_drone_path()
 
 
 class RechargeStation(Node):

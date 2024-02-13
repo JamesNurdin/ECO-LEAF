@@ -1,8 +1,7 @@
 import simpy
 
-from src.extended_Examples.precision_agriculture.infrastructure import Drone
-from src.extended_Examples.precision_agriculture.power import PowerDomain
-from src.extended_Examples.precision_agriculture.settings import *
+from src.extendedLeaf.power import PowerDomain
+from src.extended_Examples.main_examples.example7.settings import *
 
 
 class MobilityManager:
@@ -15,9 +14,9 @@ class MobilityManager:
             for plot in farm.plots:
                 if plot.drone is not None:
                     if ((env.now + plot.power_domain.start_time_index) % 1440) >= PowerDomain.get_current_time(DRONE_RUN_TIMES[plot.plot_index]):
-                        if plot.drone.last_execution_time != (env.now + plot.power_domain.start_time_index) // 1440:
+                        if plot.drone.application.last_execution_time != (env.now + plot.power_domain.start_time_index) // 1440:
                             env.process(self.run_drone(env, plot))
-                            plot.drone.last_execution_time = (env.now + plot.power_domain.start_time_index) // 1440
+                            plot.drone.application.last_execution_time = (env.now + plot.power_domain.start_time_index) // 1440
             yield env.timeout(1)
 
     def run_drone(self, env: simpy.Environment, plot):
@@ -47,7 +46,6 @@ class MobilityManager:
             else:
                 self.move_drone(drone, plot, self.get_next_location(drone, plot))
                 plot.orchestrator.place(drone.application)
-                print(drone.utilization())
                 yield env.timeout(UPDATE_MOBILITY_INTERVAL)
                 drone.application.deallocate()
 

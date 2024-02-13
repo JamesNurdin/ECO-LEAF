@@ -126,6 +126,7 @@ class PowerModelNode(PowerModel):
             dynamic_power = self.power_per_cu * self.node.used_cu
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
+        print(f"{self.node.name}_{(self.max_power - self.static_power)}")
         return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power * update_interval/60)
 
     def set_parent(self, parent):
@@ -330,8 +331,8 @@ class PowerSource(ABC):
         if data_set_filename is not None:
             self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
             self.next_update_time = list(self.power_data.keys())[0]
-            self.update_interval = self.power_domain.get_current_time(
-                list(self.power_data.keys())[1]) - self.power_domain.get_current_time(list(self.power_data.keys())[0])
+            self.update_interval = PowerDomain.get_current_time(
+                list(self.power_data.keys())[1]) - PowerDomain.get_current_time(list(self.power_data.keys())[0])
 
     def get_current_power(self) -> float:
         return self.remaining_power
@@ -639,14 +640,14 @@ class PowerDomain:
         carbon_intensity = 0
         for time_offset in range(time_to_recharge):
             carbon_intensity = power_source.get_current_carbon_intensity(time_offset)
-            carbon_released += power_source.power_domain.calculate_carbon_released(power_consumed, carbon_intensity)
+            carbon_released += PowerDomain.calculate_carbon_released(power_consumed, carbon_intensity)
         recharge_data = {"Power Used": power_consumed,
                          "Carbon Intensity": carbon_intensity,
                          "Carbon Released": carbon_released}
 
         """ Update the logs of the power source"""
-        power_source.power_domain.logging_data[power_source.name] = {entity.name: recharge_data}
-        power_source.power_domain.carbon_emitted.append(carbon_released)
+        self.logging_data[power_source.name] = {entity.name: recharge_data}
+        self.carbon_emitted.append(carbon_released)
 
     def get_best_power_source(self, power_to_consume):
         """
