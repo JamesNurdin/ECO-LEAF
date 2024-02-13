@@ -292,3 +292,5 @@ Holiday break
 ### 6th Feb
 * *3.5 Hours* Encountered an issue with the main example where the power consumption for the drone traversing the plot was not being recorded, introduced a more streamline way for the user to integrate power consumption, also identified an issue where the power domain run method was being called twice clearing results also
 * *1 Hour* Applied the application to the drone, had an issue were I could not see a change in the power consumption after realising that the compute units for the source task where negligible and made no difference to the final value so changed them.
+### 8th Feb
+* *4.5 Hours* Finished working on the logic to the final example, by: correcting issues with the number of sensors, adding the logic to the applications and the placement of them, restructuring of the file, introducing a carbon aware orchestrator.
