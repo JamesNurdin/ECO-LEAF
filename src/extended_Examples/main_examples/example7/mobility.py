@@ -25,7 +25,7 @@ class MobilityManager:
             drone moves throughout the plot
             at each location on travel path the application is placed signaling that a reading is occuring
             before each traversal to the next location a check occurs to ensure that their is enough power
-                if theres enough continue
+                if there's enough continue
                 else return back to the recharge point
             once at the end of the path:
                 return to the recharge point

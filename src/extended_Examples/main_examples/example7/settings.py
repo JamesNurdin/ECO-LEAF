@@ -23,7 +23,7 @@ START_TIME = "11:00:00"
 """ Farm scenario parameters """
 NUMBER_OF_PLOTS = 4
 PLOT_NAMES = ["Plot_1", "Plot_2", "Plot_3", "Plot_4"]
-PLOT_SIZES = [(500, 500), (500, 500), (500, 500), (500, 500)]   # (Width, Height) in meters.
+PLOT_SIZES = [(500, 500), (1500, 1500), (500, 500), (500, 500)]   # (Width, Height) in meters.
 POWER_SOURCES_AVAILABLE = [[SolarPower, WindPower, GridPower],
                            [SolarPower, GridPower],
                            [WindPower, GridPower],

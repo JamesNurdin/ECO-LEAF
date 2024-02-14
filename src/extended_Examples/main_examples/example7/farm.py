@@ -164,7 +164,6 @@ class Farm:
         for plot in self.plots:
             for sensor in plot.sensors:
                 plot.orchestrator.place(sensor.application)
-                print(sensor.application.tasks())
 
     def terminate_sensor_applications(self):
         for plot in self.plots:

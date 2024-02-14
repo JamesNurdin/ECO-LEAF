@@ -80,7 +80,8 @@ class PowerModel(ABC):
     @abstractmethod
     def update_sensitive_measure(self, update_interval):
         """ return the current power usage, relative to the time elapsed
-            units are KWH."""
+            units are WH as we are simplifying the conversion from watts to watt hours:
+            W * 60 (conv to Wm, how much energy has been consumed in 60s) * update interval (in mins) / 3600."""
 
 
 class PowerModelNode(PowerModel):
@@ -126,7 +127,6 @@ class PowerModelNode(PowerModel):
             dynamic_power = self.power_per_cu * self.node.used_cu
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
-        print(f"{self.node.name}_{(self.max_power - self.static_power)}")
         return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power * update_interval/60)
 
     def set_parent(self, parent):

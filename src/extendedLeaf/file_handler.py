@@ -438,7 +438,8 @@ class FigurePlotter:
             if node is not None:
                 nodes[node.name] = {"Power Used": [None] * len(list(time_series.keys())),
                                     "Carbon Intensity": [None] * len(list(time_series.keys())),
-                                    "Carbon Released": [None] * len(list(time_series.keys()))}
+                                    "Carbon Released": [None] * len(list(time_series.keys())),
+                                    "Total Carbon Released": [None] * len(list(time_series.keys()))}
         # Go through each time series
         for time_index, (time, power_sources) in enumerate(time_series.items()):
             # Go through each power source to isolate nodes
@@ -460,8 +461,10 @@ class FigurePlotter:
                 power_source_results[power_source.name] = {"Power Used": [None] * len(list(time_series.keys())),
                                     "Carbon Intensity": [power_source.get_carbon_intensity_at_time(time) for time in range(len(list(time_series.keys())))],
                                     "Power Available": [power_source.get_power_at_time(time) for time in range(len(list(time_series.keys())))],
-                                    "Carbon Released": [None] * len(list(time_series.keys()))}
+                                    "Carbon Released": [None] * len(list(time_series.keys())),
+                                    "Total Carbon Released": [None] * len(list(time_series.keys()))}
         # Go through each time series
+        running_carbon_released_totals = [0] * len(list(power_source_results.keys()))
         for time_index, (time, power_sources) in enumerate(time_series.items()):
             # Go through each power source to isolate nodes
             for power_source_index, power_source in enumerate(power_sources):
@@ -475,4 +478,6 @@ class FigurePlotter:
                             carbon_released = carbon_released + power_sources[power_source][node]["Carbon Released"]
                     power_source_results[power_source]["Power Used"][time_index] = power_used
                     power_source_results[power_source]["Carbon Released"][time_index] = carbon_released
+                    running_carbon_released_totals[power_source_index] = running_carbon_released_totals[power_source_index] + carbon_released
+                    power_source_results[power_source]["Total Carbon Released"][time_index] = running_carbon_released_totals[power_source_index]
         return power_source_results

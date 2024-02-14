@@ -42,7 +42,8 @@ def main():
         fig2 = figure_plotter.subplot_time_series_entities("Power Used", entities=plot.all_entities)
         fig3 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=plot.power_sources)
         fig4 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=plot.power_sources)
-        figs = [fig1, fig2, fig3, fig4]
+        fig5 = figure_plotter.subplot_time_series_power_sources("Total Carbon Released", power_sources=plot.power_sources)
+        figs = [fig1, fig2, fig3, fig4, fig5]
         main_fig = figure_plotter.aggregate_subplots(figs)
         file_handler.write_figure_to_file(main_fig, len(figs), filename)
         main_fig.show()

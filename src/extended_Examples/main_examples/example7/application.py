@@ -7,7 +7,6 @@ class SensorApplication(Application):
     def __init__(self, name, source_node, sink_node):
         super().__init__(name)
         self.source_node = source_node
-        print(source_node)
         self.sink_node = sink_node
 
         source_task = SourceTask(cu=SENSOR_SOURCE_TASK_CU, bound_node=self.source_node)
