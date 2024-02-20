@@ -289,8 +289,14 @@ Holiday break
 ## Week 21
 ### 5th February 
 * *1.5 Hour* Identified the issue with the power domain and removed the static nature from that and moved it to the power sources, here power sources declare whether they are static or not, the same logic occurs.
-### 6th Feb
+### 6th February
 * *3.5 Hours* Encountered an issue with the main example where the power consumption for the drone traversing the plot was not being recorded, introduced a more streamline way for the user to integrate power consumption, also identified an issue where the power domain run method was being called twice clearing results also
 * *1 Hour* Applied the application to the drone, had an issue were I could not see a change in the power consumption after realising that the compute units for the source task where negligible and made no difference to the final value so changed them.
-### 8th Feb
+### 7th February
+* *0.5 Hours* Meeting with Lauritz.
+### 8th February
 * *4.5 Hours* Finished working on the logic to the final example, by: correcting issues with the number of sensors, adding the logic to the applications and the placement of them, restructuring of the file, introducing a carbon aware orchestrator.
+### 10th February
+* *1 Hour* Initial outline and plan for the dissertation has been produced, in particular key ideas and aspects I intend to include, in addition to this I have also set up a custom compiler to allow for citations to be entered by the user.
+### 11th February
+* *2 Hours* Reworked how total available power is held for power sources in particular, moved the power_log dictionary to the parent class of power source and record all sources "remaining power" attribute, this dictionary is then used to plot available power instead of the data read from file to allow for a more accurate value.
