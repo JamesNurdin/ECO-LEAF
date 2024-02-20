@@ -173,7 +173,7 @@ def main():
     event_figure = figure_plotter.subplot_events(event_domain.event_history)
     fig1 = figure_plotter.subplot_time_series_entities("Power Used", entities=entities)
     fig2 = figure_plotter.subplot_time_series_power_sources("Carbon Released", power_sources=[solar_power, battery_power, grid_power])
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[battery_power])
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[battery_power,solar_power])
     fig4 = figure_plotter.subplot_time_series_power_meter([application2_pm,application1_pm])
     figs = [event_figure, fig1, fig2, fig3, fig4]
     main_fig = figure_plotter.aggregate_subplots(figs)

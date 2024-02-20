@@ -458,9 +458,16 @@ class FigurePlotter:
         power_source_results = {}
         for power_source in desired_power_sources:
             if power_source is not None:
+                power_available = []
+                for time in time_series.keys():
+                    if time in power_source.power_log.keys():
+                        power_available.append(power_source.get_remaining_power_at_time(time))
+                    else:
+                        power_available.append(None)
+
                 power_source_results[power_source.name] = {"Power Used": [None] * len(list(time_series.keys())),
                                     "Carbon Intensity": [power_source.get_carbon_intensity_at_time(time) for time in range(len(list(time_series.keys())))],
-                                    "Power Available": [power_source.get_power_at_time(time) for time in range(len(list(time_series.keys())))],
+                                    "Power Available": power_available,
                                     "Carbon Released": [None] * len(list(time_series.keys())),
                                     "Total Carbon Released": [None] * len(list(time_series.keys()))}
         # Go through each time series

@@ -334,8 +334,15 @@ class PowerSource(ABC):
             self.update_interval = PowerDomain.get_current_time(
                 list(self.power_data.keys())[1]) - PowerDomain.get_current_time(list(self.power_data.keys())[0])
 
+        self.power_log = {}
+
     def get_current_power(self) -> float:
         return self.remaining_power
+
+    def get_remaining_power_at_time(self, time: str):
+        if time not in self.power_log.keys():
+            raise ValueError(f"Error: time: {time} was not present in logs")
+        return self.power_log[time]
 
     def set_current_power(self, remaining_power):
         if remaining_power < 0:
@@ -679,8 +686,7 @@ class PowerDomain:
 
             current_power_source_carbon_released += carbon_released
             current_power_source_dictionary[entity.name] = entity_data
-        if current_power_source.powerType == PowerType.BATTERY:
-            current_power_source.power_log[self.env.now] = current_power_source.get_current_power()
+            current_power_source.power_log[str(self.env.now + self.start_time_index)] = current_power_source.get_current_power()
 
         current_power_source_dictionary["Total Carbon Released"] = current_power_source_carbon_released
         return current_power_source_dictionary
@@ -922,7 +928,6 @@ class BatteryPower(PowerSource):
         self.total_power = total_power_available  # kWh
         self.recharge_rate = charge_rate  # kw/h
         self.recharge_data = []
-        self.power_log = {}
 
     def update_power_available(self):
         pass
