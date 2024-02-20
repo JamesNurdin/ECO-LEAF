@@ -127,7 +127,7 @@ class PowerModelNode(PowerModel):
             dynamic_power = self.power_per_cu * self.node.used_cu
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
-        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=self.static_power * update_interval/60)
+        return PowerMeasurement(dynamic=dynamic_power /60, static=self.static_power /60)
 
     def set_parent(self, parent):
         self.node = parent
@@ -158,7 +158,7 @@ class PowerModelLink(PowerModel):
         if self.link.src.paused or self.link.src.tasks == []:
             return PowerMeasurement(0, 0)
         dynamic_power = self.energy_per_bit * self.link.used_bandwidth
-        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=0)
+        return PowerMeasurement(dynamic=dynamic_power/60, static=0)
 
 
 class PowerModelLinkWirelessTx(PowerModel):
@@ -196,7 +196,7 @@ class PowerModelLinkWirelessTx(PowerModel):
         distance = self.link.src.distance(self.link.dst)
         dissipation_energy_per_bit = self.amplifier_dissipation * distance ** 2
         dynamic_power = (self.energy_per_bit + dissipation_energy_per_bit) * self.link.used_bandwidth
-        return PowerMeasurement(dynamic=dynamic_power * update_interval/60, static=0)
+        return PowerMeasurement(dynamic=dynamic_power/60, static=0)
 
     def set_parent(self, parent):
         self.link = parent
@@ -361,7 +361,8 @@ class PowerSource(ABC):
 
     @abstractmethod
     def update_carbon_intensity(self):
-        """Update a power sources carbon intensity."""
+        """Update a power sources carbon intensity. use env.now rather than self.env.now + self.start_time_index
+        as the data is reformatted so the desired start time is at index 0"""
 
     def evaluate_entities(self):
         for entity in self.powered_infrastructure:
@@ -585,9 +586,7 @@ class PowerDomain:
             for entity in powered_infrastructure:
                 self.add_entity(entity)
 
-        if update_interval < 1:
-            raise ValueError(f"Error update interval should be positive.")
-        self.update_interval = update_interval
+        self.update_interval = 1
 
     def run(self, env):
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
@@ -608,6 +607,7 @@ class PowerDomain:
                                          power_source is not None]:
                 """Update the power available to the power source"""
                 current_power_source.update_power_available()
+                current_power_source.update_carbon_intensity()
 
             """Execute any pre-planned commands at the current moment of time"""
 

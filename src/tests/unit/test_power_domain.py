@@ -47,7 +47,7 @@ class TestPowerDomain(unittest.TestCase):
         self.assertEqual(power_domain.powered_infrastructure_distributor, self.mock_powered_infrastructure_distributor)
         self.assertEqual(power_domain.start_time_string, string_start_time)
         self.assertEqual(power_domain.powered_infrastructure, powered_infrastructure)
-        self.assertEqual(power_domain.update_interval, update_interval)
+        self.assertEqual(power_domain.update_interval, 1)
 
         # Assert attributes constructed automatically
         self.assertEqual(power_domain.carbon_emitted, [])

@@ -113,7 +113,7 @@ def main():
 
     entities = infrastructure.nodes() + infrastructure.links()
 
-    power_domain = PowerDomain(env, name="Power Domain 1", start_time_str="15:00:00", update_interval=1)
+    power_domain = PowerDomain(env, name="Power Domain 1", start_time_str="15:00:00")
     solar_power = SolarPower(env, power_domain=power_domain, priority=1,
                              powered_infrastructure=[solar_microprocessor, solar_wired_link_from_source,
                                                      solar_wifi_link_to_server], static=True)
