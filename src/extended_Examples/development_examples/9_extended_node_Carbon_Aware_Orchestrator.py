@@ -26,15 +26,15 @@ def main():
         DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=24.00W)
         ...
         DEBUG	148: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	148: application_meter: PowerMeasurement(dynamic=13.77W, static=3.00W)
-        DEBUG	148: infrastructure_meter: PowerMeasurement(dynamic=34.89W, static=24.00W)
+        DEBUG	148: application_meter: PowerMeasurement(dynamic=52.39W, static=14.00W)
+        DEBUG	148: infrastructure_meter: PowerMeasurement(dynamic=52.39W, static=24.00W)
         DEBUG	149: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	149: application_meter: PowerMeasurement(dynamic=13.77W, static=3.00W)
-        DEBUG	149: infrastructure_meter: PowerMeasurement(dynamic=34.89W, static=24.00W)
-        INFO	Total application power usage: 5334.118215384617 Ws
-        INFO	Total application power usage: 6149.721237948734 Ws
-        INFO	Total infrastructure power usage: 14544.43333333332 Ws
-        INFO	Total carbon emitted: 35.62215131399992 gCo2
+        DEBUG	149: application_meter: PowerMeasurement(dynamic=52.39W, static=14.00W)
+        DEBUG	149: infrastructure_meter: PowerMeasurement(dynamic=52.39W, static=24.00W)
+        INFO	Total application power usage: 3809.1182153846175 Ws
+        INFO	Total application power usage: 7025.061584615381 Ws
+        INFO	Total infrastructure power usage: 12474.100000000008 Ws
+        INFO	Total carbon emitted: 38.574354082000134 gCo2
 
     """
     env = simpy.Environment()  # creating SimPy simulation environment
@@ -42,7 +42,7 @@ def main():
 
     # Initializing infrastructure and workload
     source_node = Node("source_node", cu=40, power_model=PowerModelNode(max_power=30, static_power=3))  # Source
-    grid_node = Node("grid_node", cu=20, power_model=PowerModelNode(max_power=40, static_power=5))  # processing task
+    grid_node = Node("grid_node", cu=40, power_model=PowerModelNode(max_power=40, static_power=5))  # processing task
     solar_node = Node("solar_node", cu=40, power_model=PowerModelNode(max_power=70, static_power=10))  # processing task
     battery_node = Node("battery_node", cu=30, power_model=PowerModelNode(max_power=50, static_power=7))  # processing task
     sink_node = Node("sink_node", cu=25, power_model=PowerModelNode(max_power=50, static_power=6))  # sink

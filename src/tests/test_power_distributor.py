@@ -36,7 +36,7 @@ class MyTestCase(unittest.TestCase):
         self.low_priority_power_source.powered_infrastructure = [self.mock_entity]
         # Entity initially is in a lower power source.
         self.mock_entity.power_model.power_source = self.low_priority_power_source
-        self.mock_entity.power_model.update_sensitive_measure.return_value = 30.0
+        self.mock_entity.power_model.update_sensitive_measure.return_value = 30.0/60
 
         # Mock the get_current_time method to return a specific value (600 in this case).
         self.powered_infrastructure_distributor.default_powered_infrastructure_distribution_method(

@@ -32,19 +32,20 @@ def main():
         DEBUG	1: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	1: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         ...
-        DEBUG	148: application_meter: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	148: infrastructure_meter: PowerMeasurement(dynamic=26.88W, static=10.00W)
-        DEBUG	148: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	148: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	148: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	149: application_meter: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	149: infrastructure_meter: PowerMeasurement(dynamic=26.88W, static=10.00W)
-        DEBUG	149: Source Task: PowerMeasurement(dynamic=1.08W, static=3.00W)
-        DEBUG	149: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        DEBUG	149: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        INFO	Total application power usage: 2774.9438600000058 Ws
-        INFO	Total infrastructure power usage: 6284.500000000012 Ws
-        INFO	Total carbon emitted: 6.265203955999975 gCo2
+        DEBUG	598: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	598: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	598: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	598: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	599: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	599: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	599: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        DEBUG	599: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
+        INFO	Total application power usage: 10211.317180000045 Ws
+        INFO	Total infrastructure power usage: 10900.000000000027 Ws
+        INFO	Total carbon emitted: 14.428666666666608 gCo2
+
 
     """
     env = simpy.Environment()  # creating SimPy simulation environment
@@ -110,7 +111,7 @@ def main():
     env.process(processing_task_pm.run(env))
     env.process(sink_task_pm.run(env))
 
-    env.run(until=150)
+    env.run(until=600)
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")

@@ -114,15 +114,15 @@ class TestSolarPower(unittest.TestCase):
         """ Testing purposes only, the framework does not anticipate erroneous times. """
         self.power_source.env = simpy.Environment(600)  # A valid time
         self.power_source.update_power_available()
-        self.assertEqual(self.power_source.get_current_power(), 100)
+        self.assertEqual(self.power_source.get_current_power(), 100/60)
 
         self.power_source.env = simpy.Environment(659)  # A valid time, outside of update interval
         self.power_source.update_power_available()
-        self.assertEqual(self.power_source.get_current_power(), 100)  # Should retain previous power before update
+        self.assertEqual(self.power_source.get_current_power(), 100/60)  # Should retain previous power before update
 
         self.power_source.env = simpy.Environment(2040)  # A valid time, after the 24 hours (24*60) = 1440
         self.power_source.update_power_available()
-        self.assertEqual(self.power_source.get_current_power(), 100)  # Should loop around back, 10am of Day 2
+        self.assertEqual(self.power_source.get_current_power(), 100/60)  # Should loop around back, 10am of Day 2
 
         self.power_source.env = simpy.Environment(-1)  # An invalid time
         self.power_source.update_power_available()
@@ -177,15 +177,15 @@ class TestWindPower(unittest.TestCase):
         """ Testing purposes only, the framework does not anticipate erroneous times. """
         self.power_source.env = simpy.Environment(600)  # A valid time
         self.power_source.update_power_available()
-        self.assertEqual(self.power_source.get_current_power(), 100)
+        self.assertEqual(self.power_source.get_current_power(), 100/60)
 
         self.power_source.env = simpy.Environment(659)  # A valid time, outside of update interval
         self.power_source.update_power_available()
-        self.assertEqual(self.power_source.get_current_power(), 100)  # Should retain previous power before update
+        self.assertEqual(self.power_source.get_current_power(), 100/60)  # Should retain previous power before update
 
         self.power_source.env = simpy.Environment(2040)  # A valid time, after the 24 hours (24*60) = 1440
         self.power_source.update_power_available()
-        self.assertEqual(self.power_source.get_current_power(), 100)  # Should loop around back, 10am of Day 2
+        self.assertEqual(self.power_source.get_current_power(), 100/60)  # Should loop around back, 10am of Day 2
 
         self.power_source.env = simpy.Environment(-1)  # An invalid time
         self.power_source.update_power_available()
@@ -345,13 +345,13 @@ class TestBatteryPower(unittest.TestCase):
         """ Test that the power available is infinite. """
         self.power_source.remaining_power = 50
 
-        self.assertEqual(self.power_source.get_current_power(), 50)
+        self.assertEqual(self.power_source.get_current_power(), 50/60)
 
     def test_set_current_power(self):
         """ Test that the remaining power left is correct. """
         self.power_source.remaining_power = 50
         self.power_source.set_current_power(100)  # Valid power
-        self.assertEqual(self.power_source.get_current_power(), 100)
+        self.assertEqual(self.power_source.get_current_power(), 100/60)
         with self.assertRaises(ValueError):
             self.power_source.set_current_power(-1)  # Invalid power
 
@@ -366,7 +366,7 @@ class TestBatteryPower(unittest.TestCase):
 
         self.power_source.remaining_power = 10
         self.power_source.recharge_battery(other_power_source)
-        self.assertEqual(self.power_source.get_current_power(), self.power_source.total_power)
+        self.assertEqual(self.power_source.get_current_power(), self.power_source.get_total_power())
 
     def test_get_current_carbon_intensity(self):
         """ Test to ensure that no carbon intensity is being given off, given off through recharge instead. """

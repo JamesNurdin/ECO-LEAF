@@ -36,7 +36,8 @@ def main():
         DEBUG	49: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
         INFO	Total application power usage: 1536.5209999999997 Ws
         INFO	Total infrastructure power usage: 8036.499999999993 Ws
-        INFO	Total carbon emitted: 28.32829286866667 gCo2
+        INFO	Total carbon emitted: 11.124292868666663 gCo2
+
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()

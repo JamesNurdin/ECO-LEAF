@@ -39,7 +39,7 @@ def main():
         DEBUG	1440: Sink Task: PowerMeasurement(dynamic=0.20W, static=20.00W)
         INFO	Total application power usage: 17494.150650000203 Ws
         INFO	Total infrastructure power usage: 36099.26245000072 Ws
-        INFO	Total carbon emitted: 79.30067750000022 gCo2
+        INFO	Total carbon emitted: 87.37827750000042 gCo2
     """
     env = simpy.Environment()
     infrastructure = Infrastructure()

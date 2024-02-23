@@ -300,3 +300,7 @@ Holiday break
 * *1 Hour* Initial outline and plan for the dissertation has been produced, in particular key ideas and aspects I intend to include, in addition to this I have also set up a custom compiler to allow for citations to be entered by the user.
 ### 11th February
 * *2 Hours* Reworked how total available power is held for power sources in particular, moved the power_log dictionary to the parent class of power source and record all sources "remaining power" attribute, this dictionary is then used to plot available power instead of the data read from file to allow for a more accurate value.
+
+## Week 22
+### 13th February
+* *6 Hours* After looking through the code trying to ensure that the calculations were sound, I figured out the conversion between units was incorrect. As a result of this many hours were spent trying to resolve the issue without overhauling the power, the solution is to consider power consumed in Wh, as a result some chnages were made to carry out this.

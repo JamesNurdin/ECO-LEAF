@@ -70,8 +70,8 @@ def main():
         DEBUG	599: application_1_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	599: application_2_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         INFO	Total infrastructure power usage: 19353.39299999997 Ws
-        INFO	Total carbon emitted: 142.81519929999982 gCo2
-    """
+        INFO	Total carbon emitted: 71.75519929999965 gCo2
+         """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
 
@@ -113,7 +113,7 @@ def main():
 
     entities = infrastructure.nodes() + infrastructure.links()
 
-    power_domain = PowerDomain(env, name="Power Domain 1", start_time_str="15:00:00")
+    power_domain = PowerDomain(env, name="Power Domain 1", start_time_str="15:00:00", update_interval=1)
     solar_power = SolarPower(env, power_domain=power_domain, priority=1,
                              powered_infrastructure=[solar_microprocessor, solar_wired_link_from_source,
                                                      solar_wifi_link_to_server], static=True)
@@ -173,7 +173,7 @@ def main():
     event_figure = figure_plotter.subplot_events(event_domain.event_history)
     fig1 = figure_plotter.subplot_time_series_entities("Power Used", entities=entities)
     fig2 = figure_plotter.subplot_time_series_power_sources("Carbon Released", power_sources=[solar_power, battery_power, grid_power])
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[battery_power,solar_power])
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[battery_power])
     fig4 = figure_plotter.subplot_time_series_power_meter([application2_pm,application1_pm])
     figs = [event_figure, fig1, fig2, fig3, fig4]
     main_fig = figure_plotter.aggregate_subplots(figs)

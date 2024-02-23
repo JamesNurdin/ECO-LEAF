@@ -1,4 +1,3 @@
-import bisect
 import csv
 import logging
 import math
@@ -127,7 +126,7 @@ class PowerModelNode(PowerModel):
             dynamic_power = self.power_per_cu * self.node.used_cu
         else:
             raise RuntimeError("Invalid state of PowerModelNode: `max_power` and `power_per_cu` are undefined.")
-        return PowerMeasurement(dynamic=dynamic_power /60, static=self.static_power /60)
+        return PowerMeasurement(dynamic=dynamic_power/60, static=self.static_power/60)
 
     def set_parent(self, parent):
         self.node = parent
@@ -307,21 +306,21 @@ class PowerSource(ABC):
                 remaining_power: Floating point which describes the remaining power of the power source for the
                     remainder of the "update event".
     """
-    def __init__(self, env: Environment, name, data_set_filename=None, power_domain=None, priority: int = 0,
+    def __init__(self, env: Environment, name, power_type, data_set_filename=None, power_domain=None, priority: int = 0,
                  powered_infrastructure: ["PowerModel"] = None, remaining_power=0, static=False):
-        self.name = name
-        self.env = env
-        self.carbon_intensity = 0
-        self.remaining_power = remaining_power
-        self.priority = priority
+        self.name: str = name
+        self.env: Environment = env
+        self.carbon_intensity: int = 0
+        self.remaining_power: float = remaining_power
+        self.priority: int = priority
 
-        self.static = static
-        self.powerType = None
+        self.static: bool = static
+        self.powerType: PowerType = power_type
 
         if power_domain is None:
             raise AttributeError(f"No power domain was supplied")
-        self.power_domain = power_domain
-        self.powered_infrastructure = []
+        self.power_domain: PowerDomain = power_domain
+        self.powered_infrastructure: [PowerModel] = []
 
         if self.static:
             if powered_infrastructure:
@@ -330,19 +329,19 @@ class PowerSource(ABC):
 
         if data_set_filename is not None:
             self._retrieve_power_data(data_set_filename, self.power_domain.start_time_string)
-            self.next_update_time = list(self.power_data.keys())[0]
-            self.update_interval = PowerDomain.get_current_time(
+            self.next_update_time: str = list(self.power_data.keys())[0]
+            self.update_interval: int = PowerDomain.get_current_time(
                 list(self.power_data.keys())[1]) - PowerDomain.get_current_time(list(self.power_data.keys())[0])
 
-        self.power_log = {}
+        self.remaining_power_log = {}
 
     def get_current_power(self) -> float:
-        return self.remaining_power
+        return self.remaining_power/60
 
-    def get_remaining_power_at_time(self, time: str):
-        if time not in self.power_log.keys():
+    def get_remaining_power_at_time(self, time: str) -> float:
+        if time not in self.remaining_power_log.keys():
             raise ValueError(f"Error: time: {time} was not present in logs")
-        return self.power_log[time]
+        return self.remaining_power_log[time]
 
     def set_current_power(self, remaining_power):
         if remaining_power < 0:
@@ -350,6 +349,7 @@ class PowerSource(ABC):
         self.remaining_power = remaining_power
 
     def consume_power(self, power_consumed):
+        """ Power consumed is in wh"""
         if self.get_current_power() < power_consumed:
             raise ValueError(f"Error, not enough power is able to be supplied.")
         else:
@@ -472,10 +472,10 @@ class PoweredInfrastructureDistributor:
 
     """
     def __init__(self, powered_infrastructure_distributor_method: Callable[[PowerSource, "PowerDomain"], None] = None,
-                 smart_distribution=True):
+                 smart_distribution: bool=True):
         self.powered_infrastructure_distributor_method = powered_infrastructure_distributor_method or \
                                                          self.default_powered_infrastructure_distribution_method
-        self.smart_distribution = smart_distribution
+        self.smart_distribution: bool = smart_distribution
 
     """DEFAULT powered infrastructure handler for a power source, every pass of the while loop in the simulation, 
     have to expect that the power sources may not be able to power their powered infrastructure, depending on the
@@ -566,27 +566,28 @@ class PowerDomain:
         if env is None:
             raise ValueError(f"Error: Power Domain was not supplied an environment. ")
         else:
-            self.env = env
+            self.env: Environment = env
         if name is None:
             raise ValueError(f"Error: Power Domain was not supplied a name. ")
         else:
             self.name = name
-        self.power_sources = []
-        self.carbon_emitted = []  # running count of carbon emissions
-        self.captured_data = {}  # data to be potentially written to file
-        self.logging_data = {}  # any data that needs to be logged which is captured in events
+        self.power_sources: [PowerSource] = []
+        self.carbon_emitted: [float] = []  # running count of carbon emissions
+        self.captured_data: {str: {str: {str: {str: str}}}} = {}  # data to be potentially written to file
+        self.logging_data: {str: {str: {str: {str: str}}}} = {}  # any data that needs to be logged which is captured in events
 
-        self.powered_infrastructure_distributor = powered_infrastructure_distributor or PoweredInfrastructureDistributor()
+        self.powered_infrastructure_distributor: PoweredInfrastructureDistributor = powered_infrastructure_distributor\
+                                                                                    or PoweredInfrastructureDistributor()
 
-        self.start_time_string = start_time_str
-        self.start_time_index = self.get_current_time(start_time_str)
-        self.powered_infrastructure = []
+        self.start_time_string: str = start_time_str
+        self.start_time_index: int = self.get_current_time(start_time_str)
+        self.powered_infrastructure: [PowerModel] = []
 
         if powered_infrastructure:
             for entity in powered_infrastructure:
                 self.add_entity(entity)
 
-        self.update_interval = 1
+        self.update_interval: [int] = 1
 
     def run(self, env):
         """Run method for the simpy environment, this will execute until the end of the simulation occurs,
@@ -656,7 +657,7 @@ class PowerDomain:
         self.logging_data[power_source.name] = {entity.name: recharge_data}
         self.carbon_emitted.append(carbon_released)
 
-    def get_best_power_source(self, power_to_consume):
+    def get_best_power_source(self, power_to_consume) -> PowerSource:
         """
         Finds the best power source to provide the power, takes advantage of the priority ordering to choose best
         """
@@ -666,10 +667,10 @@ class PowerDomain:
                 return current_power_source
         return None
 
-    def get_current_time_string(self):
+    def get_current_time_string(self) -> str:
         return self.convert_to_time_string((self.env.now + self.start_time_index) % 1440)
 
-    def record_power_source_carbon_released(self, current_power_source):
+    def record_power_source_carbon_released(self, current_power_source) -> {str: {str: str}}:
         if current_power_source is None:
             raise ValueError(f"Error: No power source was supplied.")
         current_power_source_dictionary = {}
@@ -686,8 +687,7 @@ class PowerDomain:
 
             current_power_source_carbon_released += carbon_released
             current_power_source_dictionary[entity.name] = entity_data
-            current_power_source.power_log[str(self.env.now + self.start_time_index)] = current_power_source.get_current_power()
-
+            current_power_source.remaining_power_log[str(self.env.now + self.start_time_index)] = current_power_source.get_current_power()
         current_power_source_dictionary["Total Carbon Released"] = current_power_source_carbon_released
         return current_power_source_dictionary
 
@@ -768,7 +768,7 @@ class PowerDomain:
                 self.power_sources[counter].priority = counter
 
     @classmethod
-    def calculate_carbon_released(cls, power_used, carbon_intensity):
+    def calculate_carbon_released(cls, power_used, carbon_intensity) -> float:
         """ While carbon intensity is measured in gCO2/kWH the call to time sensitive power measurements accounts
             for the amount of time that has occurred by instead of just reading the watts, it finds the kilowatts
             and the duration of time elapsed."""
@@ -793,13 +793,13 @@ class PowerDomain:
 
 
     @classmethod
-    def get_current_time(cls, time):
+    def get_current_time(cls, time) -> int:
         validate_str_time(time)
         hh, mm, ss = map(int, time.split(':'))
         return mm + (60 * hh)
 
     @classmethod
-    def convert_to_time_string(cls, time):
+    def convert_to_time_string(cls, time) -> str:
         if not isinstance(time, int):
             raise ValueError("Error: Invalid input. Please provide an integer.")
         if time < 0:
@@ -816,14 +816,13 @@ class SolarPower(PowerSource):
                     (All arguments relate to the abstract class)
 
     """
-    SOLAR_DATASET_FILENAME = "08-08-2020 Glasgow pv data.csv"
+    SOLAR_DATASET_FILENAME: str = "08-08-2020 Glasgow pv data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None, static: bool = False):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_infrastructure,
+        super().__init__(env, name, PowerType.RENEWABLE, data_set_filename, power_domain, priority, powered_infrastructure,
                          remaining_power=0, static=static)
-        self.inherent_carbon_intensity = 46
-        self.powerType = PowerType.RENEWABLE
+        self.inherent_carbon_intensity: float = 46
 
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
@@ -835,7 +834,7 @@ class SolarPower(PowerSource):
     def update_carbon_intensity(self):
         pass
 
-    def get_current_carbon_intensity(self, offset):
+    def get_current_carbon_intensity(self, offset) -> float:
         return self.inherent_carbon_intensity
 
     def get_carbon_intensity_at_time(self, time) -> float:
@@ -849,15 +848,13 @@ class WindPower(PowerSource):
                         (All arguments relate to the abstract class)
 
     """
-    WIND_DATASET_FILENAME = "01-01-2023 Ireland wind data.csv"
+    WIND_DATASET_FILENAME: str = "01-01-2023 Ireland wind data.csv"
 
     def __init__(self, env: Environment, name: str = "Wind", data_set_filename: str = WIND_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None, static: bool = False):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_infrastructure,
+        super().__init__(env, name, PowerType.RENEWABLE, data_set_filename, power_domain, priority, powered_infrastructure,
                          remaining_power=0, static=static)
-        self.inherent_carbon_intensity = 12
-        self.powerType = PowerType.RENEWABLE
-        self.finite_power = True
+        self.inherent_carbon_intensity: float = 12
 
     def update_power_available(self):
         self.remaining_power = self.get_power_at_time(self.env.now)
@@ -869,7 +866,7 @@ class WindPower(PowerSource):
     def update_carbon_intensity(self):
         pass
 
-    def get_current_carbon_intensity(self, offset):
+    def get_current_carbon_intensity(self, offset) -> float:
         return self.inherent_carbon_intensity
 
     def get_carbon_intensity_at_time(self, time) -> float:
@@ -883,14 +880,13 @@ class GridPower(PowerSource):
                             (All arguments relate to the abstract class)
 
     """
-    GRID_DATASET_FILENAME = "08-08-2023 national carbon intensity.csv"
+    GRID_DATASET_FILENAME: str = "08-08-2023 national carbon intensity.csv"
 
     def __init__(self, env: Environment, name: str = "Grid", data_set_filename: str = GRID_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None, static: bool = False):
-        super().__init__(env, name, data_set_filename, power_domain, priority, powered_infrastructure,
+        super().__init__(env, name, PowerType.MIXED, data_set_filename, power_domain, priority, powered_infrastructure,
                          remaining_power=np.inf, static=static)
-        self.carbon_intensity = 0
-        self.powerType = PowerType.MIXED
+        self.carbon_intensity: float = 0
 
     def update_carbon_intensity(self):
         self.carbon_intensity = self.get_current_carbon_intensity(0)
@@ -920,29 +916,31 @@ class BatteryPower(PowerSource):
     """
     def __init__(self, env: Environment, name: str = "Battery",
                  power_domain: PowerDomain = None, priority: int = 10,
-                 total_power_available=40, charge_rate=22, powered_infrastructure=None, static: bool = False):
-        super().__init__(env, name, None, power_domain, priority, powered_infrastructure, remaining_power=0, static=static)
+                 total_power_available=40, charge_rate=132, powered_infrastructure=None, static: bool = False):
+        super().__init__(env, name,PowerType.BATTERY, None, power_domain, priority, powered_infrastructure, remaining_power=0,
+                         static=static)
 
-        self.carbon_intensity = 0  # Assumed that carbon intensity comes from power source charging it
-        self.powerType = PowerType.BATTERY
-        self.total_power = total_power_available  # kWh
-        self.recharge_rate = charge_rate  # kw/h
-        self.recharge_data = []
+        self.carbon_intensity: float = 0  # Assumed that carbon intensity comes from power source charging it
+        self.total_power: float = total_power_available  #
+        self.recharge_rate: float = charge_rate  #
+
+    def get_total_power(self):
+        return self.total_power/60
 
     def update_power_available(self):
         pass
 
     def get_power_at_time(self, time_int) -> float:
-        return self.power_log[time_int]
+        return self.remaining_power_log[time_int]
 
-    def find_and_recharge_battery(self):
-        power_source = self.power_domain.get_best_power_source(self.total_power - self.remaining_power)
+    def find_and_recharge_battery(self) -> int:
+        power_source = self.power_domain.get_best_power_source(self.get_total_power() - self.get_current_power())
         time_to_recharge = self.recharge_battery(power_source)
         self.power_domain.record_power_consumption(self, power_source, self.recharge_rate, time_to_recharge)
         return time_to_recharge
 
-    def recharge_battery(self, power_source):
-        power_to_recharge = self.total_power - self.remaining_power
+    def recharge_battery(self, power_source) -> int:
+        power_to_recharge = self.get_total_power() - self.get_current_power()
         if power_source.get_current_power() < power_to_recharge:
             raise ValueError(f"Error, power source {power_source} failed to charge battery.")
         power_source.consume_power(power_to_recharge)

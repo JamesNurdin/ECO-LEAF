@@ -93,7 +93,7 @@ def main():
         DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=4.86W, static=100.14W)
         DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=4.80W, static=100.01W)
         INFO	Total infrastructure power usage: 92021.08064590898 Ws
-        INFO	Total carbon emitted: 366.4488555769847 gCo2
+        INFO	Total carbon emitted: 321.038799999999 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -156,9 +156,6 @@ def main():
     main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
-
-    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
-    animation.run_animation()
 
 
 class CustomOrchestrator(Orchestrator):
