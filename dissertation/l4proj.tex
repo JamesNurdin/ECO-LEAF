@@ -184,9 +184,46 @@ Make it clear how you derived the constrained form of your problem via a clear a
 
 How is this problem to be approached, without reference to specific implementation details?
 
-
 \section{Guidance}
 Design should cover the abstract design in such a way that someone else might be able to do what you did, but with a different language or library or tool.
+
+Fundamentally the model operates by separating logic between layers.
+At the top layer, the model considers the applications of the simulation which describes the sequential series of tasks and their flow of data from a source task to a sink task.
+These applications are then placed on top of the infrastructure layer through a mediation process which identifies the most suitable infrastructure entity to place a task onto.
+The infrastructure layer is used to describe the physical compute nodes and network links of the simulation and how these entities are inter-connected.
+Extended LEAF sees to introduce a new layer into this architecture by providing a layer underneath the infrastructure who's responsibility relies on distributing power to the nodes and links through user definable power sources.
+Similar to how the orchestrator mediates the relationships between the application and infrastructure layer, relations and interactions between power sources and infrastructure depend on power domains.
+
+In general, Extended Leaf was designed in an manner that would compliment the existing simulation framework but not have a mandated requirement for its features to be incorporated.
+As such, the new model can allow for existing simulations and scenarios to be performed under no restrictions to realise any power source or power domain.
+The framework achieves this by allowing the power layer to have an unrestricted view of the underlying infrastructure of the model, being able to query the state of entities in the above layer and having the power domain carry out necessary actions.
+In particular the framework operates within a unified discrete event space (realised by Simpy Environment \cite{HERE}) allowing for a power domain to run simultaneously, as such we can realise interactions between power sources and infrastructure through keeping associations between the two layers respectively.
+
+The goal of the power domain is to allow for configurations on how entities associated with that particular power domain within the infrastructure layer should be distributed to power sources avaiable to it.
+In particular Extended Leaf allows for a power source to distribute its power in two approaches, statically and dynamically.
+
+% Power source configs
+When a power source is defined as static, the user must provide a list of elements that belong to the subset of the infrastructure.
+From this, the power source will only distribute power to these provided entities, if in an situation occurs where the power source can no longer distribute power to these entities then they will be powered off and any the graph of tasks from that task to the sink will be paused until power is restored.
+
+When a power source is defined as dynamic, the user will associate any entities within the infrastructure to the power domain, from this the responsibility to allocate a power source resolves to the power domains distribution method, whether being the default algorithm provided by Extended LEAF or a user programmed one.
+Unlike the statically defined power source configuration, when a scenario occurs where an infrastructure entity is not allocated directly to a power source the simulation fails.
+
+moving on from the requirements the system needs to build upon the LEAF framework, as such we need to utilise existing classes and approaches to the simulation.
+At the core of the simulation as mentioned in the original paper \cite{leaf2021}, LEAF's simulation model is based upon an analytical and discrete-event approach, where as mentioned Directed Acyclic Graphs (DAGS) model the underlying infrastructures and applications.
+A fundamental idea of the simulation is based upon the idea is that due to both aspects of the model being graphs, the placement of applications on-top of existing infrastructure is trivial and allows for user-definable placement strategies realised through the use of the Orchestrator class.
+While the idea to continue this approach through to the powered infrastructure was considered and experimented with early on (and later visited for the visualisation of power source distribution) there are no immediate benefits to this approach to model associations between power sources and the infrastructure due to the fact that no semantic meaning/value needs to be described for the intermediate connections between the corresponding layers (as we assume that power is supplied immediately when a connection occurs).
+Instead, extended LEAF approaches describing the current state between power sources and infrastructure through a two way association between the entities, where a onw to many relation occurs from power source to infrastructure entity respectfully.
+To provide for more extensive and complex simulation scenarios, power sources allow infrastructure to be assigned directly to them treating the source power source as a static entitiy or to allow the power domain to distribute infrastructure to power sources based on various default factors such as preference, available power and the ability to allow for custom user distribution solutions for instance evaluating carbon intesntiy.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/Architecture}
+    ~
+    \caption{Architecture overview showing interactions between layers.}
+    \label{fig:archtecture}
+\end{figure}
+
+
 
 %==================================================================================================================================
 \chapter{Implementation}
