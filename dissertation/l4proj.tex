@@ -169,62 +169,186 @@ What did other people do, and how is it relevant to what you want to do?
 \end{itemize}
 
 %==================================================================================================================================
-\chapter{Analysis/Requirements}
+\chapter{Analysis/Requirements}\label{ch:analysis/requirements}
 The goal of this project is to extend the open-source edge/cloud computing simulator LEAF with
 features to configure particular energy sources (with potentially fluctuating availability and variable carbon intensities),
 functionality to translate estimates of power consumption of distributed applications and infrastructure components into carbon footprints – would need to to translate energy consumption into greenhouse gas emissions- helpful to
-interesting example scenarios that demonstrate the newly added capabilities. An interesting demonstration could, for example, test mechanisms for distributed software systems that aim to make the most of low-carbon energy over time and locations.
+interesting example scenarios that demonstrate the newly added capabilities.
+An interesting demonstration could, for example, test mechanisms for distributed software systems that aim to make the most of low-carbon energy over time and locations.
 
 What is the problem that you want to solve, and how did you arrive at it?
 \section{Guidance}
 Make it clear how you derived the constrained form of your problem via a clear and logical process. 
 
+In order to approach translating estimations in power consumptions into carbon footprints, Extended Leaf needs to
+Using the definition provided by \cite{owid-electricity-mix}, we can define carbon intensity as ``the amount of CO2 that is produced per unit of electricity''.
+% INTRODUCE NOTATION FOR CARBON INTENSITY Ci
+\section{Configuring Energy Sources}
+\section{Translating Power Consumption into Carbon Footprints}
+mention notation for carbon intensity
+mention issues with converting to discrete event space and timings i.e. assume power drawn for delta t is consistent
+\section{Demonstrating Scenarios}
+
+goal Attach power to entitites to the infrastructure
+from this need a means to go from power consumed to a carbon footprint
+introduce a means to show results to the user
+
+- then allow for interactions
 %==================================================================================================================================
-\chapter{Design}
+\chapter{Design}\label{ch:design}
 
-How is this problem to be approached, without reference to specific implementation details?
+%How is this problem to be approached, without reference to specific implementation details?
 
-\section{Guidance}
-Design should cover the abstract design in such a way that someone else might be able to do what you did, but with a different language or library or tool.
+%Design should cover the abstract design in such a way that someone else might be able to do what you did, but with a different language or library or tool.
 
+\section{Archtecture Overview}\label{sec:architecture-overview}
+% overview
 Fundamentally the model operates by separating logic between layers.
 At the top layer, the model considers the applications of the simulation which describes the sequential series of tasks and their flow of data from a source task to a sink task.
 These applications are then placed on top of the infrastructure layer through a mediation process which identifies the most suitable infrastructure entity to place a task onto.
 The infrastructure layer is used to describe the physical compute nodes and network links of the simulation and how these entities are inter-connected.
 Extended LEAF sees to introduce a new layer into this architecture by providing a layer underneath the infrastructure who's responsibility relies on distributing power to the nodes and links through user definable power sources.
-Similar to how the orchestrator mediates the relationships between the application and infrastructure layer, relations and interactions between power sources and infrastructure depend on power domains.
+Similar to how the orchestrator mediates the relationships between the application and infrastructure layer, relations and interactions between power sources and infrastructure depend on power domains as seen in figure \ref{fig:archtecture}.
 
-In general, Extended Leaf was designed in an manner that would compliment the existing simulation framework but not have a mandated requirement for its features to be incorporated.
-As such, the new model can allow for existing simulations and scenarios to be performed under no restrictions to realise any power source or power domain.
-The framework achieves this by allowing the power layer to have an unrestricted view of the underlying infrastructure of the model, being able to query the state of entities in the above layer and having the power domain carry out necessary actions.
-In particular the framework operates within a unified discrete event space (realised by Simpy Environment \cite{HERE}) allowing for a power domain to run simultaneously, as such we can realise interactions between power sources and infrastructure through keeping associations between the two layers respectively.
-
-The goal of the power domain is to allow for configurations on how entities associated with that particular power domain within the infrastructure layer should be distributed to power sources avaiable to it.
-In particular Extended Leaf allows for a power source to distribute its power in two approaches, statically and dynamically.
-
-% Power source configs
-When a power source is defined as static, the user must provide a list of elements that belong to the subset of the infrastructure.
-From this, the power source will only distribute power to these provided entities, if in an situation occurs where the power source can no longer distribute power to these entities then they will be powered off and any the graph of tasks from that task to the sink will be paused until power is restored.
-
-When a power source is defined as dynamic, the user will associate any entities within the infrastructure to the power domain, from this the responsibility to allocate a power source resolves to the power domains distribution method, whether being the default algorithm provided by Extended LEAF or a user programmed one.
-Unlike the statically defined power source configuration, when a scenario occurs where an infrastructure entity is not allocated directly to a power source the simulation fails.
-
-moving on from the requirements the system needs to build upon the LEAF framework, as such we need to utilise existing classes and approaches to the simulation.
-At the core of the simulation as mentioned in the original paper \cite{leaf2021}, LEAF's simulation model is based upon an analytical and discrete-event approach, where as mentioned Directed Acyclic Graphs (DAGS) model the underlying infrastructures and applications.
-A fundamental idea of the simulation is based upon the idea is that due to both aspects of the model being graphs, the placement of applications on-top of existing infrastructure is trivial and allows for user-definable placement strategies realised through the use of the Orchestrator class.
-While the idea to continue this approach through to the powered infrastructure was considered and experimented with early on (and later visited for the visualisation of power source distribution) there are no immediate benefits to this approach to model associations between power sources and the infrastructure due to the fact that no semantic meaning/value needs to be described for the intermediate connections between the corresponding layers (as we assume that power is supplied immediately when a connection occurs).
-Instead, extended LEAF approaches describing the current state between power sources and infrastructure through a two way association between the entities, where a onw to many relation occurs from power source to infrastructure entity respectfully.
-To provide for more extensive and complex simulation scenarios, power sources allow infrastructure to be assigned directly to them treating the source power source as a static entitiy or to allow the power domain to distribute infrastructure to power sources based on various default factors such as preference, available power and the ability to allow for custom user distribution solutions for instance evaluating carbon intesntiy.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{images/Architecture}
+    \includegraphics[width=0.8\textwidth]{images/Architecture.pdf}
     ~
     \caption{Architecture overview showing interactions between layers.}
     \label{fig:archtecture}
 \end{figure}
 
+In general, Extended LEAF was designed in an manner that would compliment the existing simulation framework but not have a mandated requirement for its features to be incorporated to carry out simulations.
+As such, the extension was designed to be loosely coupled to the existing framework \citep{looseCoupling}, therefore allowing for existing simulations and scenarios to be performed under no restrictions to realise any power source or power domain.
+The framework achieves this by allowing the power layer to have an unrestricted view of the underlying infrastructure of the model, being able to query the state of entities in the above layer and having the power domain carry out necessary actions on the infrastructure.
+In particular, the framework operates within a unified discrete event space allowing for a power domain to run simultaneously, as such we can realise interactions between power sources and infrastructure through keeping associations between the two layers respectively.
+
+\section{Power Domains}\label{sec:power-domains}
+The main goal of the power domain is to allow for configurations and manage how entities in the infrastructure layer should be distributed amongst power sources.
+Power domains should be defined in order to separate the different power options available to a simulation's infrastructure.
+For instance when considering power distribution policies for different parts of the infrastructure, individual power domains should be present in order to handle how power sources are allocated, as large scenarios may mean that power sources are present to only part of the infrastructure, see figure 4.2.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/seperatePDDiagram.pdf}
+    ~
+    \caption{Diagram depicting separate power sources available to parts of the infrastructure.}
+    \label{fig:seperatePDs}
+\end{figure}
+
+Whilst the framework can carry out simulations without including the new additions of Extended LEAF, if the user wants to provide power sources to the infrastructure, then a power domain must be present to allow for interactions to occur.
+
+\subsection{Workflow}\label{subsec:power-domain-workflow}
+In order to ensure that power can be correctly distributed to entities in the infrastructure, the power domain consistently adheres to a predefined workflow as the simulation moves forward in time.
+By utilising a discrete event space, Extended LEAF can ensure that the workflow can be completed before time increments in the space.
+Therefore, tasks are executed in the following order:
+\begin{enumerate}
+    \item As time steps forward the first action carried out by the power domain is to execute any defined events allocated by the user \emph{(see section \ref{sec:events}}), this ensures that these actions change the state of the simulation before the normal workflow occurs.
+    \item Once any events are executed, the power domain proceeds to update the available power and carbon intensity for all power sources currently allocated to the power domain.
+    \item The power domain will then proceed to reorder the power sources based on initial user preference, guaranteeing that the order of power sources remains consistent.
+    \item Using this order, each power source determines the active set of infrastructure entities they will provide power to.
+    \item After this, the power domain proceeds to calculate how much carbon was produced by each entity and the power sources as a whole.
+    \item These measurements are then logged to allow for potential access after the simulation finishes.
+    \item Finally, the simulation steps forward in time.
+\end{enumerate}
+
+\subsection{Calculating Carbon Emissions}\label{subsec:carbon released}
+Another role the power domain takes on is generating estimations in how much carbon was released during the step in time for entities within the infrastructure.
+In order to achieve this, the power domain inspects the infrastructure entities present within the power source ($\mathbf{I_{ps}}$) and individually measures the power for each item.
+As carbon intensity is defined as the amount of carbon released per kilowatt-hour of energy \citep{owid-electricity-mix}, the power measurement is converted into a discrete amount of energy consumed within the timestep.
+This can be defined $\mathbf{Energy_{i}} = \mathbf{Power_{i}} \times 10^{-3} \times \mathbf{\delta T}$, where:
+\begin{itemize}
+    \item $\mathbf{Energy_{i}}$ is the amount of energy consumed in watt-hours.
+    \item $\mathbf{Power_{i}}$ is the power measurement of entity i in watts.
+    \item $\mathbf{\delta T}$ is the step in time in hours.
+    \item $10^{-3}$ is used to change to the kilo prefix.
+\end{itemize}
+From this, the power domain can calculate the carbon emitted by finding the product of this and the carbon intensity of the source as $Carbon Released = Energy_{i} \times CI_{ps(t)}$.
+
+\subsection{Recording Measurements}\label{subsec:power-domain-recording-measurements}
+The final responsibility of the power domain is to record measurements generated during the simulation.
+Once an entity within the infrastructure has had their carbon emissions calculated, the power domain gathers information about the current state of the entity and composes an entry log.
+In particular information about the state such as the current time step, the associated power source, the energy consumed (in watt-hours) and the carbon emitted are all associated to the entity.
+The power domain then proceeds to store this entry so it can be used later on. \\
+As a result of Extended LEAF allowing for power consumption outside the power domain's workflow, the power domain also provides a means to allow for these actions to be logged, ensuring that the file written results of a simulation reflect the events that occurred.
+
+\section{Power Sources}
+To allow for advanced scenarios, Extended LEAF allows for a power source to distribute its power in two approaches, statically and dynamically.
+
+idea to use the Liskov Substitution Principle \cite{here} to allow power domains to be interchangeable for infrastructure entities.
+- power sources are assumed to fall into one of 4 categories (State them)
+- power sources depending on their configuration to always distribute power on update intervals
+- due to the discrete nature of the simulation power is calculated in Wh
+- available power is treated at a discrete value during a current state and is assumed that every update interval power sources can only distribute what they have been allocated.
+- power sources have a heirarchy in which if the user wants to prioritise a particular power source they will give it a high priority
+- As LEAF is an estimation simulator power sources draw their data from historical data.
+- power sources are allocated a priority to determine what order they should appear in
+    $I_{pd}(t) \in I$
+~
+    $I = I_{pd}^{1}(t) \cup I_{pd}^{2}(t) \cup \ldots \cup I_{pd}^{n}(t) $
+
+\subsection{Static Power Sources}\label{subsec:static-power-sources}
+When a power source is defined as static, the user must provide the entities from the infrastructure that they want to associate the source to.
+From this, the power source will only distribute power to these provided entities, if a situation occurs where the power source can no longer provide power to these entities then all nodes and links associated will be powered off and any tasks running will be paused until power can be provided to the entity.
+The model provides this ability to allow for scenarios when a simulation requires various power sources but needs to impose restrictions on particular entities in the infrastructure.
+For instance when considering entities in the infrastructure that are mobile, providing power from a battery is a necessity but is essential that these entities do not receive power from another source in the power domain.\\
+
+\subsection{Dynamic Power Sources}\label{subsec:dynamic-power-sources}
+When a power source is defined as dynamic, the user will associate any entities within the infrastructure to the power domain, represented as $\mathbf{I_{pd} \in I}$, where $\mathbf{I}$ encompasses all nodes and links denoted as $\mathbf{\{N\} \cup \{L\}}$.
+    From this the responsibility to allocate a power source resolves to the power domains distribution method, whether being the default algorithm provided by Extended LEAF or one defined by the user.
+Unlike the statically defined power source configuration, when a scenario occurs where an infrastructure entity is not allocated directly to a power source the simulation fails.\\
+When considering entities to allocate power to at time $t$, the default distribution method prioritises nodes into three categories:
+\begin{enumerate}
+    \item Entities that were previously provided power by the source.
+    \item Entities that currently have no power source.
+    \item Entities that reside in a less desirable power source.
+\end{enumerate}
+The distribution method considers infrastructure entities in this order to ensure that nodes and links which have an existing association remain powered before the power source allocates any remaining power to other entities.
+In addition to this, the power domain also considers the order in which power sources choose entities in the infrastructure.
+As one of the goals of the project is to introduce carbon awareness into the simulation, similar to other systems \cite{cucumber}, the power domain will always distribute infrastructure to the most desirable power sources first.
+This will ensure that power sources with a higher carbon intensity at any moment in time, always choose from the smallest set of entities.
+This can is formulated as $I_{pd}^j(t) \in I(t)_{r}$ where:
+\begin{quote}
+    $I_{pd}^j(t)$ is the set of infrastructure entities associated to power domain $j$ at time $t$.\\
+    $I(t)_{r}$ is defined as $I \setminus \left( \bigcup_{j-1} I_{pd}^{j-1}(t) \right)$, which describes the entities that are yet to be allocated a power domain.
+\end{quote}
+
+\subsection{Power Source Types}\label{subsec:power-source-types}
+3 main types:
+renewable:
+    - static carbon intensity
+    - variable power
+mixed
+    - variable carbon intensity (as a result of combo of non)
+    - assumed unlimited power
+battery
+    - small static carbon intensity (result assumed to come from recharging)
+    - finite power
+    - power is provided from another source
+
+\subsection{Historical Data}\label{subsec:data Reading}
+ - As this is an estimation can rely on historical data to represent trends in both power and carbon intensity
+    - type is based on power source type
+    - user is able to decide what data is used and can pass their own in
+
+\section{Events}\label{sec:events}
+- core feature to integrate functionality and allow for actions/events to occur without going into the power domain/ runner to alter logic
+- events can be repeated
+- events are called to alter functionality to represent changing conditions of the simulation, allowing for more complex interactions
+- events are executed
+
+\subsection{Displaying results}\label{subsec:displaying-results}
 
 
+- events are logged once power has been consumed
+- power consumed
+- carbon emitted
+- carbon intensity
+
+- further logging is made calculating total carbon emitted for the source in total at time t
+- Graphs are produced showing how values change over time
+- optional class the user can implement
+- passes through the power domain per file writer
+- specify what graphs they want to plot
 %==================================================================================================================================
 \chapter{Implementation}
 What did you do to implement this idea, and what technical achievements did you make?

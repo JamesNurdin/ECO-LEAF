@@ -421,7 +421,7 @@ class FigurePlotter:
                 ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
                 tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
             yaxis=dict(
-                title=dict(text="Power Used", standoff=0))
+                title=dict(text="Energy Used (Wh)", standoff=0))
         )
 
         # Update layout to add a title

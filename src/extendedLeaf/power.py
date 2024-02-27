@@ -620,9 +620,9 @@ class PowerDomain:
             current_carbon_intensities = {}
             for current_power_source in [power_source for power_source in self.power_sources if
                                          power_source is not None]:
+                """distribute entities among power sources"""
 
                 if current_power_source.static is False:
-                    """distribute entities among power sources"""
                     self.powered_infrastructure_distributor.powered_infrastructure_distributor_method(
                         current_power_source, self)
                 else:
