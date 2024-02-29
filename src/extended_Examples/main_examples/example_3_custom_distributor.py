@@ -121,7 +121,6 @@ def main():
 
 
 def custom_distribution_method(current_power_source: PowerSource, power_domain):
-    """Update renewable sources"""
     for entity in power_domain.powered_infrastructure:
         if entity.power_model.power_source == current_power_source:
             current_entity_power_requirement = float(entity.power_model.update_sensitive_measure(

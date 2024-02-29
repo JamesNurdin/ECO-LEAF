@@ -304,3 +304,9 @@ Holiday break
 ## Week 22
 ### 13th February
 * *6 Hours* After looking through the code trying to ensure that the calculations were sound, I figured out the conversion between units was incorrect. As a result of this many hours were spent trying to resolve the issue without overhauling the power, the solution is to consider power consumed in Wh, as a result some chnages were made to carry out this.
+### 14th February
+* *4 Hours* Worked on the Design aspect of the dissertation.
+### 16th February
+* *3 Hours* Continued work on design and produced a diagram for the power domain.
+### 17th February
+* *2 Hours* Carried on with the design and started on work for the power source section.
