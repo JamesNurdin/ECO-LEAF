@@ -1,7 +1,7 @@
-numpy~=1.21.5
+numpy~=1.23.0
 simpy~=4.1.1
 setuptools~=63.2.0
 networkx~=2.7.1
 matplotlib~=3.5.1
-pandas~=2.2.1
+pandas~=2.1.4
 plotly~=5.18.0
