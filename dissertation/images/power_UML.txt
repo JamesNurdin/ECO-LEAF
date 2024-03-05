@@ -1,0 +1,201 @@
+@startuml
+class PowerMeasurement {
+    sum()
+    __repr__()
+    __float__()
+    __int__()
+    __add__()
+    __radd__()
+    __sub__()
+    multiply()
+    total()
+        dynamic
+    static
+    __init__()
+}
+class PowerModel {
+    measure()
+    set_parent()
+    update_sensitive_measure()
+        __init__()
+}
+class PowerModelNode {
+    measure()
+    update_sensitive_measure()
+    set_parent()
+        max_power
+    power_per_cu
+    static_power
+    node
+    power_source
+    node
+    __init__()
+}
+class PowerModelLink {
+    measure()
+    set_parent()
+    update_sensitive_measure()
+        energy_per_bit
+    link
+    power_source
+    link
+    __init__()
+}
+class PowerModelLinkWirelessTx {
+    measure()
+    update_sensitive_measure()
+    set_parent()
+        energy_per_bit
+    amplifier_dissipation
+    link
+    power_source
+    link
+    __init__()
+}
+class PowerAware {
+    measure_power()
+        __init__()
+}
+class PowerMeter {
+    run()
+        entities
+    name
+    name
+    measurement_interval
+    callback
+    __init__()
+}
+class PowerType {
+        __init__()
+}
+class PowerSource {
+    get_current_power()
+    get_remaining_power_at_time()
+    set_current_power()
+    consume_power()
+    get_current_carbon_intensity()
+    update_carbon_intensity()
+    evaluate_entities()
+    remove_entity()
+    add_entity()
+    _retrieve_power_data()
+    _map_to_time()
+        name : str 
+    env : Environment 
+    carbon_intensity : int 
+    remaining_power : float 
+    priority : int 
+    static : bool 
+    powerType : PowerType 
+    power_domain : PowerDomain 
+    powered_infrastructure : [PowerModel] 
+    next_update_time : str 
+    update_interval : int 
+    remaining_power
+    remaining_power
+    power_data
+    __init__(name: str , env: Environment , carbon_intensity: int , remaining_power: float , priority: int , static: bool , powerType: PowerType , power_domain: PowerDomain , powered_infrastructure: [PowerModel] , next_update_time: str , update_interval: int )
+}
+class PoweredInfrastructureDistributor {
+    default_powered_infrastructure_distribution_method()
+        powered_infrastructure_distributor_method
+    smart_distribution : bool 
+    __init__(smart_distribution: bool )
+}
+class PowerDomain {
+    run()
+    record_power_consumption()
+    get_best_power_source()
+    get_current_time_string()
+    record_power_source_carbon_released()
+    update_logs()
+    insert_power_reading()
+    update_carbon_intensity()
+    return_total_carbon_emissions()
+    update_recorded_data()
+    add_power_source()
+    remove_power_source()
+    assign_power_source_priority()
+    calculate_carbon_released()
+    add_entity()
+    remove_entity()
+    get_current_time()
+    convert_to_time_string()
+        env : Environment 
+    name
+    power_sources : [PowerSource] 
+    carbon_emitted : [float] 
+    captured_data :  
+    logging_data :  
+    powered_infrastructure_distributor : PoweredInfrastructureDistributor 
+    start_time_string : str 
+    start_time_index : int 
+    powered_infrastructure : [PowerModel] 
+    update_interval : [int] 
+    __init__(env: Environment , power_sources: [PowerSource] , carbon_emitted: [float] , captured_data:  , logging_data:  , powered_infrastructure_distributor: PoweredInfrastructureDistributor , start_time_string: str , start_time_index: int , powered_infrastructure: [PowerModel] , update_interval: [int] )
+}
+class SolarPower {
+    update_power_available()
+    get_power_at_time()
+    update_carbon_intensity()
+    get_current_carbon_intensity()
+    get_carbon_intensity_at_time()
+        inherent_carbon_intensity : float 
+    remaining_power
+    __init__(inherent_carbon_intensity: float )
+}
+class WindPower {
+    update_power_available()
+    get_power_at_time()
+    update_carbon_intensity()
+    get_current_carbon_intensity()
+    get_carbon_intensity_at_time()
+        inherent_carbon_intensity : float 
+    remaining_power
+    __init__(inherent_carbon_intensity: float )
+}
+class GridPower {
+    update_carbon_intensity()
+    get_current_carbon_intensity()
+    update_power_available()
+    get_power_at_time()
+    get_carbon_intensity_at_time()
+        carbon_intensity
+    carbon_intensity
+    __init__()
+}
+class BatteryPower {
+    update_power_available()
+    get_power_at_time()
+    find_and_recharge_battery()
+    recharge_battery()
+    update_carbon_intensity()
+    get_current_carbon_intensity()
+    get_carbon_intensity_at_time()
+    validate_str_time()
+        carbon_intensity : float 
+    total_power : float 
+    recharge_rate : float 
+    remaining_power
+    __init__(carbon_intensity: float , total_power: float , recharge_rate: float )
+}
+ABC <|-- PowerModel
+PowerModel <|-- PowerModelNode
+PowerModel <|-- PowerModelLink
+PowerModel <|-- PowerModelLinkWirelessTx
+ABC <|-- PowerAware
+auto <|-- PowerType
+ABC <|-- PowerSource
+PowerSource --> Environment
+PowerSource --> PowerType
+PowerSource --> PowerDomain
+PowerSource --> PowerModel
+PowerDomain --> Environment
+PowerDomain --> PowerSource
+PowerDomain --> PoweredInfrastructureDistributor
+PowerDomain --> PowerModel
+PowerSource <|-- SolarPower
+PowerSource <|-- WindPower
+PowerSource <|-- GridPower
+PowerSource <|-- BatteryPower
+@enduml

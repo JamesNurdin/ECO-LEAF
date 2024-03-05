@@ -4,7 +4,7 @@ import numpy as np
 import simpy
 
 from src.extendedLeaf.animate import AllowCertainDebugFilter, Animation
-from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
+from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
