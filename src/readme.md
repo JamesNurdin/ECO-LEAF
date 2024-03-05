@@ -11,10 +11,9 @@ instructions to run automated tests.
 
 List the all of the pre-requisites software required to set up your project (e.g. compilers, packages, libraries, OS, hardware)
 
-For example:
 
-* Python 3.7
-* Packages: listed in `requirements.txt` 
+* Python versions between 3.9 and 3.10 inclusive
+* Packages: listed in `requirements.txt` alongside pip for installation
 * Tested on Windows 10
 
 or another example:
@@ -27,8 +26,9 @@ or another example:
 
 List the steps required to build software. 
 
-Hopefully something simple like `pip install -e .` or `make` or `cd build; cmake ..`. In
-some cases you may have much more involved setup required.
+To install the necessary required packages, using a version of python between 3.9 and 3.10 (inclusive)
+in this environment navigate to the src folder of the project directory
+while inside the directory issue the command: "pip install extended_LEAF-1.0.tar.gz" to install the dependencies within the python environment
 
 ### Test steps
 

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='extended_LEAF',
-    version='1',
+    version='1.0',
     packages=find_packages(),
     install_requires=["numpy~=1.23.0",
                       "simpy~=4.1.1",

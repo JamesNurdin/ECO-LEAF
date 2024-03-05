@@ -208,7 +208,6 @@ class ExampleOrchestrator(Orchestrator):
                                 if carbon_intensity < current_best_carbon_intensity:
                                     return_node = node
                                     current_best_carbon_intensity = carbon_intensity
-        print(return_node, application)
         return return_node
 
 

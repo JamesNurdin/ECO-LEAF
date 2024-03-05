@@ -34,23 +34,13 @@ class MobilityManager:
         """
         drone = plot.drone
         while ((env.now + plot.power_domain.start_time_index) % 1440) < PowerDomain.get_current_time(END_OF_DAY):
-            print(drone.battery_power.remaining_power)
-            print(drone.battery_power.total_power)
             if drone.battery_power.get_current_power() < drone.battery_power.get_total_power() * DRONE_BATTERY_THRESHOLD:
                 self.move_drone(drone, plot, location=plot.recharge_station.location)
-                # # check carbon state
-                if CARBON_AWARE:
-                    # TODO Make carbon aware choice
-                    recharge_time = drone.battery_power.find_and_recharge_battery()
-                    print(f"Recharge")
-                else:
-                    recharge_time = drone.battery_power.find_and_recharge_battery()
-                    print(f"Recharge")
+                recharge_time = drone.battery_power.find_and_recharge_battery()
                 yield env.timeout(recharge_time)
             else:
                 self.move_drone(drone, plot, self.get_next_location(drone, plot))
                 plot.orchestrator.place(drone.application)
-                print("Run app")
                 yield env.timeout(UPDATE_MOBILITY_INTERVAL)
                 drone.application.deallocate()
 

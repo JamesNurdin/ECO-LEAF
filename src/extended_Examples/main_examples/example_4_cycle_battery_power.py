@@ -110,7 +110,6 @@ def main():
     env.process(sink_task_pm.run(env))
 
     env.run(until=1441)  # run simulation for a day
-    print(len(power_domain.captured_data))
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
