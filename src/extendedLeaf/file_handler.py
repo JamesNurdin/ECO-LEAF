@@ -77,12 +77,12 @@ class FileHandler:
     def get_results_dir(self) -> str:
         """ Returns the filepath to the results' directory. """
         current_script_path = os.path.abspath(__file__)
-        target_directory = "project-carbon-emissions-estimation-in-edge-cloud-computing-simulations"
+        target_directory = "src"
         dir_path = current_script_path
 
         while not dir_path.endswith(target_directory):
             dir_path = os.path.dirname(dir_path)
-        filepath = os.path.join(dir_path, "src", "results")
+        filepath = os.path.join(dir_path, "results")
         return filepath
 
     def write_out_results(self, power_domain: PowerDomain, dir_path: str = None, filename: str = "output"):

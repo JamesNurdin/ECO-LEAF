@@ -5,3 +5,4 @@ networkx~=2.7.1
 matplotlib~=3.5.1
 pandas~=2.1.4
 plotly~=5.18.0
+kaleido~=0.1.0.post1
