@@ -9,7 +9,7 @@ setup(
                       "setuptools~=63.2.0",
                       "networkx~=2.7.1",
                       "matplotlib~=3.5.1",
-                      "pandas~=2.1.4",
+                      "pandas~=2.2.1",
                       "plotly~=5.18.0", ],
     author="James Andrew Nurdin",
     url="https://stgit.dcs.gla.ac.uk/2570809n/project-carbon-emissions-estimation-in-edge-cloud-computing-simulations",
