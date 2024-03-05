@@ -1,13 +1,16 @@
 from setuptools import setup, find_packages
 
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
-
 setup(
     name='extended_LEAF',
     version='1',
     packages=find_packages(),
-    install_requires=[requirements],
+    install_requires=["numpy~=1.21.5",
+                      "simpy~=4.1.1",
+                      "setuptools~=63.2.0",
+                      "networkx~=2.7.1",
+                      "matplotlib~=3.5.1",
+                      "pandas~=2.1.4",
+                      "plotly~=5.18.0", ],
     author="James Andrew Nurdin",
     url="https://stgit.dcs.gla.ac.uk/2570809n/project-carbon-emissions-estimation-in-edge-cloud-computing-simulations",
     license="",
