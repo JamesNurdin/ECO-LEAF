@@ -1,7 +1,7 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -72,7 +72,7 @@ def main():
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(solar_power)
     event_domain = EventDomain(env, start_time_str="15:00:00", update_interval=1)
-    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="15:20:00", repeat=False))
+    event_domain.add_event(Event(event=battery_power.recharge_battery, args=[solar_power], time_str="15:20:00", repeat=False))
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
@@ -126,7 +126,7 @@ def main():
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, battery_power])
     fig4 = figure_plotter.subplot_time_series_power_meter(power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
     figs = [fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs)
+    main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

@@ -6,6 +6,7 @@
 %
 % put any additional packages here
 %
+\usepackage{forest}
 
 \begin{document}
 
@@ -83,75 +84,92 @@
 \pagenumbering{arabic} 
 
 
-Why should the reader care about what are you doing and what are you actually doing?
-\section{Guidance}
+%Why should the reader care about what are you doing and what are you actually doing?
+%\section{Guidance}
 
-\textbf{Motivate} first, then state the general problem clearly. 
+%\textbf{Motivate} first, then state the general problem clearly.
 
-\section{Writing guidance}
-\subsection{Who is the reader?}
+%This is the key question for any writing. Your reader:
+%    is a trained computer scientist: \emph{don't explain basics}.
+%    has limited time: \emph{keep on topic}.
+%    has no idea why anyone would want to do this: \emph{motivate clearly}
+%    might not know \emph{anything} about your project in particular:
+%    \emph{explain your project}.
+%    but might know precise details and check them: \emph{be precise and
+%    strive for accuracy.}
+%    doesn't know or care about you: \emph{personal discussions are irrelevant}.
 
+%- motivation:
+%    - i'm missing energy sources, including multiple sources, with both grid and on-site renewables, and how these have different carbon intensities (at different times and different locations)
+%    - i'm also missing a bit more of a problem: this is already quite focused on abilities and framework features
 
-This is the key question for any writing. Your reader:
-\begin{itemize}
-    \item
-    is a trained computer scientist: \emph{don't explain basics}.
-    \item
-    has limited time: \emph{keep on topic}.
-    \item
-    has no idea why anyone would want to do this: \emph{motivate clearly}
-    \item
-    might not know \emph{anything} about your project in particular:
-    \emph{explain your project}.
-    \item
-    but might know precise details and check them: \emph{be precise and
-    strive for accuracy.}
-    \item
-    doesn't know or care about you: \emph{personal discussions are
-    irrelevant}.
-\end{itemize}
+\subsection{Motivation}\label{intro:subsec:motivation}
+Over the past decade the information and communication technology (ICT) industry has seen a drastic increase in global energy consumption.
+As of now, the industry consumes approximately 10\% of the global energy demand \citep{current_energy_consumption}.
+With the ever increasing energy requirements from power intensive services like large scale data centers, worst-case projections expect that the ICT industry will require 23\% in 2030 \citep{c02challenges}.
+As a consequence, the industry continuously imposes a greater threat to the environment through the emission of greenhouse gasses produced as a byproduct in efforts to meet this demand.
+In an attempt to circumvent this, the discipline of sustainable computing has become a vital area of study within computer science.
 
-Remember, you will be marked by your supervisor and one or more members
-of staff. You might also have your project read by a prize-awarding
-committee or possibly a future employer. Bear that in mind.
+One proposed solution currently being researched exists in the form of a distributed computation process called fog computing.
+Rather than carrying out centralised processing at the centre of a network, the technique sees to locally execute processes on the edge of the network before being transported to the intended destination.
+In order to facilitate research and industrial applications of the technique, a simulation tool called LEAF was previously developed in order to model Large Energy-Aware Fog computing environments.
+During the simulation, LEAF captures the power requirements of devices within the network environment which is then available to be analysed by the user.
+However, the problem at the moment is that LEAF is yet to model how this power is supplied to the network and consider the carbon footprint as a consequence.
 
-\subsection{References and style guides}
-There are many style guides on good English writing. You don't need to
-read these, but they will improve how you write.
+The proposed solution, Extended LEAF, sees to expand upon the LEAF framework and rectify this by introducing the ability to model various grid and on-site renewable power sources.
+In addition to this, Extended LEAF also models how these power sources have varying carbon intensities that can fluctuate as a consequence of generating power at various times and locations.
+By introducing the tools necessary to estimate potential carbon footprints of model networks, Extended LEAF aims to provide further research and industrial opportunities to utilise fog computing by being able to take into consideration the carbon produced as a result of running the environment.
 
-\begin{itemize}
-    \item
-    \emph{How to write a great research paper}~\cite{Pey17} (\textbf{recommended}, even though you aren't writing a research paper)
-    \item
-    \emph{How to Write with Style} \cite{Von80}. Short and easy to read. Available online.
-    \item
-    \emph{Style: The Basics of Clarity and Grace} \cite{Wil09} A very popular modern English style guide.
-    \item
-    \emph{Politics and the English Language} \cite{Orw68}  A famous essay on effective, clear writing in English.
-    \item
-    \emph{The Elements of Style} \cite{StrWhi07} Outdated, and American, but a classic.
-    \item
-    \emph{The Sense of Style} \cite{Pin15} Excellent, though quite in-depth.
-\end{itemize}
+%   - estimation of carbon emissions is one aim, but being able to assess "how exploiting opportunities can reduce the carbon footprint" is another, yet that isn't presented in much detail
+%    - "demonstrate the accuracy of estimated carbon footprints of smaller scenarios": that's interesting. how will you demonstrate the accuracy?
 
-\subsubsection{Citation styles}
+\subsection{Goals}\label{intro:subsec:goals}
+The goals of the project were set out as follows:
+- introduce a means to provide power to infrastructure within the environment
+- provide a means to distribute available power in an informed approach, assume that certain power sources are limited
+- introduce the ability to have an associated carbon footprint for using a particular power source
+- have the ability to have power fluctuate as the simulation is executed to reflect varying power availability
+- have the ability to have carbon intensity fluctuate as the simulation is executed to reflect the variations in power generation.
+- provide means to allow users to create their own power sources
+- provide a tool to be able to visualise the results to analyse results
+- produce a suite of examples to demonstrate the functionality
+- keep the core design philosophy of Extended LEAF the same as LEAF (framework should follow from leaf)
 
-\begin{itemize}
-\item If you are referring to a reference as a noun, then cite it as: ``\citet{Orw68} discusses the role of language in political thought.''
-\item If you are referring implicitly to references, use: ``There are many good books on writing \citep{Orw68, Wil09, Pin15}.''
-\end{itemize}
-
-There is a complete guide on good citation practice by Peter Coxhead available here: \url{http://www.cs.bham.ac.uk/~pxc/refs/index.html}. 
-If you are unsure about how to cite online sources, please see this guide: \url{https://student.unsw.edu.au/how-do-i-cite-electronic-sources}.
-
-\subsection{Plagiarism warning}
-
-\begin{highlight_title}{WARNING}
-    
-    If you include material from other sources without full and correct attribution, you are commiting plagiarism. The penalties for plagiarism are severe.
-    Quote any included text and cite it correctly. Cite all images, figures, etc. clearly in the caption of the figure.
-\end{highlight_title}
-
+This project aims to extend the capabilities of LEAF in order to provide users with the ability to estimate potential environmental footprints
+of simulations through the quantity of carbon being released.
+In particular the extension aims to provide a suite of features to allow users to curate custom power sources and the ability to control
+how they are distributed amongst a defined infrastructure.
+The framework will also provide the ability to explicitly define conditions relating to the nature of the simulation
+such as the environment and restrictions of the infrastructure to allow for the accurate capture of carbon emissions.
+The result of this will generate a realistic report of how carbon is released during the simulation.
+The effectiveness of the project will be evaluating various scenarios to:
+First demonstrate the accuracy of estimated carbon footprints of
+smaller scenarios.
+Then investigate and analyse realistic examples to demonstrate how the distribution of computational nodes amongst
+aggregated power sources and environmental conditions can have adverse affects on the total carbon emission, and how
+exploiting opportunities can reduce the carbon footprint.
+%\subsection{References and style guides}
+%There are many style guides on good English writing. You don't need to
+%read these, but they will improve how you write.
+%    \emph{How to write a great research paper}~\cite{Pey17} (\textbf{recommended}, even though you aren't writing a research paper)
+%    \emph{How to Write with Style} \cite{Von80}. Short and easy to read. Available online.
+%    \emph{Style: The Basics of Clarity and Grace} \cite{Wil09} A very popular modern English style guide.
+%    \emph{Politics and the English Language} \cite{Orw68}  A famous essay on effective, clear writing in English.
+%    \emph{The Elements of Style} \cite{StrWhi07} Outdated, and American, but a classic.
+%    \emph{The Sense of Style} \cite{Pin15} Excellent, though quite in-depth.
+%
+%\subsubsection{Citation styles}
+%
+%%\item If you are referring to a reference as a noun, then cite it as: ``\citet{Orw68} discusses the role of language in political thought.''
+%\item If you are referring implicitly to references, use: ``There are many good books on writing \citep{Orw68, Wil09, Pin15}.''
+%
+%There is a complete guide on good citation practice by Peter Coxhead available here: \url{http://www.cs.bham.ac.uk/~pxc/refs/index.html}.
+%If you are unsure about how to cite online sources, please see this guide: \url{https://student.unsw.edu.au/how-do-i-cite-electronic-sources}.
+%
+%\subsection{Plagiarism warning}
+%    If you include material from other sources without full and correct attribution, you are commiting plagiarism. The penalties for plagiarism are severe.
+%    Quote any included text and cite it correctly. Cite all images, figures, etc. clearly in the caption of the figure.
+%
 
 %==================================================================================================================================
 \chapter{Background}
@@ -178,10 +196,10 @@ functionality to translate estimates of power consumption of distributed applica
 interesting example scenarios that demonstrate the newly added capabilities.
 An interesting demonstration could, for example, test mechanisms for distributed software systems that aim to make the most of low-carbon energy over time and locations.
 
-What is the problem that you want to solve, and how did you arrive at it?
-\section{Guidance}
-Make it clear how you derived the constrained form of your problem via a clear and logical process. 
-
+%What is the problem that you want to solve, and how did you arrive at it?
+%\section{Guidance}
+%Make it clear how you derived the constrained form of your problem via a clear and logical process.
+%
 In order to approach translating estimations in power consumptions into carbon footprints, Extended Leaf needs to
 Using the definition provided by \cite{owid-electricity-mix}, we can define carbon intensity as ``the amount of CO2 that is produced per unit of electricity''.
 % INTRODUCE NOTATION FOR CARBON INTENSITY Ci
@@ -195,7 +213,6 @@ goal Attach power to entitites to the infrastructure
 from this need a means to go from power consumed to a carbon footprint
 introduce a means to show results to the user
 
-- then allow for interactions
 %==================================================================================================================================
 \chapter{Design}\label{ch:design}
 
@@ -257,7 +274,7 @@ Power domains should be defined in order to separate the different power options
 For instance when considering power distribution policies for different parts of the infrastructure, individual power domains should be present in order to handle how power sources are allocated, as large scenarios may mean that power sources are present to only part of the infrastructure, see Figure \ref{fig:seperatePDs}.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{images/seperatePDDiagram.pdf}
+    \includegraphics[width=0.8\textwidth]{images/seperatePDDiagram.pdf}
     ~
     \caption{Diagram depicting separate power sources available to parts of the infrastructure.}
     \label{fig:seperatePDs}
@@ -273,7 +290,6 @@ Therefore, the tasks of the power domain are executed in the following order:
     \item Execute any defined events allocated by the user \emph{(see section \ref{sec:events}}).
     \item Determine the power produced by each power source.
     \item Determine the carbon intensity of each power source.
-    \item Order the power sources based on initial user preference.
     \item Allocate entities in the infrastructure to the power sources.
     \item Calculate the carbon released during the time step.
     \item Log results.
@@ -294,7 +310,7 @@ However, whilst the provided approach always preferences existing entities first
 For example \ref{sec:eval-example3} demonstrates the ability to dynamically assign infrastructure with uncapped power consumption to power sources with unlimited power available to them.\\
 
 In addition to this, the power domain also considers the order in which power sources are allocated entities.
-As one of the goals of the project is to introduce carbon awareness into the simulation, similar to other systems \cite{cucumber}, the power domain utilises a priority queue to order when power sources receive entities.
+As one of the goals of the project is to introduce carbon awareness into the simulation, the power domain utilises a priority queue to order when power sources receive entities.
 This has been done to ensure that the user can specify which power sources are allocated entities first, for instance the examples demonstrated in chapter \ref{chp:evaluation} prioritise power sources that have a small inherent carbon intensities to optimise utilisation of cleaner energy.
 This will ensure that power sources with a higher carbon intensity at any moment in time, always choose from the smallest set of entities.
 This can is formulated as $\mathbf{I_{pd}^j(t) \in I_{r}(t)}$ where:
@@ -329,6 +345,46 @@ In particular the following information about the entity's state is logged:
 
 The power domain then proceeds to store this entry so it can be used later on.
 As Extended LEAF allows for power consumption outside the power domain's workflow, the framework also provides a means to allow for these actions to be logged, ensuring that the file results of a simulation reflect the events that occurred.
+The structure of these logs can be seen in the example provided by Figure \ref{tree:log}:
+\begin{figure}[h]
+\centering
+\caption{Tree diagram representing an example dictionary structure }
+\begin{forest}
+for tree={
+  grow'=0,
+  parent anchor=east,
+  child anchor=west,
+  anchor=west,
+  align=center,
+  l sep=1em,
+  s sep=1em,
+}
+[
+  [Time
+    [Power Source 1
+      [node A
+        [Power Used: -]
+        [Carbon Intensity: -]
+        [Carbon Released: -]
+      ]
+    ]
+    [Power Source 2
+      [Node B
+        [Power Used: -]
+        [Carbon Intensity: -]
+        [Carbon Released: -]
+      ]
+      [Node C
+        [Power Used: -]
+        [Carbon Intensity: -]
+        [Carbon Released: -]
+      ]
+    ]
+    [Total Carbon Released: -]
+  ]
+]
+\end{forest}\label{tree:log}
+\end{figure}
 
 \section{Power Sources}
 The responsibility of a power source in Extended LEAF is to provide power to entities in the infrastructure they are associated to.
@@ -384,13 +440,19 @@ The events in power domain 1 show how the power layer of the model can be change
 The events in power domain 2 depict how the application layer of the model can be changed, here we see the running of an application for $\mathbf{i - 1}$ units of time.
 Finally, the event in power domain 3 shows how the infrastructure layer can be changed, here we see how a node n can be introduced to the infrastructure in power domain n.
 
+\section{Displaying Results}\label{sec:displaying results}
+To provide a visual aid to analysing results, Extended LEAF also sees to visualise the results generated from the simulation.
+It aims to achieve this by implementing a means for the user to specify what graphs they would want to see after the model finishes the simulation.
+The graphs will all appear in the same figure and would contain the necessary details to help the user understand the contents of the graphs.
+Because the simulation would deal with time moving forward, the graphs will be time series and have time on the x-axis to show how certain measurements such as carbon released for an entity or power source vary as time moves forward in the simulation.
+In addition to this, by having a file handling system in place also, the tool allows the user to specify what results are written to file and where they should be written to.
+This could also mean that the raw data being logged by the power domain as mentioned in Section \ref{subsec:power-domain-recording-measurements} can also be written out as well.
+By having the data saved to file, the user would be able to retrieve the results when they want to and can access them after the simulation has finished allowing for future analysis if needed.
 %==================================================================================================================================
 \chapter{Implementation}
 %What did you do to implement this idea, and what technical achievements did you make?
 %\section{Guidance}
 %You can't talk about everything. Cover the high level first, then cover important, relevant or impressive details.
-Using the concepts discussed in the previous chapter, the following sections go onto explain how these designs were realised during development to produce the final product.
-
 \section{Python Implentation}\label{sec:python}
 At the start of development, the first task required of me was to determine what programming language Extended LEAF was going to use.
 As Extended LEAF is a framework and would require users to work in this language to create simulations, the language in question needed to be chosen carefully.
@@ -411,22 +473,7 @@ Figure \ref{fig:archtecture} shows in reality how the architecture of the model 
 
 As we can see, similar to how the orchestrator class mediates the relationships between the application and infrastructure layer, Extended LEAF allows interactions to occur between the power source and infrastructure layer through power domains.
 
-\section{Development Process}\label{sec:development}
-To understand how the details on particular aspects of Extended LEAF work, it would be a good idea to explore how the development process initially started.
-Upon being informed about LEAF's existence by Thamsen, it was suggested that documentation about the framework was explored.
-
-To get a better understanding of how LEAF fundamentally worked, the examples that existed were explred
--reviewing documentation and reading on how LEAF works
-- looking at the basic examples and how a simulation was created
-- creating my own and understanding what the core aspects of the system were realised
-- moving onto the larger examples
-- built power sources to see roughly how power would could be taken supplied
-- fast realisation that a mediator would be needed to see that these power sources could run in the simpy environment
-
-\section{Fundamental Aspects}\label{imp:sec:time-data}
-To provide context ahead of the discussion about the core aspects of Extended LEAF, the following subsections explain the fundamental concepts the framework uses in order to operate.
-
-\subsection{Discrete Event Simulations}\label{imp:subsec:des}
+\section{Discrete Event Simulations}\label{imp:subsec:des}
 As briefly mentioned in Section \ref{subsec:power-domain-workflow} LEAF and subsequently Extended LEAF forward time through the use of Discrete Event Simulations (DESs).
 DESs simulate environments by changing the state of the model through events, where events are used to describe actions that result in a direct transition from one state to another.
 Extended LEAF incorporates this through the use of the Python SimPy package \cite{simpy}.
@@ -460,7 +507,7 @@ To allow for the task method to be considered an `event' by the SimPy environmen
 In order to allow for the task to be called periodically, the task method encloses the logic of its body inside an indefinite while loop and uses yield environment.timeout(2) to pause the simulation for 2 units of time.
 Fundamentally, Extended LEAF uses this approach in order to allow the power domain to execute it's workflow on the most current state of the model during the simulation.
 
-\subsection{Time}\label{imp:subsec:time}
+\section{Time}\label{imp:subsec:time}
 Now that a means to progress time forward within the simulation space has been established, we can now discuss how and why the implementation does this.
 As consequence of using historical data mapped to time, \textit{discussed in the upcoming section}, Extended LEAF needs a means to go from an integer based representation of time to one that is formatted as HH\%MM\%SS.
 This is achieved by assuming that for every increment of 1 in env.now() a minute passes or 60 seconds passes in real time.
@@ -468,7 +515,7 @@ A minute was chosen because the simulation could avoid taking unnecessary measur
 However in order to allow for the current state to be uniquely identified in simulations that occur for longer than 24 hours, Extended LEAF identifies each state using the integer representation of time.
 This is to ensure that when data is written to file, entries logged by the power domain wont get overwritten due to the fact they are both identified by the same time.
 
-\subsection{Accessing Data}\label{imp:subsec:daa}
+\section{Accessing Data}\label{imp:subsec:daa}
 
 As a core requirement of the project was to allow for fluctuations in power availability, Extended LEAF models a power source's power availability and carbon intensity as values that are updated every step forward in time.
 When the simulation moves forward in time, a power source will determine its available power and carbon intensity that it should have at that corresponding moment.
@@ -528,299 +575,333 @@ To help illustrate this idea, Table \ref{tab:data-dic} visualises what an exampl
     \end{tabular}
 \end{table}
 
-\section{Power Domain}\label{sec:power-domain}
-The power domain is realised in Extended LEAF through initialising a class instance of PowerDomain.
-when PowerDomain is initialized the user is expected to pass through a variety of items
-- the simulation variable
-- the time (string) when it should start, used to format the data (discussed later on)
-- user passes through what entities they want to be dynamically distributed
-- the distribution method
-- the initial set of power sources
--  user has to provide a name
-As the power domains goal is to distribute entities (instances of Infrastructure) it is expected that at least 1 power source is present
-Because Extended LEAF allows for external actions to change the state of the simulation, the power domain allows for both power sources and entities to be ammended during runtime, therefore the power domain can invoke these methods to do so
+\section{The Power Domain Class}\label{sec:power-domain}
+The power domain is realised in Extended LEAF through the class type of PowerDomain.
+In order to access for power domain's workflow, the user must initialise an instance of the class and pass the run method through the simulation.
+When an instance is initialised, the user is expected to pass through these items:
+\begin{itemize}
+    \item \textbf{env}, this is the reference to the Environment() class used to simulate the model.
+    \item \textbf{name}, the name of the power domain, this must be kept unique as it used to identify the power domain.
+    \item \textit{(Optional)} \textbf{start\_time\_str}, this is the string time for when the simulation should start. NB, this should be formatted as HH\%MM\%SS.
+    \item \textit{(Optional)} \textbf{powered\_infrastructure}, these are the entities the user wants to dynamically assign to a power source.
+    \item \textit{(Optional)} \textbf{powered\_infrastructure\_distributor}, the custom entity distribution method. NB, this replaces the default implementation provided by Extended LEAF.
+\end{itemize}
 
-- discuss how the workflow works
-\subsection{Powered Infrastructure Distributor}\label{imp:subsec:distributor}
-- mention seperate class, discuss params
-- the user can define their own
-- Extended LEAF has its own default approach
-(go through this, attach to appendicies )
+\subsection{Utility Functions}\label{imp:subsec:utility}
+As the power domain acts as the focus for the features provided in Extended LEAF, the class provides an array of methods that are used to allow the workflow to carry out its tasks.
 
-\subsection{Logging Results}\label{imp:subsec:logging-results}
-- remaining
+When a power domain is initialised it may have been apparent that no power sources are passed through the constructor argument, this is because the first feature provided by the power domain is add\_power\_source() which creates associations between a power source and a power domain().
+When the power domain invokes add\_power\_source(), the priority of the power source is used to insert itself into the correct location within the power domain's list data structure power\_sources.
+When a power domain no longer wishes to have an association with a power source, the power domain invokes the instance method remove\_power\_source().
+This is to insure that the power source is correctly removed from the power domain and that any entities that are currently powered by it are safely removed.
 
-\section{Power Sources}\label{sec:power-sources}
+The next core utility function the power domain provides is the ability to create and remove associations between infrastructure entities and the domain.
+This is achieved by the power domain calling add\_entity() and remove\_entity() respectively.
+Similar to those for the power sources, add\_entity() and remove\_entity() safely add and remove infrastructure entities to the power domains list structure powered\_infrastructure.
 
-\subsection{Static Power Sources}\label{imp:subsec:static-power-sources}
-When a power source is defined as static, the user must provide the entities from the infrastructure that they want to associate the source to.
-From this, the power source will only distribute power to these provided entities and disregard the distribution process of the power domain, if a situation occurs where the power source can no longer provide power to these entities then all nodes and links associated will be powered off and any tasks running will be paused until power can be provided to the entity.
-The model provides this ability to allow for scenarios when a simulation requires various power sources but needs to impose restrictions on particular entities in the infrastructure.
-
-\subsection{Dynamic Power Sources}\label{imp:subsec:dynamic-power-sources}
-When a power source is defined as dynamic, the user will associate any entities within the infrastructure to the power domain, represented as $\mathbf{I_{pd} \in I}$, where $\mathbf{I}$ encompasses all nodes and links denoted as $\mathbf{\{N\} \cup \{L\}}$.
-From this the responsibility to allocate a power source resolves to the power domains distribution method discussed in \ref{subsec:distributing-entities}, whether being the default algorithm provided by Extended LEAF or one defined by the user.
-Unlike the statically defined power source configuration, when a scenario occurs where an infrastructure entity is not allocated directly to a power source the simulation fails.\\
-
-\subsection{Power Source Types}\label{imp:subsec:power-source-types}
-In order to realise the ability to fluctuate power availability and carbon intensity, Extended LEAF introduces Power Types for power sources.
-Power sources should be characterised into groups based on attributes inherent to them.
-For instance, an assumption made by Extended LEAF is the idea that real life power sources such as the National Energy Grid in the UK
-3 main types:
-renewable:
-    - static carbon intensity
-    - variable power
-mixed
-    - variable carbon intensity (as a result of combo of non)
-    - assumed unlimited power
-battery
-    - small static carbon intensity
-    - finite power
-    - power is provided from another source and is recharged by them, providing source emits the carbon obvisouly
-
-The goal of these events is to allow for users to
-- core feature to integrate functionality and allow for actions/events to occur without going into the power domain/ runner to alter logic
-- events can be repeated
-- events are called to alter functionality to represent changing conditions of the simulation, allowing for more complex interactions
-- events are executed
-- power domain bound
-\section{Events}\label{imp:sec:envts}
-
-\section{Running Simulations}\label{imp:sec:running-simulations}
-
-\section{Displaying Results}\label{sec:displaying-results}
-
-++++++++++++++++++++++
-TODO: rewrite to move focus on how this would occur i.e. dicuss as mentioned we operate between three layers, in order to facilitate the interactions mediatior
-+++++++++++++
-
-At the top layer, the model considers the applications of the simulation which describes the sequential series of tasks and their flow of data from a source task to a sink task.
-These applications are then placed on top of the infrastructure layer through a mediation process which identifies the most suitable infrastructure entity to place a task onto.
-The infrastructure layer is used to describe the physical compute nodes and network links of the simulation and how these entities are inter-connected.
-
-
-\section{Displaying results}\label{subsec:displaying-results}
-
-
-The final aspect introduced into Extended LEAF was the ability to display results.
-
-
-- events are logged once power has been consumed
-- power consumed
-- carbon emitted
-- carbon intensity
-
-- further logging is made calculating total carbon emitted for the source in total at time t
-- Graphs are produced showing how values change over time
-- optional class the user can implement
-- passes through the power domain per file writer
-- specify what graphs they want to plot
-
-In general, Extended LEAF was designed in an manner that would compliment the existing simulation framework but not have a mandated requirement for its features to be incorporated to carry out simulations.
-As such, the extension was designed to be loosely coupled to the existing framework \citep{looseCoupling}, therefore allowing for existing simulations and scenarios to be performed under no restrictions to realise any power source or power domain.
-The framework achieves this by allowing the power layer to have an unrestricted view of the underlying infrastructure of the model, being able to query the state of entities in the above layer and having the power domain carry out necessary actions on the infrastructure.
-In particular, the framework operates within a unified discrete event space allowing for a power domain to run simultaneously, as such we can realise interactions between power sources and infrastructure through keeping associations between the two layers respectively.
-
-Despite entities within the infrastructure having the optional ability to indicate a positional location, power sources do not consider share this property and assumes that a power is able to be supplied
-As a result of this, Extended LEAF expects power sources to be defined by the user in the unit of watts.
-
-
-As previously mentioned, power sources interact with the infrastructure through the power domain and can receive entities through the distribution mechanism employed by it.
-The remaining part of this section will proceed to describe why
-
-
-
-
-
-\subsection{Figures}
-\emph{Always} refer to figures included, like Figure \ref{fig:relu}, in the body of the text. Include full, explanatory captions and make sure the figures look good on the page.
-You may include multiple figures in one float, as in Figure \ref{fig:synthetic}, using \texttt{subcaption}, which is enabled in the template.
-
-
-
-% Figures are important. Use them well.
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{images/relu.pdf}    
-
-    \caption{In figure captions, explain what the reader is looking at: ``A schematic of the rectifying linear unit, where $a$ is the output amplitude,
-    $d$ is a configurable dead-zone, and $Z_j$ is the input signal'', as well as why the reader is looking at this: 
-    ``It is notable that there is no activation \emph{at all} below 0, which explains our initial results.'' 
-    \textbf{Use vector image formats (.pdf) where possible}. Size figures appropriately, and do not make them over-large or too small to read.
-    }
-
-    % use the notation fig:name to cross reference a figure
-    \label{fig:relu} 
-\end{figure}
-
-
-\begin{figure}
-    \centering
-    \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{images/synthetic.png}
-        \caption{Synthetic image, black on white.}
-        \label{fig:syn1}
-    \end{subfigure}
-    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
-      %(or a blank line to force the subfigure onto a new line)
-    \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{images/synthetic_2.png}
-        \caption{Synthetic image, white on black.}
-        \label{fig:syn2}
-    \end{subfigure}
-    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
-    %(or a blank line to force the subfigure onto a new line)    
-    \caption{Synthetic test images for edge detection algorithms. \subref{fig:syn1} shows various gray levels that require an adaptive algorithm. \subref{fig:syn2}
-    shows more challenging edge detection tests that have crossing lines. Fusing these into full segments typically requires algorithms like the Hough transform.
-    This is an example of using subfigures, with \texttt{subref}s in the caption.
-    }\label{fig:synthetic}
-\end{figure}
-
-\clearpage
-
-\subsection{Equations}
-
-Equations should be typeset correctly and precisely. Make sure you get parenthesis sizing correct, and punctuate equations correctly 
-(the comma is important and goes \textit{inside} the equation block). Explain any symbols used clearly if not defined earlier. 
-
-For example, we might define:
-\begin{equation}
-    \hat{f}(\xi) = \frac{1}{2}\left[ \int_{-\infty}^{\infty} f(x) e^{2\pi i x \xi} \right],
-\end{equation}    
-where $\hat{f}(\xi)$ is the Fourier transform of the time domain signal $f(x)$.
-
-\subsection{Algorithms}
-Algorithms can be set using \texttt{algorithm2e}, as in Algorithm \ref{alg:metropolis}.
-
-% NOTE: line ends are denoted by \; in algorithm2e
-\begin{algorithm}
-    \DontPrintSemicolon
-    \KwData{$f_X(x)$, a probability density function returing the density at $x$.\; $\sigma$ a standard deviation specifying the spread of the proposal distribution.\;
-    $x_0$, an initial starting condition.}
-    \KwResult{$s=[x_1, x_2, \dots, x_n]$, $n$ samples approximately drawn from a distribution with PDF $f_X(x)$.}
-    \Begin{
-        $s \longleftarrow []$\;
-        $p \longleftarrow f_X(x)$\;
-        $i \longleftarrow 0$\;
-        \While{$i < n$}
-        {
-            $x^\prime \longleftarrow \mathcal{N}(x, \sigma^2)$\;
-            $p^\prime \longleftarrow f_X(x^\prime)$\;
-            $a \longleftarrow \frac{p^\prime}{p}$\;
-            $r \longleftarrow U(0,1)$\;
-            \If{$r<a$}
-            {
-                $x \longleftarrow x^\prime$\;
-                $p \longleftarrow f_X(x)$\;
-                $i \longleftarrow i+1$\;
-                append $x$ to $s$\;
-            }
-        }
-    }
-    
-\caption{The Metropolis-Hastings MCMC algorithm for drawing samples from arbitrary probability distributions, 
-specialised for normal proposal distributions $q(x^\prime|x) = \mathcal{N}(x, \sigma^2)$. The symmetry of the normal distribution means the acceptance rule takes the simplified form.}\label{alg:metropolis}
-\end{algorithm}
-
-\subsection{Tables}
-
-If you need to include tables, like Table \ref{tab:operators}, use a tool like https://www.tablesgenerator.com/ to generate the table as it is
-extremely tedious otherwise. 
-
-\begin{table}[]
-    \caption{The standard table of operators in Python, along with their functional equivalents from the \texttt{operator} package. Note that table
-    captions go above the table, not below. Do not add additional rules/lines to tables. }\label{tab:operators}
-    %\tt 
-    \rowcolors{2}{}{gray!3}
-    \begin{tabular}{@{}lll@{}}
-    %\toprule
-    \textbf{Operation}    & \textbf{Syntax}                & \textbf{Function}                            \\ %\midrule % optional rule for header
-    Addition              & \texttt{a + b}                          & \texttt{add(a, b)}                                    \\
-    Concatenation         & \texttt{seq1 + seq2}                    & \texttt{concat(seq1, seq2)}                           \\
-    Containment Test      & \texttt{obj in seq}                     & \texttt{contains(seq, obj)}                           \\
-    Division              & \texttt{a / b}                          & \texttt{div(a, b) }  \\
-    Division              & \texttt{a / b}                          & \texttt{truediv(a, b) } \\
-    Division              & \texttt{a // b}                         & \texttt{floordiv(a, b)}                               \\
-    Bitwise And           & \texttt{a \& b}                         & \texttt{and\_(a, b)}                                  \\
-    Bitwise Exclusive Or  & \texttt{a \textasciicircum b}           & \texttt{xor(a, b)}                                    \\
-    Bitwise Inversion     & \texttt{$\sim$a}                        & \texttt{invert(a)}                                    \\
-    Bitwise Or            & \texttt{a | b}                          & \texttt{or\_(a, b)}                                   \\
-    Exponentiation        & \texttt{a ** b}                         & \texttt{pow(a, b)}                                    \\
-    Identity              & \texttt{a is b}                         & \texttt{is\_(a, b)}                                   \\
-    Identity              & \texttt{a is not b}                     & \texttt{is\_not(a, b)}                                \\
-    Indexed Assignment    & \texttt{obj{[}k{]} = v}                 & \texttt{setitem(obj, k, v)}                           \\
-    Indexed Deletion      & \texttt{del obj{[}k{]}}                 & \texttt{delitem(obj, k)}                              \\
-    Indexing              & \texttt{obj{[}k{]}}                     & \texttt{getitem(obj, k)}                              \\
-    Left Shift            & \texttt{a \textless{}\textless b}       & \texttt{lshift(a, b)}                                 \\
-    Modulo                & \texttt{a \% b}                         & \texttt{mod(a, b)}                                    \\
-    Multiplication        & \texttt{a * b}                          & \texttt{mul(a, b)}                                    \\
-    Negation (Arithmetic) & \texttt{- a}                            & \texttt{neg(a)}                                       \\
-    Negation (Logical)    & \texttt{not a}                          & \texttt{not\_(a)}                                     \\
-    Positive              & \texttt{+ a}                            & \texttt{pos(a)}                                       \\
-    Right Shift           & \texttt{a \textgreater{}\textgreater b} & \texttt{rshift(a, b)}                                 \\
-    Sequence Repetition   & \texttt{seq * i}                        & \texttt{repeat(seq, i)}                               \\
-    Slice Assignment      & \texttt{seq{[}i:j{]} = values}          & \texttt{setitem(seq, slice(i, j), values)}            \\
-    Slice Deletion        & \texttt{del seq{[}i:j{]}}               & \texttt{delitem(seq, slice(i, j))}                    \\
-    Slicing               & \texttt{seq{[}i:j{]}}                   & \texttt{getitem(seq, slice(i, j))}                    \\
-    String Formatting     & \texttt{s \% obj}                       & \texttt{mod(s, obj)}                                  \\
-    Subtraction           & \texttt{a - b}                          & \texttt{sub(a, b)}                                    \\
-    Truth Test            & \texttt{obj}                            & \texttt{truth(obj)}                                   \\
-    Ordering              & \texttt{a \textless b}                  & \texttt{lt(a, b)}                                     \\
-    Ordering              & \texttt{a \textless{}= b}               & \texttt{le(a, b)}                                     \\
-    % \bottomrule
-    \end{tabular}
-    \end{table}
-\subsection{Code}
-
-Avoid putting large blocks of code in the report (more than a page in one block, for example). Use syntax highlighting if possible, as in Listing \ref{lst:callahan}.
-
-\begin{lstlisting}[language=python, float, caption={The algorithm for packing the $3\times 3$ outer-totalistic binary CA successor rule into a 
-    $16\times 16\times 16\times 16$ 4 bit lookup table, running an equivalent, notionally 16-state $2\times 2$ CA.}, label=lst:callahan]
-    def create_callahan_table(rule="b3s23"):
-        """Generate the lookup table for the cells."""        
-        s_table = np.zeros((16, 16, 16, 16), dtype=np.uint8)
-        birth, survive = parse_rule(rule)
-
-        # generate all 16 bit strings
-        for iv in range(65536):
-            bv = [(iv >> z) & 1 for z in range(16)]
-            a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p = bv
-
-            # compute next state of the inner 2x2
-            nw = apply_rule(f, a, b, c, e, g, i, j, k)
-            ne = apply_rule(g, b, c, d, f, h, j, k, l)
-            sw = apply_rule(j, e, f, g, i, k, m, n, o)
-            se = apply_rule(k, f, g, h, j, l, n, o, p)
-
-            # compute the index of this 4x4
-            nw_code = a | (b << 1) | (e << 2) | (f << 3)
-            ne_code = c | (d << 1) | (g << 2) | (h << 3)
-            sw_code = i | (j << 1) | (m << 2) | (n << 3)
-            se_code = k | (l << 1) | (o << 2) | (p << 3)
-
-            # compute the state for the 2x2
-            next_code = nw | (ne << 1) | (sw << 2) | (se << 3)
-
-            # get the 4x4 index, and write into the table
-            s_table[nw_code, ne_code, sw_code, se_code] = next_code
-
-        return s_table
-
+Another core feature that the power domain provides is the function used to calculate how much carbon has been produced.
+Listing \ref{lst:calc-carbon} shows that the class function takes as arguments the energy consumed (in watt-hours) and a power source's current carbon intensity to calculate the amount of carbon that has been released.
+\begin{lstlisting}[language=python, numbers=left, caption={Listing showing the class method used to calculate carbon emissions.}, label=lst:calc-carbon]
+    @classmethod
+    def calculate_carbon_released(cls, power_used, carbon_intensity) -> float:
+        return float(power_used) * (10 ** -3) * float(carbon_intensity)
 \end{lstlisting}
 
-%==================================================================================================================================
+Finally, the power domain also provides various small class functions to carry out common tasks, for instance convert\_to\_time\_string() and get\_current\_time() which are used to translate between the string and integer representations of time respectfully.
+
+\subsection{Workflow}\label{imp:subsec:workflow}
+As discussed in Section \ref{subsec:power-domain-workflow}, the workflow of the power domain is where the main interactions between the Power and Infrastructure layers occur.
+Extended LEAF implements this workflow by providing an invokable run method for an instance of the PowerDomain class.
+Using the ideas presented in Section \ref{imp:subsec:des}, this method is passed through into the simulation environment so that it can be used to progress the simulation forward in time.
+
+To minimise having to iterate through the power sources multiple times, the power domain combines tasks in the workflow into the same body of a for loop when possible.
+In addition, the power domain takes advantage of the ordering of its power\_sources list and uses this to iterate through each power source, as the priority of the source was used to determine the position within this list.
+As you can see the workflow consists of three for loops.
+
+The first for loop iterates through power\_sources in order to define each power source's available power and carbon intensity at that moment in the simulation.
+This is necessary to happen before the next loop as the distribution process in the following stage takes in to consideration the power and carbon intensity of other power sources so these must be updated before it occurs.
+
+Once all the power sources have their state updated, each power source determines the infrastructure entities they will power for the current time step and have their measurements logged.
+We can take measurements at this stage due to the fact Extended LEAF iterates through power sources in the order of most desirable.
+Because of this, once dynamic power source has their entities allocated to that power domain, these entities will remain there until time moves forward.
+For static entities this does not have any affect due to the fact that entities remain associated to the power source but just pause any running tasks and are considered turned off.
+
+Finally, the last loop iterates through all the entities that need to be provided a power source.
+If one is not allocated a power source the simulation fails by returning an error.
+
+\subsection{The Powered Infrastructure Distributor Class}\label{imp:subsec:distributor}
+The PoweredInfrastructureDistributor class is used by the power domain to distribute entities within the infrastructure to power sources.
+The class contains only two attributes:
+\begin{itemize}
+    \item \textbf{powered\_infrastructure\_distributor\_method}, this is the method which is called to distribute entities.
+    \item \textbf{smart\_distribution}, this is used within the default method to allow for advanced features.
+\end{itemize}
+The class is initialized in one of two ways, either by letting the framework initialise a default implementation or by creating a custom instance with a custom distribution method.
+
+For context when a power source evaluates an entity, an inequality comparison is carried out between the power source's available power and an entity's power requirements.
+When the power domain calls the distributor method it passes in two items, the power source which wants to receive entities and the power domain itself.
+The method receives the power domain in order to see the entities within it.
+
+As defined in Section \ref{subsec:distributing-entities}, the entities are seperated into three categories.
+The first category evaluated are the entities that the power source powered in the previous state of the simulation.
+It evaluates these first as the system assumes that these should try to retain an association before distributing power elsewhere.
+If an entity can be no longer powered by the source the entity is released from the power source's list of powered\_infrastructure.
+
+After this entities that have no power source are then evaluated.
+These are evaluated next as the simulation would fail as an error is raised when an entity cant be assigned a power source.
+If a entity here can join the power source, the entity is added to the power source's powered\_infrastructure.
+
+Finally, the method makes use of the instance's smart\_distribution attribute and uses the current power source's priority to try and power entities from power sources that are deemed less desirable.
+This is done last because the categories above take more precedence over this one.
+If an entity can join the power source, it is first removed from the previous power source's list of powered\_infrastructure and added to its own.
+
+\subsection{Logging Results}\label{imp:subsec:logging-results}
+The last aspect the power domain deals in is logging information about each state of the simulation.
+It achieves this by building up a nested dictionary that holds measurements about the simulation as it moves forward in time.
+The benefit with working with nested dictionaries is that this can be easily transformed into a JSON file later on to write to file.
+Appendix \ref{lst:dic-log} shows an example of this tree like structure.
+As we can see from this, we have a cascading set of dictionaries that eventually describe the measurements for a given entity at that current moment in the simulation.
+To provide meaning to the structure itself, the dictionary that encapsulates this describes the current state of the power source.
+In the listing we can see that within the power source level of the dictionary the total carbon emissions is also logged.
+This is done as we keep a running total during runtime of the simulation and can later aggregate this value once finished to reduce unnecessary summations of the data.
+
+\section{The Power Source Class}\label{sec:power-sources}
+
+Power sources are implemented in Extended LEAF by using an abstract class to define the universal attributes and methods used by all instances of the class.
+As discussed in Section \ref{sec:power-sources}, power sources are classified through two distinct features, their type and whether they are a static or dynamic power source.
+To implement a power source's type an enumerator is used to describe the 3 potential types that exist: RENEWABLE, MIXED and BATTERY.
+If the user wishes for a power source to maintain a constant relationship with a collection of entities then the static argument must be set True in the constructor along with providing the entities they wish to have an association.\\
+Power sources are initialised in Extended LEAF by defining a concrete instance of the PowerSource class.
+These instances are used to model the real power sources they are based upon.
+
+While the user can develop their own power sources, Extended LEAF provides 3 main examples SolarPower, WindPower and GridPower.
+These power sources take from real life historical data to define their behaviour for each state of the simulation.
+For instance renewable power sources (SolarPower and WindPower) retrieve data for their power availability, whereas non renewable power sources (GridPower) retrieve data for their carbon intensity.
+If the user wishes to implement their own power source they are expected to define the logic for updating and providing information about the current power available and the carbon intensity at that moment in time.
+
+Power sources provide the user the ability to configure them in a variety of ways.
+This can be seen through the arguments they allow in the constructor:
+\begin{itemize}
+    \item \textbf{env}, the reference to the Environment() class used to simulate the model.
+    \item \textbf{name}, the name of the power source, like the power domain, this must be kept unique as it used to identify itself.
+    \item \textbf{data\_set\_filename}, this is the filepath for the data that fluctuates, this is either the carbon intensity or available power.
+    \item \textbf{power\_domain}, this is power domain instance. NB, this is required in order to acknowledge what time the simulation starts at.
+    \item \textbf{priority}, this is the integer that describes preference when distributing entities where 0 is the most important.
+    \item \textit{(Optional)} \textbf{static}, this is a boolean flag to signal to the power domain not to distribute entities to this power source.
+    \item \textit{(Optional)} \textbf{powered\_infrastructure}, these are the entities the user wants to statically assign to a power source.
+\end{itemize}
+The PowerSource class represents the available power at any given moment in time through the use of a floating point variable \textit{remaining\_power}.
+While \cite{leaf2021} use the idea of a power model in the Application and Infrastructure layer to represent static and dynamic power consumption, Extended LEAF only needs a single value to represent it.
+To convert from a PowerModel reading of power to a single value, the power domain simply casts the type as a float to retrieve the required power.
+
+\subsection{Evaluating Static Power sources}\label{imp:subsec:static-entities}
+Whilst the PoweredInfrastructureDistributor class is used to distribute entities to dynamic power sources, static power sources also need to determine what entities they will power at each moment in the simulation.
+Because of this, the power source provides provides a crucial method called \textbf{evaluate\_entities}.
+The purpose of this method, \textit{just like the powered\_infrastructure\_distributor\_method}, is to determine which entities are powered at the current state of the simulation for static power sources.
+It achieves this by iterating through each entity present and carrying out the same evaluation discussed in Section \ref{imp:subsec:distributor}.
+However, as the power source is considered static, the method is unable to simply free the entity back to the power domain for another power source to power.
+Instead, the power source effectively turns off the entity by pausing the entity itself and removes any tasks or dataflows that exist in the entity itself and the remaining application.
+
+\subsection{Functions}\label{imp:subsec:utility-funcs}
+Like the PowerDomain class, the abstract class of PowerSource provides the user a range of functions that are available to all realised instances of the class.
+Unlike the abstract methods that the are specialised to each individual concrete class of PowerSource, these methods are used to provide the same functionality throughout all instances.
+
+The first collection of functions the PowerSource class provides are related to power consumption.
+These include providing safe approaches in consuming (\textit{consume\_power()}), setting (\textit{set\_current\_power()}) and retrieving power (\textit{get\_current\_power()}).
+Because of this, when the simulation needs to interact with the current remaining power of a power source, they are able to call these methods without having to worry about providing checks to ensure correctness.
+The PowerSource class also provides basic add and remove methods to include and drop entities from within their list of powered\_infrastructure.
+Similar to the PowerDomain class, these add and remove methods correctly insure that when an entity is being handled by the power source the necessary processes have happened to avoid entities not being correctly updated.
+Finally the PowerSource class also implements the file reader used to access the data regarding the particular power source instance.
+
+Finally the PowerSource class also provides the functionality to read the data concerning either the power availability or carbon intensity from file.
+In addition to this, the method structures the data so that the data starts from the user's desired time.
+It does this by taking in the filepath for the data and the desired start time.
+Next, the dictionary that is used to retrieve data during the simulation is created along with a temporary one.
+Once the file has been loaded the method proceeds to iterate through the file creating entries within the temporary dictionary using the time as the key and the data as the value.
+Whilst this is happening the loop is also checking to see if the current entry is the start time of the simulation.
+Once the entry has been found the method switches over to the final dictionary and adds the remaining entries to this one.
+Finally, the temporary dictionary with entries before the start time are then appended onto the end of the actual dictionary.
+
+\section{Events}\label{imp:sec:envts}
+Extended LEAF Implements events into the framework by introducing two classes, Event and EventDomain.
+An instance of Event describes a method that will be executed at some point during the simulation.
+An instance of EventDomain manages these events and moves independently within the simulation executing them when appropriate.
+
+\subsection{The Event Class}\label{imp:subsec:event-class}
+The goal of the Event class is to inform an instance of EventDomain how and when a callback method should be executed.
+Because of this, the class provides no functionality besides being initialised.
+When a user does this, they will pass the following arguments into the constructor:
+\begin{itemize}
+    \item \textbf{event}, this is method the user wants to execute. NB, the user should only reference the method, therefore no parenthesise are included.
+    \item \textbf{args}, this is a list of the arguments that need to be passed into the method.
+    \item \textbf{time\_str}, this is the (string) time when the event should execute. NB, this should be formatted as HH\%MM\%SS.
+    \item \textit{(Optional)} \textbf{repeat}, this is a boolean flag to signal whether the event should execute after a certain amount of time has elapsed.
+    \item \textit{(Optional)} \textbf{repeat\_counter}, following from repeat, this indicates how much time should elapse in minutes before the event executes again.
+\end{itemize}
+
+\subsection{The EventDomain Class}\label{imp:subsec:event-domain-class}
+As previously mentioned, the goal of the EventDomain class is to manage when events are executed within the simulation.
+Just like the Event class, the EventDomain instance is expected to be initialised by the user by passing in the following:
+\begin{itemize}
+    \item \textbf{env}, the reference to the simulation variable.
+    \item \textbf{update\_interval}, the amount of minutes that pass between steps forward in time.
+    \item \textbf{start\_time\_str}, this is the (string) when the events should start running. NB, this should be formatted as HH\%MM\%SS.
+\end{itemize}
+When the simulation model is being defined by the user, instances of the Events class are associated with the event domain by calling the add\_event() method.
+Similar to the PowerDomain class, the EventDomain moves independently within the simulation space using the same approach outlined within Section \ref{imp:subsec:time}, where a driver method is used to constantly iterate through time within the simulation.
+When the event domain does move forward in time, the driver method calls the only other method available run\_events().
+
+The run\_events() method operates by first finding the current time of the simulation and initialises an empty list.
+The purpose of this list is to identify any events that have been executed during this time interval of the simulation so they can be safely removed afterwards.
+The method then proceeds to iterate through its events.
+During this, each event is evaluated using an inequality comparison.
+If the current time equals or surpasses an event's execution time, the event's method is called passing in any provided arguments.
+To allow for events to be repeated, if the user wishes for the event to be executed regularly, a new event instance is created by copying over the attributes of the old event with the execution time being incremented.
+After this, to log events that have been executed, the event is added to the event\_history list data structure.
+Finally, the old event is flagged and ready to be deleted once all other events have been ran.
+
+\section{Analysing Results}\label{sec:displaying-results}
+The final aspect introduced into Extended LEAF is the ability to store and display results.
+Using the data logged from Section \ref{imp:subsec:logging-results} Extended LEAF provides the ability for the data generated during the simulation to be saved to file and or visualised through graphs and animations.
+It achieves this by using the python packages Plotly \citep{plotly-git}, Matplotlib \citep{Hunter:2007} and NetworkX \citep{networkx}.
+Once the simulation has finished executing, the user is free to go about analysing the data anyway they deem fit.
+Extended LEAF provides the user with 3 built in classes to view the data:
+
+\begin{enumerate}
+    \item FileHandler
+    \item FigurePlotter
+    \item Animation
+\end{enumerate}
+
+\subsection{The FileHandler Class}\label{subsec:imp:filehandler}
+The FileHandler class is used to save writable objects to file.
+Similar to the native FileHandler class in Python \citep{python-docs-FileHandler}, the FileHandler class in Extended LEAF provides the necessary features to write a both the power domain's results of the simulation and any graphs generated to file.
+It achieves this by creating a unique directory within the results folder, where the folder's name reflects the file that the FileHandler was initialized from along with a date and time stamp.
+If the user wants to use the class, then they are expected to initialise an instance of the class.
+This is necessary as in order to automatically write to the same directory, the same instance of the class needs to be used.
+
+\subsection{The FigurePlotter Class}\label{subsec:imp:figureplotter}
+The user can generate automated graphs of the simulation by utilising the FigurePlotter class.
+The goal of this class is to provide a collection of functions that can be used to generate instances of Plotly.Figure.
+If the user wants to use this class then an instance of it must be initialised passing through the following items:
+\begin{itemize}
+    \item \textbf{power\_domain}, the power domain that the user wants to produce results from.
+    \item \textit{(Optional)} \textbf{event\_domain}, the event domain that issued any events in the same simulation space as power\_domain.
+    \item \textit{(Optional)} \textbf{show\_event\_lines}, this is a boolean flag for a stylistic choice to have lines that intersect events cut through other figures.
+    \item \textit{(Optional)} \textbf{(number\_of\_divisions)}, this is an integer used to indicate how many x-ticks there should be.
+    \item \textit{(Optional)} \textbf{title}, this is the overall title if an aggregated figure is used.
+\end{itemize}
+Once an instance has been defined, the user is able to invoke the instance and generate a figure by calling any of these methods:
+\begin{itemize}
+    \item subplot\_time\_series\_entities()
+    \item subplot\_time\_series\_power\_sources()
+    \item subplot\_time\_series\_power\_meter()
+\end{itemize}
+By passing through the desired attribute and necessary instances to plot, the methods return an instance of Plotly.Figure.\\
+Finally the class can reduce the number of figures present by aggregating the graphs into the same figure by converting the existing figure into sub-figures.
+Figure \ref{fig:dev-example7-results} shows an example of the graphs that can be generated from this class.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/dev_examaple7_results}
+    ~
+    \caption{Example figure generated from 7\_extended\_file\_writer.py in the development\_examples folder.}
+    \label{fig:dev-example7-results}
+\end{figure}
+
+\subsection{The Animation Class}\label{subsec:imp:animation}
+The last major class Extended LEAF saw to provide was a means to visualise how infrastructure entities interacted with power sources during the simulation.
+The Animation class achieves this by providing an interactive means to move through each state of the simulation and view the relations between entities and power sources.
+It implements this by using the Matplotlib and NetworkX packages to place a series of graphs over an interactive plot.
+A NetworkX graph is generated when either the play button is pressed or the slider moves across the time series.
+When this happens, an index of that current moment in time is used to generate the relationships that existed by inspecting the corresponding entry in the power domains log using the key values to decide.
+Figure \ref{fig:dev-example7-animation} shows an example instance of this animation.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/example7-animation.pdf}
+    ~
+    \caption{Example figure generated from 7\_extended\_file\_writer.py in the development\_examples folder.}
+    \label{fig:dev-example7-animation}
+\end{figure}
+
+
+
 \chapter{Evaluation} \label{chp:evaluation}
 How good is your solution? How well did you solve the general problem, and what evidence do you have to support that?
 
+To Evaluate Extended LEAF various examples have been developed to demonstrate the framework's functionality.
+The intention behind these examples, is to provide evidence that the framework succeeds in being what it set out to accomplish
+These examples progress in complexity and focus around a central context
+\section{Scenarios}\label{eval:sec:scenarios}
+\subsection{Context Background}\label{eval:subsec:precision-agriculture}
+
+Throughout the following sections,
+\subsection{Scenarios 1--4}\label{eval:subsec:small-scenarios}
+
+\subsubsection{A Singular Static Power Source}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/examples/example_1/example1_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 1.}
+    \label{fig:example1_diagram}
+\end{figure}
+
+\subsubsection{Multiple Dynamic Power Sources}\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/examples/example_2/example2_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 2.}
+    \label{fig:example2_diagram}
+\end{figure}
+
+\subsubsection{A Custom Infrastructure Distributor}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/examples/example_3/example3_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 3.}
+    \label{fig:example3_diagram}
+\end{figure}
+
+\subsubsection{An Off-Peak Battery Power Source}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/examples/example_4/example4_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 4.}
+    \label{fig:example4_diagram}
+\end{figure}
+
+\subsection{Scenarios 5 - A Carbon Aware Application Orchestrator}\label{eval:subsec:scenario 5}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/examples/example_5/example5_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 5.}
+    \label{fig:example5_diagram}
+\end{figure}
+
+\subsection{Scenarios 6 - Cyclic Infrastructure Pausing}\label{eval:subsec:scenario 6}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/examples/example_6/example6_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 6.}
+    \label{fig:example6_diagram}
+\end{figure}
+
+\subsection{Scenarios 7 - Precision Agriculture}\label{eval:subsec:scenario 7}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/examples/example_7/example7_diagram.pdf}
+    ~
+    \caption{Illustration depicting scenario 7.}
+    \label{fig:example7_diagram}
+\end{figure}
+
 When the user sets out to carry out a simulation, the user should reference Figure \ref{fig:archtecture} and work from the bottom up
-\section{Introduction}\label{sec:eval-intro}
-\section{Introduction}\label{sec:eval-example1}
-\section{Introduction}\label{sec:eval-example2}
-\section{Introduction}\label{sec:eval-example3}
-\section{Introduction}\label{sec:eval-example4}
-\section{Introduction}\label{sec:eval-example5}
-\section{Introduction}\label{sec:eval-example6}
-\section{Introduction}\label{sec:eval-example7}
+\section{Running Simulations}\label{imp:sec:running-simulations}
+
 
 \section{Guidance}
 \begin{itemize}
@@ -837,9 +918,9 @@ When the user sets out to carry out a simulation, the user should reference Figu
 \end{itemize}
 
 \section{Evidence}
-Make sure you present your evidence well. Use appropriate visualisations, reporting techniques and statistical analysis, as appropriate.
+%Make sure you present your evidence well. Use appropriate visualisations, reporting techniques and statistical analysis, as appropriate.
 
-If you visualise, follow the basic rules, as illustrated in Figure \ref{fig:boxplot}:
+%If you visualise, follow the basic rules, as illustrated in Figure \ref{fig:boxplot}:
 \begin{itemize}
 \item Label everything correctly (axis, title, units).
 \item Caption thoroughly.
@@ -848,20 +929,6 @@ If you visualise, follow the basic rules, as illustrated in Figure \ref{fig:boxp
 \item Minimize clutter.
 \end{itemize}
 
-See the file \texttt{guide\_to\_visualising.pdf} for further information and guidance.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=1.0\linewidth]{images/boxplot_finger_distance.pdf}    
-
-    \caption{Average number of fingers detected by the touch sensor at different heights above the surface, averaged over all gestures. Dashed lines indicate
-    the true number of fingers present. The Box plots include bootstrapped uncertainty notches for the median. It is clear that the device is biased toward 
-    undercounting fingers, particularly at higher $z$ distances.
-    }
-
-    % use the notation fig:name to cross reference a figure
-    \label{fig:boxplot} 
-\end{figure}
 
 
 %==================================================================================================================================
@@ -889,11 +956,60 @@ Summarise the whole project for a lazy reader who didn't read the rest (e.g. a p
 % 
 %==================================================================================================================================
 %  APPENDICES  
-
 \begin{appendices}
-
 \chapter{Appendices}
 
+\section{Dictionary log Example}
+\begin{lstlisting}[caption={Example dictionary structure used by the power domain.},label={lst:dic-log}]
+{
+    "0": {
+        "Wind Power Source": {
+          "Node A": {
+            "Power Used": 0.1,
+            "Carbon Intensity": 1,
+            "Carbon Released": 0.1
+          },
+          "Total Carbon Released": 0.1
+        },
+        "Solar Power Source": {
+          "Node B": {
+            "Power Used": 0.06,
+            "Carbon Intensity": 2,
+            "Carbon Released": 0.12
+          },
+          "Node C": {
+            "Power Used": 0.15,
+            "Carbon Intensity": 1,
+            "Carbon Released": 0.15
+          },
+          "Total Carbon Released": 0.27
+        }
+    },
+    "1": {
+        "Wind Power Source": {
+          "Node A": {
+            "Power Used": 0.15,
+            "Carbon Intensity": 2,
+            "Carbon Released": 0.30
+          },
+          "Node B": {
+            "Power Used": 0.03,
+            "Carbon Intensity": 2,
+            "Carbon Released": 0.06
+          }
+          "Total Carbon Released": 0.36
+        },
+        "Solar Power Source": {
+          "Node C": {
+            "Power Used": 0.15,
+            "Carbon Intensity": 1,
+            "Carbon Released": 0.15
+          },
+          "Total Carbon Released": 0.27
+        }
+    }
+}
+\end{lstlisting}
 Typical inclusions in the appendices are:
 
 \begin{itemize}
@@ -914,8 +1030,404 @@ Typical inclusions in the appendices are:
 \textbf{Don't include your source code in the appendices}. It will be
 submitted separately.
 
+\section{Scenario 1 Results}\label{apen:subsec:scen1}
+\clearpage
+\section{Scenario 2 Results}\label{apen:subsec:scen2}
+
+\clearpage
+\section{Scenario 3 Results}\label{apen:subsec:scen3}
+The Following appendices are the results for scenario 3.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-0}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example3-0}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-1}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example3-1}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example3-2}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-3}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example3-3}
+\end{figure}
+
+\clearpage
+\section{Scenario 4 Results}\label{apen:subsec:scen4}
+The Following appendices are the results for scenario 4.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example4-0}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-1}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example4-1}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example4-2}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example4-3}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example4-4}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-5}
+    ~
+    \caption{Graph showing the timeseries of power used for power meters.}
+    \label{fig:example4-5}
+\end{figure}
+
+\clearpage
+\section{Scenario 5 Results}\label{apen:subsec:scen5}
+The Following appendices are the results for scenario 5.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example5-0}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-1}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example5-1}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example5-2}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example5-3}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example5-4}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-5}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example5-5}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-6}
+    ~
+    \caption{Graph showing the timeseries of power used for power meters.}
+    \label{fig:example5-6}
+\end{figure}
+
+\clearpage
+\section{Scenario 6 Results}\label{apen:subsec:scen6}
+The Following appendices are the results for scenario 6.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example6-0}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example6-1}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example6-2}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-5}
+    ~
+    \caption{Graph showing the timeseries of energy available for power sources.}
+    \label{fig:example6-3}
+\end{figure}
+
+\clearpage
+\section{Scenario 7 Results}\label{apen:subsec:scen7}
+\subsection{Plot 1 Results}\label{apen:subsec:scen7plot1}
+The Following appendices are the results for plot 1 of scenario 7.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example_pd0_7-0}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-1}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example_pd0_7-1}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example_pd0_7-2}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example_pd0_7-3}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example_pd0_7-4}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-5}
+    ~
+    \caption{Graph showing the timeseries of energy available for power sources.}
+    \label{fig:example_pd0_7-5}
+\end{figure}
+
+\clearpage
+\subsection{Plot 2 Results}\label{apen:subsec:scen7plot2}
+The Following appendices are the results for plot 2 of scenario 7.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example_pd1_7-0}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-1}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example_pd1_7-1}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example_pd1_7-2}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example_pd1_7-3}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example_pd1_7-4}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-5}
+    ~
+    \caption{Graph showing the timeseries of energy available for power sources.}
+    \label{fig:example_pd1_7-5}
+\end{figure}
+
+\clearpage
+\subsection{Plot 3 Results}\label{apen:subsec:scen7plot3}
+The Following appendices are the results for plot 3 of scenario 7.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example_pd2_7-0}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-1}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example_pd2_7-1}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example_pd2_7-2}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example_pd2_7-3}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example_pd2_7-4}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-5}
+    ~
+    \caption{Graph showing the timeseries of energy available for power sources.}
+    \label{fig:example_pd2_7-5}
+\end{figure}
 \end{appendices}
 
+
+\clearpage
+\subsection{Plot 4 Results}\label{apen:subsec:scen7plot4}
+The Following appendices are the results for plot 4 of scenario 7.
+\clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-0}
+    ~
+    \caption{Graph showing the timeseries of events.}
+    \label{fig:example_pd3_7-0}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-1}
+    ~
+    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
+    \label{fig:example_pd3_7-1}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-2}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
+    \label{fig:example_pd3_7-2}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-3}
+    ~
+    \caption{Graph showing the timeseries of energy consumed for power sources.}
+    \label{fig:example_pd3_7-3}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-4}
+    ~
+    \caption{Graph showing the timeseries of carbon released for power sources.}
+    \label{fig:example_pd3_7-4}
+\end{figure}
+    \clearpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-5}
+    ~
+    \caption{Graph showing the timeseries of energy available for power sources.}
+    \label{fig:example_pd3_7-5}
+\end{figure}
 %==================================================================================================================================
 %   BIBLIOGRAPHY   
 

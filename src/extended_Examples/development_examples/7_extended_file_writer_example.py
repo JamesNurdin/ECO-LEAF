@@ -3,7 +3,7 @@ import simpy
 
 from src.extendedLeaf.animate import Animation, AllowCertainDebugFilter
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -70,10 +70,10 @@ def main():
     power_domain.add_power_source(grid1)
 
     event_domain = EventDomain(env, update_interval=1, start_time_str="19:00:00")
-    event_domain.add_event(PowerDomainEvent(event=power_domain.remove_power_source, args=[wind_power], time_str="19:20:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time_str="19:40:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=power_domain.add_entity, args=[node4], time_str="20:30:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=power_domain.remove_entity, args=[node4], time_str="21:15:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.remove_power_source, args=[wind_power], time_str="19:20:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.add_power_source, args=[solar_power], time_str="19:40:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.add_entity, args=[node4], time_str="20:30:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.remove_entity, args=[node4], time_str="21:15:00", repeat=False))
 
     # three nodes 1,2,3
     # #two Wi-Fi links between 1 -> 2 and 2 -> 3
@@ -117,15 +117,27 @@ def main():
     filename = "Results.Json"
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
-    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
+    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True, title="Development Example 7 Results")
     event_fig = figure_plotter.subplot_events(event_domain.event_history)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=all_entities)
-    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, grid1, wind_power])
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[solar_power, grid1, wind_power])
-    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released", power_sources=[solar_power, grid1, wind_power])
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=all_entities,
+                                                       axis_label="(gC02/kWh)",
+                                                       title_attribute="Carbon Released")
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                            power_sources=[solar_power, grid1, wind_power],
+                                                            axis_label="(Wh)",
+                                                            title_attribute="Energy Consumed")
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available",
+                                                            power_sources=[solar_power, grid1, wind_power],
+                                                            axis_label="(Wh)",
+                                                            title_attribute="Energy Available")
+    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
+                                                            power_sources=[solar_power, grid1, wind_power],
+                                                            axis_label="(gC02/kWh)",
+                                                            title_attribute="Carbon Released")
 
-    figs = [event_fig,fig1, fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs)
+    figs = [event_fig, fig1, fig2, fig3, fig4]
+    main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

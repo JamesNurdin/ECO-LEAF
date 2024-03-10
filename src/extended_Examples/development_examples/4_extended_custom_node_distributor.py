@@ -1,7 +1,7 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, WindPower, \
@@ -65,9 +65,9 @@ def main():
     power_domain.add_power_source(grid1)
 
     event_domain = EventDomain(env, update_interval=1, start_time_str="19:00:00")
-    event_domain.add_event(PowerDomainEvent(event=power_domain.remove_power_source, args=[wind_power], time_str="19:20:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time_str="19:40:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=power_domain.add_entity, args=[node4], time_str="20:30:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.remove_power_source, args=[wind_power], time_str="19:20:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.add_power_source, args=[solar_power], time_str="19:40:00", repeat=False))
+    event_domain.add_event(Event(event=power_domain.add_entity, args=[node4], time_str="20:30:00", repeat=False))
 
     # Initialise three tasks
     source_task = SourceTask(cu=0.4, bound_node=node1)

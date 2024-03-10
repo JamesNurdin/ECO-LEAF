@@ -5,7 +5,7 @@ import simpy
 
 from src.extendedLeaf.animate import Animation, AllowCertainDebugFilter
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -83,12 +83,21 @@ def main():
     orchestrator = SimpleOrchestrator(infrastructure, power_domain)
 
     event_domain = EventDomain(env, update_interval=1, start_time_str="11:00:00")
-    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="11:00:00", repeat=True,
-                         repeat_counter=1440))
-    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application], time_str="12:00:00", repeat=True,
-                         repeat_counter=60))
-    event_domain.add_event(PowerDomainEvent(event=application.deallocate, args=[], time_str="12:30:00", repeat=True,
-                         repeat_counter=60))
+    event_domain.add_event(Event(event=battery_power.recharge_battery,
+                                 args=[solar_power],
+                                 time_str="11:00:00",
+                                 repeat=True,
+                                 repeat_counter=1440))
+    event_domain.add_event(Event(event=orchestrator.place,
+                                 args=[application],
+                                 time_str="12:00:00",
+                                 repeat=True,
+                                 repeat_counter=60))
+    event_domain.add_event(Event(event=application.deallocate,
+                                 args=[],
+                                 time_str="12:30:00",
+                                 repeat=True,
+                                 repeat_counter=60))
 
     # Early power meters when exploring isolated power measurements
     application_pm = PowerMeter(application, name="application_meter")
@@ -120,12 +129,28 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
-    fig1 = figure_plotter.subplot_events(event_domain.event_history)
-    fig2 = figure_plotter.subplot_time_series_entities("Power Used", entities=entities)
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[solar_power, battery_power])
-    fig4 = figure_plotter.subplot_time_series_power_meter(power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
-    figs = [fig1, fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs)
+
+    fig0 = figure_plotter.subplot_events(event_domain.event_history)
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       title_attribute="Carbon Released")
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+                                                       entities=entities,
+                                                       axis_label="Energy Consumed (Wh)",
+                                                       title_attribute="Energy Consumed")
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                            power_sources=[solar_power, battery_power],
+                                                            axis_label="Energy Consumed (Wh)",
+                                                            title_attribute="Energy Consumed")
+    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
+                                                            power_sources=[solar_power, grid, battery_power],
+                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            title_attribute="Carbon Released")
+    fig5 = figure_plotter.subplot_time_series_power_meter(power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
+
+    figs = [fig0, fig1, fig2, fig3, fig4, fig5]
+    main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

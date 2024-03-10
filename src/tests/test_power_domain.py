@@ -3,7 +3,7 @@ import os
 import unittest
 from unittest.mock import MagicMock
 
-from src.extendedLeaf.events import PowerDomainEvent, EventDomain
+from src.extendedLeaf.events import Event, EventDomain
 from src.extendedLeaf.file_handler import FileHandler
 from src.extendedLeaf.power import PowerDomain, SolarPower
 
@@ -342,8 +342,8 @@ class TestEventDomain(unittest.TestCase):
 
     def test_add_event(self):
         """ Test that the power sources can be correctly added to the power domain. """
-        event = PowerDomainEvent(event=self.mock_power_domain.remove_entity, args=[self.mock_entity],
-                                 time_str="19:40:00", repeat=False)
+        event = Event(event=self.mock_power_domain.remove_entity, args=[self.mock_entity],
+                      time_str="19:40:00", repeat=False)
         event_domain = EventDomain(self.mock_env, update_interval=self.update_interval, start_time_str=self.start_time_string)
 
         event_domain.power_sources = []

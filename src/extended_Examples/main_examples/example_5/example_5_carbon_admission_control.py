@@ -6,7 +6,7 @@ import simpy
 
 from src.extendedLeaf.animate import Animation, AllowCertainDebugFilter
 from src.extendedLeaf.application import Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -136,17 +136,17 @@ def main():
     event_domain = EventDomain(env, update_interval=1, start_time_str="15:00:00")
 
     event_domain.add_event(
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[grid_power], time_str="15:00:00", repeat=False))
+        Event(event=battery_power.recharge_battery, args=[grid_power], time_str="15:00:00", repeat=False))
     event_domain.add_event(
-        PowerDomainEvent(event=orchestrator.place_applications, args=[type_1_applications], time_str="15:10:00", repeat=True))
+        Event(event=orchestrator.place_applications, args=[type_1_applications], time_str="15:10:00", repeat=True))
     event_domain.add_event(
-        PowerDomainEvent(event=orchestrator.place_applications, args=[type_2_applications], time_str="15:10:00", repeat=True))
+        Event(event=orchestrator.place_applications, args=[type_2_applications], time_str="15:10:00", repeat=True))
     event_domain.add_event(
-        PowerDomainEvent(event=orchestrator.deallocate_applications, args=[type_1_applications], time_str="15:20:00", repeat=True))
+        Event(event=orchestrator.deallocate_applications, args=[type_1_applications], time_str="15:20:00", repeat=True))
     event_domain.add_event(
-        PowerDomainEvent(event=orchestrator.deallocate_applications, args=[type_2_applications], time_str="15:20:00", repeat=True))
+        Event(event=orchestrator.deallocate_applications, args=[type_2_applications], time_str="15:20:00", repeat=True))
     event_domain.add_event(
-        PowerDomainEvent(event=power_domain.add_power_source, args=[solar_power], time_str="17:00:00", repeat=False))
+        Event(event=power_domain.add_power_source, args=[solar_power], time_str="17:00:00", repeat=False))
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
     application1_pm = PowerMeter(type_1_applications[0], name="application_1_meter")
     application2_pm = PowerMeter(type_2_applications[0], name="application_2_meter")
@@ -170,13 +170,30 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
-    event_figure = figure_plotter.subplot_events(event_domain.event_history)
-    fig1 = figure_plotter.subplot_time_series_entities("Power Used", entities=entities)
-    fig2 = figure_plotter.subplot_time_series_power_sources("Carbon Released", power_sources=[solar_power, battery_power, grid_power])
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[battery_power])
-    fig4 = figure_plotter.subplot_time_series_power_meter([application2_pm,application1_pm])
-    figs = [event_figure, fig1, fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs)
+    fig0 = figure_plotter.subplot_events(event_domain.event_history)
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       title_attribute="Carbon Released")
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+                                                       entities=entities,
+                                                       axis_label="Energy Consumed (Wh)",
+                                                       title_attribute="Energy Consumed")
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                            power_sources=[solar_power, battery_power],
+                                                            axis_label="Energy Consumed (Wh)",
+                                                            title_attribute="Energy Consumed")
+    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
+                                                            power_sources=[solar_power, grid_power, battery_power],
+                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            title_attribute="Carbon Released")
+    fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
+                                                            power_sources=[battery_power],
+                                                            axis_label="Energy Consumed (Wh)",
+                                                            title_attribute="Energy Consumed")
+    fig6 = figure_plotter.subplot_time_series_power_meter([application2_pm, application1_pm])
+    figs = [fig0, fig1, fig2, fig3, fig4,fig5,fig6]
+    main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
 

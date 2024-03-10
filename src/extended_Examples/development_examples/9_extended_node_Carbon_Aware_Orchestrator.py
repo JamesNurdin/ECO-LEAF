@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -107,12 +107,12 @@ def main():
 
     event_domain = EventDomain(env, update_interval=1, start_time_str="15:00:00")
 
-    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application1], time_str="15:10:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="15:30:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=orchestrator.place, args=[application2], time_str="15:40:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="16:00:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=application1.deallocate, args=[], time_str="16:30:00", repeat=False))
-    event_domain.add_event(PowerDomainEvent(event=battery_power.recharge_battery, args=[solar_power], time_str="17:00:00", repeat=False))
+    event_domain.add_event(Event(event=orchestrator.place, args=[application1], time_str="15:10:00", repeat=False))
+    event_domain.add_event(Event(event=battery_power.recharge_battery, args=[solar_power], time_str="15:30:00", repeat=False))
+    event_domain.add_event(Event(event=orchestrator.place, args=[application2], time_str="15:40:00", repeat=False))
+    event_domain.add_event(Event(event=battery_power.recharge_battery, args=[solar_power], time_str="16:00:00", repeat=False))
+    event_domain.add_event(Event(event=application1.deallocate, args=[], time_str="16:30:00", repeat=False))
+    event_domain.add_event(Event(event=battery_power.recharge_battery, args=[solar_power], time_str="17:00:00", repeat=False))
 
     # Early power meters when exploring isolated power measurements
     application1_pm = PowerMeter(application1, name="application_meter")
@@ -143,7 +143,7 @@ def main():
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Available", power_sources=[solar_power, battery_power])
     fig4 = figure_plotter.subplot_time_series_power_meter(power_meters=[application1_pm,application2_pm,infrastructure_pm])
     figs = [fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs)
+    main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
 

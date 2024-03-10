@@ -1,7 +1,7 @@
 from src.extendedLeaf.power import PowerDomain, validate_str_time
 
 
-class PowerDomainEvent:
+class Event:
     def __init__(self, event, args, time_str, repeat=False, repeat_counter=30):
         self.event = event
         self.args = args
@@ -55,8 +55,8 @@ class EventDomain:
                 events_to_remove.append(event)
                 if event.repeat:
                     new_event_time_str = PowerDomain.convert_to_time_string(event.time_int + event.repeat_counter)
-                    new_event = PowerDomainEvent(event=event.event, args=event.args, time_str=new_event_time_str,
-                                                        repeat=True, repeat_counter=event.repeat_counter)
+                    new_event = Event(event=event.event, args=event.args, time_str=new_event_time_str,
+                                      repeat=True, repeat_counter=event.repeat_counter)
                     new_event.time_int = event.time_int + event.repeat_counter
                     self.events.append(new_event)
 

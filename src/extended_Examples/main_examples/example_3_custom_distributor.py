@@ -103,13 +103,22 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=entities)
-    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used",
-                                                            power_sources=[solar_power, wind_power])
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Available",
-                                                            power_sources=[solar_power, grid, wind_power])
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       title_attribute="Carbon Released")
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+                                                       entities=entities,
+                                                       axis_label="Energy Consumed (Wh)",
+                                                       title_attribute="Energy Consumed")
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                            power_sources=[solar_power, wind_power],
+                                                            axis_label="Energy Consumed (Wh)",
+                                                            title_attribute="Energy Consumed")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
-                                                            power_sources=[solar_power, grid, wind_power])
+                                                            power_sources=[solar_power, grid, wind_power],
+                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            title_attribute="Carbon Released")
 
     figs = [fig1, fig2, fig3, fig4]
     main_fig = figure_plotter.aggregate_subplots(figs)

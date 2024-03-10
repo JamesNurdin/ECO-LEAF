@@ -610,10 +610,6 @@ class PowerDomain:
                 current_power_source.update_power_available()
                 current_power_source.update_carbon_intensity()
 
-            """Execute any pre-planned commands at the current moment of time"""
-
-            self.assign_power_source_priority()
-
             """Go through every power source and:
                 - distribute entities among power sources
                 - log the carbon released since the last update"""
@@ -761,11 +757,6 @@ class PowerDomain:
         for entity in power_source.powered_infrastructure:
             entity.power_model.power_source = None
         power_source.powered_infrastructure = []
-
-    def assign_power_source_priority(self):
-        for counter in range(len(self.power_sources)):
-            if self.power_sources[counter] is not None:
-                self.power_sources[counter].priority = counter
 
     @classmethod
     def calculate_carbon_released(cls, power_used, carbon_intensity) -> float:

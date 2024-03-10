@@ -310,3 +310,37 @@ Holiday break
 * *3 Hours* Continued work on design and produced a diagram for the power domain.
 ### 17th February
 * *2 Hours* Carried on with the design and started on work for the power source section.
+### 18th February
+* * 1 Hour* Finished the static section and moved onto the dynamic section of the power source.
+
+## Week 23
+### 19th February
+* *4 Hours* Worked on events section of the design and included a graphic of the event schedule.
+### 20th February
+* *6 Hours* Finished off the design section of the document and moved onto implementation.
+### 22nd February
+* *4 Hours* Following the meeting with lauritz revised key sections of the design and continued work on the implementation.
+### 25th February
+* *5 Hours* Reworked the design and introduced a more abstract implementation of the design graphic.
+
+## Week 24
+### 26th February
+*5 Hours* Continued work on the implementation side of the project and the focus on the power domains and started on the power sources.
+### 27th February
+* 3 hours* Focused on the code aspect for the power domain for the writeup of the implementation.
+### 28th February
+* *5 hours* Worked on the implementation again, this time focusing on the power sources and other key features.
+### 2nd March
+* *6 hours* Moved onto the event domain aspect of the implementation along with finishing off the power sources section.
+
+## Week 25
+### 4th March
+*4 Hours* Worked on the deployment side of the project and getting the dependencies ready for the file.
+### 5th Match
+* 3 Hours* Worked on converting the json files into cvs files in order to be extracted to another plotting service.
+### 7th March
+* *5 Hours* Created the graphs and moved them over to the appendices.
+### 9th March
+* *3 Hours* Finished the implementation.
+### 10th March 
+* *5 Hours* Worked on the introduction.

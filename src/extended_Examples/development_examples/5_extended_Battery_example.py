@@ -1,7 +1,7 @@
 import logging
 import simpy
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.events import EventDomain, PowerDomainEvent
+from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
@@ -67,7 +67,7 @@ def main():
     power_domain.add_power_source(sol)
     event_domain = EventDomain(env, update_interval=1, start_time_str="10:00:00")
     event_domain.add_event(
-        PowerDomainEvent(event=battery_power.recharge_battery, args=[sol], time_str="10:40:00", repeat=False))
+        Event(event=battery_power.recharge_battery, args=[sol], time_str="10:40:00", repeat=False))
 
     # Initialise three tasks
     source_task = SourceTask(cu=0.4, bound_node=node1)
@@ -103,15 +103,6 @@ def main():
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
-
-    file_handler = FileHandler()
-    figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released", entities=power_domain.powered_infrastructure)
-    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used", power_sources=[sol, battery_power])
-    figs = [fig1, fig2]
-    main_fig = figure_plotter.aggregate_subplots(figs)
-    file_handler.write_figure_to_file(main_fig, len(figs))
-    main_fig.show()
 
 
 class SimpleOrchestrator(Orchestrator):

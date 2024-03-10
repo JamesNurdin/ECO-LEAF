@@ -101,6 +101,7 @@ class FileHandler:
 
         # Convert dictionary to JSON format
         json_data = json.dumps(power_domain.captured_data, indent=2)
+        import csv
 
         # Write JSON data to a file
         with open(filepath, 'w') as json_file:
@@ -122,7 +123,8 @@ class FileHandler:
             filename = "figure_" + str(self.repeated_figures)
             self.repeated_figures = self.repeated_figures + 1
         # Create and save the figure as a PDF
-        figure.update_layout(height=pdf_height, width=pdf_width)  # Adjust the height and width as needed
+        figure.update_layout(height=pdf_height, width=0.5*pdf_width)
+        figure.update_layout(showlegend=True)
         if self.results_dir is None:
             self.results_dir = self.create_results_dir()
         if os.path.exists(self.results_dir):
@@ -131,7 +133,7 @@ class FileHandler:
 
 class FigurePlotter:
     def __init__(self, power_domain: PowerDomain = None, event_domain: EventDomain = None, show_event_lines=False,
-                 number_of_divisions: int = 6):
+                 number_of_divisions: int = 6, title=""):
         if power_domain is None:
             raise ValueError(f"Error: No power domain was provided.")
         else:
@@ -153,6 +155,7 @@ class FigurePlotter:
                 else:
                     raise AttributeError(f"Error: No event history was provided in event domain.")
         self.number_of_divisions = number_of_divisions
+        self.title = title
 
     def get_unique_events(self, events) -> dict:
         sorted_events = {}
@@ -173,8 +176,8 @@ class FigurePlotter:
             else:
                 event_times[event_time] = [event]
         return event_times
-
-    def aggregate_subplots(self, plots) -> go.Figure:
+    @classmethod
+    def aggregate_subplots(cls, plots, title="") -> go.Figure:
         # Create a subplot with one column and as many rows as the number of plots
         main_fig = make_subplots(rows=len(plots),
                                  cols=1,
@@ -199,10 +202,7 @@ class FigurePlotter:
                 main_fig.add_shape(shape, row=plot_index+1, col=1)
 
             # Update layout of the main subplot based on the individual layout of each subplot
-
-        # Update layout of the main subplot
-        main_fig.update_layout(title_text="Results:")
-
+            main_fig.update_layout(title_text=title)
         return main_fig
 
     def add_events_updated(self, fig, offset) -> go.Figure:
@@ -233,7 +233,6 @@ class FigurePlotter:
                 marker=dict(size=5),
                 name=name)
                 )
-
         return fig
 
     def add_events(self, fig, offset) -> go.Figure:
@@ -292,7 +291,7 @@ class FigurePlotter:
                 title=dict(text="Time", standoff=0),
                 ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in
                           np.linspace((start_time), end_time, self.number_of_divisions)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time-1, self.number_of_divisions)]),
         )
 
         # Update layout to add a title
@@ -304,7 +303,8 @@ class FigurePlotter:
         return fig
 
     def subplot_time_series_entities(self, captured_attribute="Carbon Released",
-                                     entities=None) -> go.Figure:
+                                     entities=None, axis_label="Carbon Released (gC02/kWh)",
+                                     title_attribute="Carbon Released") -> go.Figure:
         if entities is None:
             raise ValueError(f"Error: No entities provided to plot.")
 
@@ -335,20 +335,24 @@ class FigurePlotter:
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
                 ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time-1, self.number_of_divisions)]),
             yaxis=dict(
-                title=dict(text=captured_attribute, standoff=0))
+                title=dict(text=axis_label, standoff=0))
         )
 
         # Update layout to add a title
         fig.update_layout(
-            title_text=f"Timeseries of {captured_attribute} for Powered Infrastructure.",
+            title_text=f"Timeseries of {title_attribute} for Powered Infrastructure.",
             title_x=0.5,  # Adjust the horizontal position of the title
             title_font=dict(size=16),  # Adjust the font size of the title
         )
         return fig
 
-    def subplot_time_series_power_sources(self, captured_attribute="Carbon Released", power_sources=None) -> go.Figure:
+    def subplot_time_series_power_sources(self, captured_attribute="Carbon Released", power_sources=None,
+                                          axis_label="Carbon Released (gC02/kWh)",
+                                          title_attribute="Carbon Released", title= None) -> go.Figure:
+        if title is None:
+            title = f"Timeseries of {title_attribute} for power sources."
         if power_sources is None:
             raise ValueError(f"Error: No power sources were provided.")
 
@@ -378,14 +382,14 @@ class FigurePlotter:
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
                 ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time-1, self.number_of_divisions)]),
             yaxis=dict(
-                title=dict(text=captured_attribute, standoff=0))
+                title=dict(text=axis_label, standoff=0))
         )
 
         # Update layout to add a title
         fig.update_layout(
-            title_text=f"Timeseries of {captured_attribute} for Power Sources.",
+            title_text= title,
             title_x=0.5,  # Adjust the horizontal position of the title
             title_font=dict(size=16),  # Adjust the font size of the title
         )
@@ -419,7 +423,7 @@ class FigurePlotter:
             xaxis=dict(
                 title=dict(text="Time", standoff=0),
                 ticktext=[self.power_domain.convert_to_time_string(int(value)) for value in np.linspace((start_time), end_time, self.number_of_divisions)],
-                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time, self.number_of_divisions)]),
+                tickvals=[int(value) - offset for value in np.linspace(start_time, end_time-1, self.number_of_divisions)]),
             yaxis=dict(
                 title=dict(text="Energy Used (Wh)", standoff=0))
         )
