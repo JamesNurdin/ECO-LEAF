@@ -12,7 +12,7 @@ class Cloud(Node):
 
 class CropSensor(Node):
     def __init__(self, infrastructure, plot, sensor_index, location):
-        super().__init__(name=f"{plot.name}_Crop_Sensor_{sensor_index}",
+        super().__init__(name=f"CropSensor_{plot.name}__{sensor_index}",
                          cu=SENSOR_CU,
                          power_model=PowerModelNode(max_power=SENSOR_MAX_POWER, static_power=SENSOR_STATIC_POWER),
                          location=location)
@@ -23,7 +23,7 @@ class CropSensor(Node):
 
 class FogNode(Node):
     def __init__(self, plot, location):
-        super().__init__(name=f"{plot.name}_FogNode",
+        super().__init__(name=f"FogNode_{plot.name}",
                          cu=FOG_CU,
                          power_model=PowerModelNode(max_power=FOG_MAX_POWER, static_power=SENSOR_STATIC_POWER),
                          location=location)
@@ -31,14 +31,14 @@ class FogNode(Node):
 
 class Drone(Node):
     def __init__(self, plot, location, env, power_domain, infrastructure):
-        super().__init__(name=f"{plot.name}_Drone",
+        super().__init__(name=f"Drone_{plot.name}",
                          cu=DRONE_CU,
                          power_model=PowerModelNode(max_power=DRONE_MAX_POWER, static_power=DRONE_STATIC_POWER),
                          location=location)
         cloud = infrastructure.nodes(type_filter=Cloud)[0]
         self.application = DroneApplication(f"Plot_{plot.plot_index}_Drone_Application", self, cloud)
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
-        self.battery_power = BatteryPower(env, name=f"{plot.name}_Battery", power_domain=power_domain, priority=1,
+        self.battery_power = BatteryPower(env, name=f"Battery_{plot.name}", power_domain=power_domain, priority=1,
                                           total_power_available=DRONE_BATTERY_SIZE, static=True, powered_infrastructure=[self],
                                           charge_rate=DRONE_BATTERY_SIZE/120)
         self.locations_iterator = plot.get_drone_path()

@@ -93,7 +93,7 @@ def main():
     env.process(power_domain.run(env))
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
-    env.run(until=10)  # run simulation for 10 seconds
+    env.run(until=12)  # run simulation for 10 minutes
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
@@ -106,7 +106,7 @@ def main():
     figure_plotter = FigurePlotter(power_domain)
     fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
                                                        title_attribute="Carbon Released")
     fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
@@ -118,12 +118,15 @@ def main():
                                                             title_attribute="Energy Consumed")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[grid],
-                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            axis_label="Carbon Released (gC02eq/kWh)",
                                                             title_attribute="Carbon Released")
 
     figs = [fig1, fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs)
+    main_fig = figure_plotter.aggregate_subplots(figs,title="Results for Example 1.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
+    for i, fig in enumerate(figs):
+        main_fig = FigurePlotter.aggregate_subplots([fig], title="")
+        file_handler.write_figure_to_file(main_fig, 1, filename=f"example_1-{i}")
     main_fig.show()
 
 

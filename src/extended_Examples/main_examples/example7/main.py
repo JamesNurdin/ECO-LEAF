@@ -48,7 +48,7 @@ def main():
         fig0 = figure_plotter.subplot_events(event_domain.event_history)
         fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                            entities=plot.all_entities,
-                                                           axis_label="Carbon Released (gC02/kWh)",
+                                                           axis_label="Carbon Released (gC02eq/kWh)",
                                                            title_attribute="Carbon Released")
         fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                            entities=plot.all_entities,
@@ -60,7 +60,7 @@ def main():
                                                                 title_attribute="Energy Consumed")
         fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                                 power_sources=plot.power_sources,
-                                                                axis_label="Carbon Released (gC02/kWh)",
+                                                                axis_label="Carbon Released (gC02eq/kWh)",
                                                                 title_attribute="Carbon Released")
         fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                                 power_sources=plot.power_sources,
@@ -71,7 +71,7 @@ def main():
                                                                 power_sources=plot.power_sources,
                                                                 axis_label="(gC02/kWh)",
                                                                 title_attribute=f"Total Carbon Released",
-                                                                title=f"Plot {plot.plot_index+1} Timeseries For Total Carbon Released.")
+                                                                title=f"Plot {plot.plot_index+1} Timeseries for Total Carbon Released.")
 
         figs = [fig0, fig1, fig2, fig3, fig4, fig5]
         for i, fig in enumerate(figs):
@@ -79,12 +79,12 @@ def main():
             file_handler.write_figure_to_file(main_fig, 1, filename=f"example_pd{plot.plot_index}_7-{i}")
 
         total_carbon_consumed_list.append(fig6)
-        print(f"{plot.name} Total carbon emitted: {plot.power_domain.return_total_carbon_emissions()} gCo2")
+        print(f"{plot.name} Total carbon emitted: {plot.power_domain.return_total_carbon_emissions()} gCo2eq")
 
-        main_fig = FigurePlotter.aggregate_subplots(figs, title="General Results For Scenario 7.")
+        main_fig = FigurePlotter.aggregate_subplots(figs, title="General Results for Scenario 7.")
         file_handler.write_figure_to_file(main_fig, len(figs), filename=f"plot{plot.plot_index}")
 
-    main_fig = FigurePlotter.aggregate_subplots(total_carbon_consumed_list, title="Summative Graphs For Example 7.")
+    main_fig = FigurePlotter.aggregate_subplots(total_carbon_consumed_list, title="Summative Graphs for Example 7.")
     file_handler.write_figure_to_file(main_fig, len(total_carbon_consumed_list), filename=f"Main_results")
 
 

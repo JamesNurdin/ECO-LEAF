@@ -73,19 +73,19 @@ class Plot:
 
     def _choose_power_source(self, power_source) -> PowerSource:
         if power_source == SolarPower:
-            return_power_source = SolarPower(self.env, name=f"{self.name}_solar_power",
+            return_power_source = SolarPower(self.env, name=f"SolarPower_{self.name}",
                                              power_domain=self.power_domain, priority=0,
                                              static=STATIC_CONFIG[self.plot_index])
             self.power_domain.add_power_source(return_power_source)
             return return_power_source
         elif power_source == GridPower:
-            return_power_source = GridPower(self.env, name=f"{self.name}_grid_power",
+            return_power_source = GridPower(self.env, name=f"GridPower_{self.name}",
                                             power_domain=self.power_domain, priority=5,
                                             static=STATIC_CONFIG[self.plot_index])
             self.power_domain.add_power_source(return_power_source)
             return return_power_source
         elif power_source == WindPower:
-            return_power_source = WindPower(self.env, name=f"{self.name}_wind_power",
+            return_power_source = WindPower(self.env, name=f"WindPower_{self.name}",
                                             power_domain=self.power_domain, priority=2,
                                             static=STATIC_CONFIG[self.plot_index])
             self.power_domain.add_power_source(return_power_source)

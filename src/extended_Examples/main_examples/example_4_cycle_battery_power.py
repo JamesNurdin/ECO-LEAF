@@ -133,7 +133,7 @@ def main():
     fig0 = figure_plotter.subplot_events(event_domain.event_history)
     fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
                                                        title_attribute="Carbon Released")
     fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
@@ -145,7 +145,7 @@ def main():
                                                             title_attribute="Energy Consumed")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid, battery_power],
-                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            axis_label="Carbon Released (gC02eq/kWh)",
                                                             title_attribute="Carbon Released")
 
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
@@ -154,7 +154,7 @@ def main():
                                                             title_attribute="Energy Available")
 
     figs = [fig0, fig1, fig2, fig3, fig4, fig5]
-    main_fig = FigurePlotter.aggregate_subplots(figs)
+    main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 4.")
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
     for i, fig in enumerate(figs):

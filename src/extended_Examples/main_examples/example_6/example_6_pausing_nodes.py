@@ -25,7 +25,7 @@ def create_sensors():
         max_power = rnd.gauss(SENSOR_MAX_POWER_MEAN, SENSOR_MAX_POWER_STD_DEVIATION)
         static_power = rnd.gauss(SENSOR_STATIC_POWER_MEAN, SENSOR_STATIC_POWER_STD_DEVIATION)
         cu = rnd.gauss(SENSOR_CU_POWER_MEAN, SENSOR_CU_STD_DEVIATION)
-        sensors.append(Node(f"Sensor{current_sensor_index}", cu=cu,
+        sensors.append(Node(f"Sensor_{current_sensor_index}", cu=cu,
                             power_model=PowerModelNode(max_power=max_power, static_power=static_power)))
     return sensors
 
@@ -36,7 +36,7 @@ def create_microprocessors(sensors):
         max_power = rnd.gauss(MICROPROCESSORS_MAX_POWER_MEAN, MICROPROCESSORS_MAX_POWER_STD_DEVIATION)
         static_power = rnd.gauss(MICROPROCESSORS_STATIC_POWER_MEAN, MICROPROCESSORS_STATIC_POWER_STD_DEVIATION)
         cu = rnd.gauss(MICROPROCESSORS_CU_POWER_MEAN, MICROPROCESSORS_CU_STD_DEVIATION)
-        microprocessors.append(Node(f"Microprocessor{current_sensor_index}", cu=cu,
+        microprocessors.append(Node(f"Microprocessor_{current_sensor_index}", cu=cu,
                                     power_model=PowerModelNode(max_power=max_power, static_power=static_power)))
     return microprocessors
 
@@ -152,7 +152,7 @@ def main():
     fig0 = figure_plotter.subplot_events(event_domain.event_history)
     fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
                                                        title_attribute="Carbon Released")
     fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
@@ -164,7 +164,7 @@ def main():
                                                             title_attribute="Energy Consumed")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[grid_power, battery_power],
-                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            axis_label="Carbon Released (gC02eq/kWh)",
                                                             title_attribute="Carbon Released")
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                             power_sources=[grid_power, battery_power],
@@ -176,7 +176,7 @@ def main():
         main_fig = FigurePlotter.aggregate_subplots([fig], title="")
         file_handler.write_figure_to_file(main_fig, 1, filename=f"example_6-{i}")
 
-    main_fig = FigurePlotter.aggregate_subplots(figs)
+    main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 6.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
 

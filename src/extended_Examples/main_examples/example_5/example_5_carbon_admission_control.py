@@ -77,18 +77,18 @@ def main():
 
     # Initializing infrastructure and workload
     # Source task node
-    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
+    sensor = Node("Sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
 
     # Processing task nodes
-    solar_microprocessor = Node("solar_microprocessor", cu=40,
+    solar_microprocessor = Node("SolarMicroprocessor", cu=40,
                                 power_model=PowerModelNode(max_power=6.25, static_power=4.8))
-    battery_microprocessor = Node("bat_microprocessor", cu=40,
+    battery_microprocessor = Node("BatteryMicroprocessor", cu=40,
                                   power_model=PowerModelNode(max_power=6.25, static_power=4.8))
-    grid_microprocessor = Node("grid_microprocessor", cu=40,
+    grid_microprocessor = Node("GridMicroprocessor", cu=40,
                                power_model=PowerModelNode(max_power=6.25, static_power=4.8))
 
     # Sink task node
-    server = Node("server", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
+    server = Node("Server", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
     infrastructure.add_node(sensor)
     infrastructure.add_node(solar_microprocessor)
     infrastructure.add_node(battery_microprocessor)
@@ -97,19 +97,19 @@ def main():
     # Links
 
     # Path 1
-    grid_wired_link_from_source = Link(name="grid_wired", src=sensor, dst=grid_microprocessor, latency=0,
+    grid_wired_link_from_source = Link(name="GridWiredLink", src=sensor, dst=grid_microprocessor, latency=0,
                                        bandwidth=50e6, power_model=PowerModelLink(0))
-    grid_wifi_link_to_server = Link(name="grid_wireless", src=grid_microprocessor, dst=server, latency=10,
+    grid_wifi_link_to_server = Link(name="GridWirelessLink", src=grid_microprocessor, dst=server, latency=10,
                                     bandwidth=30e6, power_model=PowerModelLink(400e-9))
     # Path2
-    bat_wired_link_from_source = Link(name="bat_wired", src=sensor, dst=battery_microprocessor, latency=0,
+    bat_wired_link_from_source = Link(name="BatteryWiredLink", src=sensor, dst=battery_microprocessor, latency=0,
                                       bandwidth=50e6, power_model=PowerModelLink(0))
-    bat_wifi_link_to_grid = Link(name="bat_wireless", src=battery_microprocessor, dst=grid_microprocessor, latency=10,
+    bat_wifi_link_to_grid = Link(name="BatteryWirelessLink", src=battery_microprocessor, dst=grid_microprocessor, latency=10,
                                  bandwidth=30e6, power_model=PowerModelLink(400e-9))
     # Path 3
-    solar_wired_link_from_source = Link(name="solar_wired", src=sensor, dst=solar_microprocessor, latency=0,
+    solar_wired_link_from_source = Link(name="SolarWiredLink", src=sensor, dst=solar_microprocessor, latency=0,
                                         bandwidth=50e6, power_model=PowerModelLink(0))
-    solar_wifi_link_to_server = Link(name="solar_wireless", src=solar_microprocessor, dst=server, latency=10,
+    solar_wifi_link_to_server = Link(name="SolarWirelessLink", src=solar_microprocessor, dst=server, latency=10,
                                      bandwidth=30e6, power_model=PowerModelLink(400e-9))
     infrastructure.add_link(grid_wired_link_from_source)
     infrastructure.add_link(grid_wifi_link_to_server)
@@ -180,7 +180,7 @@ def main():
     fig0 = figure_plotter.subplot_events(event_domain.event_history)
     fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
                                                        title_attribute="Carbon Released")
     fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
@@ -195,21 +195,21 @@ def main():
                                                          entities=[grid_microprocessor],
                                                          axis_label="Energy Consumed (Wh)",
                                                          title_attribute="Energy Consumed",
-                                                         title=f"Timeseries of Energy Consumed For Solar Microprocessor")
+                                                         title=f"Timeseries of Energy Consumed For Grid Microprocessor")
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
                                                             power_sources=[solar_power, grid_power, battery_power],
                                                             axis_label="Energy Consumed (Wh)",
                                                             title_attribute="Energy Consumed")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid_power, battery_power],
-                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            axis_label="Carbon Released (gC02eq/kWh)",
                                                             title_attribute="Carbon Released")
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                             power_sources=[battery_power],
                                                             axis_label="Energy Available (Wh)",
                                                             title_attribute="Energy Available")
     figs = [fig0, fig1, fig2, fig3, fig4, fig5, fig2_1, fig2_2]
-    main_fig = FigurePlotter.aggregate_subplots(figs)
+    main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 5.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
     for i, fig in enumerate(figs):
@@ -223,8 +223,8 @@ def main():
 class ExampleOrchestrator(Orchestrator):
 
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
-        dest_node = self.infrastructure.node("server")
-        source_node = self.infrastructure.node("sensor")
+        dest_node = self.infrastructure.node("Server")
+        source_node = self.infrastructure.node("Sensor")
         paths = list(nx.all_simple_paths(self.infrastructure.graph, source=source_node.name, target=dest_node.name))
         # iterate through all the potential nodes
         current_best_carbon_intensity = np.inf
