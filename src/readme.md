@@ -1,41 +1,30 @@
 # Readme
 
-Put a brief description of your code here. This should at least describe the file structure.
+The Project source code is seperated into a few core directories.
+* `extendedLeaf` the directory for source code for the project.
+* `extended_Examples` the directory used to access examples, this consists of:
+  * `development_examples` the directory for examples used throughout the development process to test features.
+  * `main_examples` the directory for examples used in the dissertation.
+* `results` the directory which stores results from examples, NB. each set of results exists in timestamped directories.
+* `dataSets` the directory that holds the csv data files needed for power sources.
+* `test` the directory for python unit tests. 
 
 ## Build instructions
 
-**You must** include the instructions necessary to build and deploy this project successfully. If appropriate, also include 
-instructions to run automated tests. 
-
 ### Requirements
 
-List the all of the pre-requisites software required to set up your project (e.g. compilers, packages, libraries, OS, hardware)
-
-
-* Python versions between 3.9 and 3.10 inclusive
+* Python versions between `3.9 and 3.10` inclusive
 * Packages: listed in `requirements.txt` alongside pip for installation
 * Tested on Windows 10
 
-or another example:
-
-* Requires Raspberry Pi 3 
-* a Linux host machine with the `arm-none-eabi` toolchain (at least version `x.xx`) installed
-* a working LuaJIT installation > 2.1.0
-
 ### Build steps
+Using a listed version of python, navigate to the `src` directory of the project.
+Once inside the directory, either by using a new or existing python environment, issue the command: `pip install extended_LEAF-1.0.tar.gz` to install the dependencies onto the python environment.
 
-List the steps required to build software. 
+## Running examples
+If an IDE is being used i.e. PyCharm:
+* Simply right-click the example that is desired to be run and click `run`.
+* Alternatively, enter the python console and issue the command `execfile('<Name_of_example_file.py>')`
 
-To install the necessary required packages, using a version of python between 3.9 and 3.10 (inclusive)
-in this environment navigate to the src folder of the project directory
-while inside the directory issue the command: "pip install extended_LEAF-1.0.tar.gz" to install the dependencies within the python environment
 
-### Test steps
-
-List steps needed to show your software works. This might be running a test suite, or just starting the program; but something that could be used to verify your code is working correctly.
-
-Examples:
-
-* Run automated tests by running `pytest`
-* Start the software by running `bin/editor.exe` and opening the file `examples/example_01.bin`
 

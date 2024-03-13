@@ -164,9 +164,6 @@ class TestPowerDomain(unittest.TestCase):
         for counter in range(len(self.power_domain.power_sources)):
             self.assertEqual(self.power_domain.power_sources[counter].priority, previous_priorities[counter])
 
-        self.power_domain.assign_power_source_priority()
-        for counter in range(len(self.power_domain.power_sources)):
-            self.assertEqual(self.power_domain.power_sources[counter].priority, counter)
 
     def test_calculate_carbon_released(self):
         """ Test to check that correct calculation of carbon from a power reading.

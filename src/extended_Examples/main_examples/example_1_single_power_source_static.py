@@ -99,6 +99,33 @@ def main():
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
+    file_handler = FileHandler()
+    filename = "Results.Json"
+    file_handler.write_out_results(filename=filename, power_domain=power_domain)
+
+    figure_plotter = FigurePlotter(power_domain)
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       title_attribute="Carbon Released")
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+                                                       entities=entities,
+                                                       axis_label="Energy Consumed (Wh)",
+                                                       title_attribute="Energy Consumed")
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                            power_sources=[grid],
+                                                            axis_label="Energy Consumed (Wh)",
+                                                            title_attribute="Energy Consumed")
+    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
+                                                            power_sources=[grid],
+                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            title_attribute="Carbon Released")
+
+    figs = [fig1, fig2, fig3, fig4]
+    main_fig = figure_plotter.aggregate_subplots(figs)
+    file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
+    main_fig.show()
+
 
 class ExampleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:

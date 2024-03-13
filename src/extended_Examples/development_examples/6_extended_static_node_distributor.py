@@ -31,9 +31,9 @@ def main():
         DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	120: application_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        INFO	Total application power usage: 1710.5500000000006 Ws
-        INFO	Total infrastructure power usage: 1710.5500000000006 Ws
-        INFO	Total carbon emitted: 1.311421666666666 gCo2
+        INFO	Total application power usage: 1227.8999999999987 Ws
+        INFO	Total infrastructure power usage: 1639.6500000000003 Ws
+        INFO	Total carbon emitted: 1.2570650000000008 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -49,7 +49,7 @@ def main():
     infrastructure.add_link(wifi_link_from_source)
 
     power_domain = PowerDomain(env, name="Power Domain 1",
-                               start_time_str="19:00:00", update_interval=1)
+                               start_time_str="16:30:00", update_interval=1)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0, powered_infrastructure=[node1, node2, node3], static=True)
     power_domain.add_power_source(solar_power)
 

@@ -37,9 +37,9 @@ def main():
         DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
         DEBUG	120: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
         DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
-        INFO	Total application power usage: 2472.724540000003 Ws
-        INFO	Total infrastructure power usage: 3053.519699999993 Ws
-        INFO	Total carbon emitted: 9.139072739999985 gCo2
+        NFO	Total application power usage: 1226.1443999999992 Ws
+        INFO	Total infrastructure power usage: 1514.1420000000007 Ws
+        INFO	Total carbon emitted: 4.538085299999998 gCo2
         """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -92,7 +92,7 @@ def main():
     env.process(power_domain.run(env))
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
-    env.run(until=121)  # run simulation until 21:00:00
+    env.run(until=60)  # run simulation until 20:00:00
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
@@ -112,18 +112,25 @@ def main():
                                                        axis_label="Energy Consumed (Wh)",
                                                        title_attribute="Energy Consumed")
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
-                                                            power_sources=[solar_power, wind_power],
+                                                            power_sources=[solar_power,grid, wind_power],
                                                             axis_label="Energy Consumed (Wh)",
                                                             title_attribute="Energy Consumed")
+    fig3_5 = figure_plotter.subplot_time_series_power_sources("Power Available",
+                                                            power_sources=[solar_power, wind_power],
+                                                            axis_label="Energy Available (Wh)",
+                                                            title_attribute="Energy Available")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid, wind_power],
                                                             axis_label="Carbon Released (gC02/kWh)",
                                                             title_attribute="Carbon Released")
 
-    figs = [fig1, fig2, fig3, fig4]
+    figs = [fig1, fig2, fig3, fig4, fig3_5]
     main_fig = figure_plotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
+    for i, fig in enumerate(figs):
+        main_fig = FigurePlotter.aggregate_subplots([fig], title="")
+        file_handler.write_figure_to_file(main_fig, 1, filename=f"example_3-{i}")
 
     animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
     animation.run_animation()

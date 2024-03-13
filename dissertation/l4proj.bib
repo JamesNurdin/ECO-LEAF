@@ -7,11 +7,14 @@
   year      = {2017},    
   
 }
-@software{simpy,
-    title = {{SimPy}: SimPy Documentation},
-    author = {SimPy Development Team},
-    howpublished = {\url{https://simpy.readthedocs.io/en/latest/}},
-    note = {Accessed: February 23, 2024},
+@article{simpy,
+  title={Introduction to discrete-event simulation and the simpy language},
+  author={Matloff, Norm},
+  journal={Davis, CA. Dept of Computer Science. University of California at Davis. Retrieved on August},
+  volume={2},
+  number={2009},
+  pages={1--33},
+  year={2008}
 }
 
 @book{Wil09,
@@ -156,18 +159,80 @@ abstract = {Before new technologies enter the market, their environmental superi
   note = {Accessed: 15/02/2024}
 }
 
-@Article{c02challenges,
-AUTHOR = {Andrae, Anders S. G. and Edler, Tomas},
-TITLE = {On Global Electricity Usage of Communication Technology: Trends to 2030},
-JOURNAL = {Challenges},
-VOLUME = {6},
-YEAR = {2015},
-NUMBER = {1},
-PAGES = {117--157},
-URL = {https://www.mdpi.com/2078-1547/6/1/117},
-ISSN = {2078-1547},
-ABSTRACT = {This work presents an estimation of the global electricity usage that can be ascribed to Communication Technology (CT) between 2010 and 2030. The scope is three scenarios for use and production of consumer devices, communication networks and data centers. Three different scenarios, best, expected, and worst, are set up, which include annual numbers of sold devices, data traffic and electricity intensities/efficiencies. The most significant trend, regardless of scenario, is that the proportion of use-stage electricity by consumer devices will decrease and will be transferred to the networks and data centers. Still, it seems like wireless access networks will not be the main driver for electricity use. The analysis shows that for the worst-case scenario, CT could use as much as 51% of global electricity in 2030. This will happen if not enough improvement in electricity efficiency of wireless access networks and fixed access networks/data centers is possible. However, until 2030, globally-generated renewable electricity is likely to exceed the electricity demand of all networks and data centers. Nevertheless, the present investigation suggests, for the worst-case scenario, that CT electricity usage could contribute up to 23% of the globally released greenhouse gas emissions in 2030.},
-DOI = {10.3390/challe6010117}
+@article{co2Challenges,
+title = {Assessing ICT global emissions footprint: Trends to 2040 \& recommendations},
+journal = {Journal of Cleaner Production},
+volume = {177},
+pages = {448-463},
+year = {2018},
+issn = {0959-6526},
+doi = {https://doi.org/10.1016/j.jclepro.2017.12.239},
+url = {https://www.sciencedirect.com/science/article/pii/S095965261733233X},
+author = {Lotfi Belkhir and Ahmed Elmeligi},
+abstract = {In light of the concerted efforts to reduce global greenhouse gas emissions (GHGE) per the so-called Paris Agreement, the Information and Communication Industry (ICT) has received little attention as a significant contributor to GHGE and if anything is often highly praised for enabling efficiencies that help reduce other industry sectors footprint. In this paper, we aim at assessing the global carbon footprint of the overall ICT industry, including the contribution from the main consumer devices, the data centers and communication networks, and compare it with the to the total worldwide GHGE. We conduct a detailed and rigorous analysis of the ICT global carbon footprint, including both the production and the operational energy of ICT devices, as well as the operational energy for the supporting ICT infrastructure. We then compare this contribution to the global 2016-level GHGE. We have found that, if unchecked, ICT GHGE relative contribution could grow from roughly 1–1.6% in 2007 to exceed 14% of the 2016-level worldwide GHGE by 2040, accounting for more than half of the current relative contribution of the whole transportation sector. Our study also highlights the contribution of smart phones and shows that by 2020, the footprint of smart phones alone would surpass the individual contribution of desktops, laptops and displays. Finally, we offer some actionable recommendations on how to mitigate and curb the ICT explosive GHGE footprint, through a combination of renewable energy use, tax policies, managerial actions and alternative business models.}
+}
+
+@Inbook{Des,
+author="Goldsman, David
+and Goldsman, Paul",
+editor="Loper, Margaret L.",
+title="Discrete-Event Simulation",
+bookTitle="Modeling and Simulation in the Systems Engineering Life Cycle: Core Concepts and Accompanying Lectures",
+year="2015",
+publisher="Springer London",
+address="London",
+pages="103--109",
+abstract="A discrete-event simulation (DES) is characterized by discrete changes in the sim-ulation's state as the simulation evolves over time. Examples of systems that might be evaluated using DES include: queueing systems, such as a bank service counter, where customers arrive occasionally and may wait in lines for service; manufacturing systems, where parts are processed in various sequences at differ-ent stations; and inventory systems, where random quantities of a certain product are purchased by customers each day at a store, which in turn may cause additional actions along the product supply chain. These systems are driven by various events that occur at discrete times and change the state of the simulation. Event times correspond to, for example: customer arrivals, customer departures from a server or from the system, machine breakdowns, and even an ``end-of-simulation'' event. In this chapter, we will give a high-level description of how a DES works, followed by a running example illustrating the salient concepts, and then a brief discussion of specialty DES software.",
+isbn="978-1-4471-5634-5",
+doi="10.1007/978-1-4471-5634-5_10",
+url="https://doi.org/10.1007/978-1-4471-5634-5_10"
+}
+
+@inproceedings{des-old,
+author = {Banks, Jerry and Carson, John S.},
+title = {Introduction to discrete-event simulation},
+year = {1986},
+isbn = {0911801111},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/318242.318253},
+doi = {10.1145/318242.318253},
+abstract = {In this article, we introduce the reader to discrete-event simulation. The concepts of system and model, system state, entities, attributes and delays are defined in the general context of simulation. Using these concepts, event-scheduling, process-interaction, and activity-scanning perspectives are briefly described. To demonstrate the use of the concepts, a discrete system is modeled using the event-scheduling perspective. Simulation languages are classified in terms of the type of system being modeled, the application level, and the perspective taken. The features of a simulation language are discussed. Lastly, basic information is provided about an assortment of discrete-event simulation languages.},
+booktitle = {Proceedings of the 18th Conference on Winter Simulation},
+pages = {17–23},
+numpages = {7},
+location = {Washington, D.C., USA},
+series = {WSC '86}
+}
+
+@online{EEA_CO2_emission_intensity,
+  author = {{European Environment Agency}},
+  title = {CO2 Emission Intensity},
+  year = {2024},
+  url = {https://www.eea.europa.eu/data-and-maps/daviz/co2-emission-intensity-14/},
+  note = {Accessed: 09/03/2024}
+}
+
+@article{IET_Power_System_Modeling,
+  author = {Stephanie Hay and Anna Ferguson},
+  title = {A Review of Power System Modelling Platforms and Capabilities},
+  journal = {IET Generation, Transmission \& Distribution},
+  year = {2015},
+  url = {https://www.theiet.org/media/9413/3-a-review-of-power-system-modelling-platforms-and-capabilities.pdf}
+}
+
+@website{eirgrid,
+  title = {EirGrid - System and Renewable Data Reports},
+  author = {{EirGrid}},
+  howpublished = {\url{https://www.eirgrid.ie/grid/system-and-renewable-data-reports}},
+  note = {Accessed: 11/10/2023}
+}
+
+@website{carbon_intensity_api,
+  title = {Carbon Intensity API},
+  author = {{National Grid ESO}},
+  howpublished = {\url{https://carbonintensity.org.uk/}},
+  note = {Accessed: 11/10/2023}
 }
 
 @article{2018energy_consumption,
@@ -184,21 +249,19 @@ DOI = {10.3390/challe6010117}
 }
 
 @article{current_energy_consumption,
-author = {Gelenbe, Erol},
-title = {Electricity Consumption by ICT: Facts, trends, and measurements},
-year = {2023},
-issue_date = {August 2023},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {2023},
-number = {August},
-url = {https://doi.org/10.1145/3613207},
-doi = {10.1145/3613207},
-abstract = {This paper considers key issues surrounding energy consumption by information and communication technologies (ICT), which has been steadily growing and is now attaining approximately 10\% of the worldwide electricity consumption with a significant impact on greenhouse gas emissions. The perimeter of ICT systems is discussed, and the role of the subsystems that compose ICT is considered. Data from recent years is used to understand how each of these sub-systems contribute to ICT's energy consumption. The quantitatively demonstrated positive correlation between the penetration of ICT in the world's different economies and the same economies' contributions to undesirable greenhouse gas emissions is also discussed. The paper also examines how emerging technologies such as 5G, AI, edge computing, and cryptocurrencies are contributing to the worldwide increase in electricity consumption by ICT, despite the increases in ICT efficiency, in terms of energy consumed per bit processed, stored, or transmitted. The measurement of specific ICT systems' electricity consumption is also addressed, and the manner in which this consumption can be minimized in a specific edge computing context is discussed.},
-journal = {Ubiquity},
-month = {aug},
-articleno = {1},
-numpages = {15}
+title = {The real climate and transformative impact of ICT: A critique of estimates, trends, and regulations},
+journal = {Patterns},
+volume = {2},
+number = {9},
+pages = {100340},
+year = {2021},
+issn = {2666-3899},
+doi = {https://doi.org/10.1016/j.patter.2021.100340},
+url = {https://www.sciencedirect.com/science/article/pii/S2666389921001884},
+author = {Charlotte Freitag and Mike Berners-Lee and Kelly Widdicks and Bran Knowles and Gordon S. Blair and Adrian Friday},
+keywords = {ICT, carbon footprint, trends, AI, big data, data science, IoT, blockchain, policy, regulations},
+abstract = {Summary
+In this paper, we critique ICT's current and projected climate impacts. Peer-reviewed studies estimate ICT's current share of global greenhouse gas (GHG) emissions at 1.8%–2.8% of global GHG emissions; adjusting for truncation of supply chain pathways, we find that this share could actually be between 2.1% and 3.9%. For ICT's future emissions, we explore assumptions underlying analysts' projections to understand the reasons for their variability. All analysts agree that ICT emissions will not reduce without major concerted efforts involving broad political and industrial action. We provide three reasons to believe ICT emissions are going to increase barring intervention and find that not all carbon pledges in the ICT sector are ambitious enough to meet climate targets. We explore the underdevelopment of policy mechanisms for enforcing sector-wide compliance, and contend that, without a global carbon constraint, a new regulatory framework is required to keep the ICT sector's footprint aligned with the Paris Agreement.}
 }
 
 
@@ -216,5 +279,90 @@ ABSTRACT = {Agriculture is one of the economic sectors that affect climate chang
 DOI = {10.3390/su9081339}
 }
 
+@article{FogNetSim,
+author = {Qayyum, Tariq and Malik, Asad and Khattak, Muazzam and Khalid, Osman and Khan, Samee},
+year = {2018},
+month = {10},
+pages = {1-1},
+title = {FogNetSim++: A Toolkit for Modeling and Simulation of Distributed Fog Environment},
+volume = {PP},
+journal = {IEEE Access},
+doi = {10.1109/ACCESS.2018.2877696}
+}
+
+@inproceedings{fog_computing,
+author = {Bonomi, Flavio and Milito, Rodolfo and Zhu, Jiang and Addepalli, Sateesh},
+title = {Fog computing and its role in the internet of things},
+year = {2012},
+isbn = {9781450315197},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2342509.2342513},
+doi = {10.1145/2342509.2342513},
+abstract = {Fog Computing extends the Cloud Computing paradigm to the edge of the network, thus enabling a new breed of applications and services. Defining characteristics of the Fog are: a) Low latency and location awareness; b) Wide-spread geographical distribution; c) Mobility; d) Very large number of nodes, e) Predominant role of wireless access, f) Strong presence of streaming and real time applications, g) Heterogeneity. In this paper we argue that the above characteristics make the Fog the appropriate platform for a number of critical Internet of Things (IoT) services and applications, namely, Connected Vehicle, Smart Grid, Smart Cities, and, in general, Wireless Sensors and Actuators Networks (WSANs).},
+booktitle = {Proceedings of the First Edition of the MCC Workshop on Mobile Cloud Computing},
+pages = {13–16},
+numpages = {4},
+keywords = {wsan, software defined networks, real time systems, iot, fog computing, cloud computing, analytics},
+location = {Helsinki, Finland},
+series = {MCC '12}
+}
+@inproceedings{fog_computing2,
+author = {Yi, Shanhe and Li, Cheng and Li, Qun},
+title = {A Survey of Fog Computing: Concepts, Applications and Issues},
+year = {2015},
+isbn = {9781450335249},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2757384.2757397},
+doi = {10.1145/2757384.2757397},
+abstract = {Despite the increasing usage of cloud computing, there are still issues unsolved due to inherent problems of cloud computing such as unreliable latency, lack of mobility support and location-awareness. Fog computing can address those problems by providing elastic resources and services to end users at the edge of network, while cloud computing are more about providing resources distributed in the core network. This survey discusses the definition of fog computing and similar concepts, introduces representative application scenarios, and identifies various aspects of issues we may encounter when designing and implementing fog computing systems. It also highlights some opportunities and challenges, as direction of potential future work, in related techniques that need to be considered in the context of fog computing.},
+booktitle = {Proceedings of the 2015 Workshop on Mobile Big Data},
+pages = {37–42},
+numpages = {6},
+keywords = {cloud computing, edge computing, fog computing, mobile cloud computing, mobile edge computing, review},
+location = {Hangzhou, China},
+series = {Mobidata '15}
+}
+
+@article{iot,
+  title={The internet of things: An overview},
+  author={Rose, Karen and Eldridge, Scott and Chapin, Lyman},
+  journal={The internet society (ISOC)},
+  volume={80},
+  number={15},
+  pages={1--53},
+  year={2015},
+  publisher={Reston, VA}
+}
 
 
+
+
+
+@INPROCEEDINGS{EdgeCloudSim,
+  author={Sonmez, Cagatay and Ozgovde, Atay and Ersoy, Cem},
+  booktitle={2017 Second International Conference on Fog and Mobile Edge Computing (FMEC)},
+  title={EdgeCloudSim: An environment for performance evaluation of Edge Computing systems},
+  year={2017},
+  volume={},
+  number={},
+  pages={39-44},
+  keywords={Cloud computing;Computational modeling;Edge computing;Load modeling;Delays;Wide area networks;Computer architecture},
+  doi={10.1109/FMEC.2017.7946405}}
+
+
+
+@article{ENIGMA,
+title = {A scalable simulator for cloud, fog and edge computing platforms with mobility support},
+journal = {Future Generation Computer Systems},
+volume = {144},
+pages = {117-130},
+year = {2023},
+issn = {0167-739X},
+doi = {https://doi.org/10.1016/j.future.2023.02.010},
+url = {https://www.sciencedirect.com/science/article/pii/S0167739X23000511},
+author = {Elías Del-Pozo-Puñal and Félix García-Carballeira and Diego Camarmas-Alonso},
+keywords = {Internet of things, Simulation, Fog and cloud computing, Mobility, Scalability},
+abstract = {In recent years, the devices that make up the Internet of Things (IoT) paradigm have been increasing in number and complexity as different layers of network computing, such as Cloud, Edge and Fog Computing, have emerged. Thanks to these latest paradigms and their different types of communications, it has been possible to reduce and distribute the computational load on the network. However, to build these infrastructures and reduce the cost, it is necessary to use a simulation platform to model these environments and analyze their behavior (power consumption, CPU usage, bandwidth, etc.) beforehand. An essential aspect of simulators is scalability, the ability to add new components and simulate large infrastructures without compromising the performance of the simulator. Many existing simulators, as will be discussed in this article, cannot scale adequately as new elements are added to the system. Furthermore, in these environments, it is useful to simulate mobile devices and to know the location of these devices for the development and analysis of new algorithms. To solve these problems, this article presents and describes the ENIGMA simulator. ENIGMA is a scalable simulator of Edge, Fog and Cloud computing infrastructures, which allows to efficiently simulate a large number of devices and elements and to analyze different characteristics (CPU usage, power consumption, network bandwidth, application execution time, etc.). Its objective is to analyze new infrastructures and algorithms. ENIGMA also includes support for including mobile devices and an API to integrate their visualization in graphical maps. The article presents an evaluation to compare the scalability of ENIGMA with other state-of-the-art simulators and different use cases that illustrate its operation.}
+}

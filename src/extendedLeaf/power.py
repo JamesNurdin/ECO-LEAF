@@ -641,17 +641,17 @@ class PowerDomain:
 
     def record_power_consumption(self, entity, power_source, power_consumed, time_to_recharge=1):
         carbon_released = 0
-        carbon_intensity = 0
         for time_offset in range(time_to_recharge):
+            time_occur_at = str(self.env.now + self.start_time_index + time_offset)
             carbon_intensity = power_source.get_current_carbon_intensity(time_offset)
-            carbon_released += PowerDomain.calculate_carbon_released(power_consumed, carbon_intensity)
-        recharge_data = {"Power Used": power_consumed,
+            carbon_released = PowerDomain.calculate_carbon_released(power_consumed, carbon_intensity)
+            recharge_data = {"Power Used": power_consumed,
                          "Carbon Intensity": carbon_intensity,
                          "Carbon Released": carbon_released}
 
-        """ Update the logs of the power source"""
-        self.logging_data[power_source.name] = {entity.name: recharge_data}
-        self.carbon_emitted.append(carbon_released)
+            """ Update the logs of the power source"""
+            self.logging_data[time_occur_at] = {power_source.name: {entity.name: recharge_data}}
+            self.carbon_emitted.append(carbon_released)
 
     def get_best_power_source(self, power_to_consume) -> PowerSource:
         """
@@ -685,14 +685,22 @@ class PowerDomain:
             current_power_source_dictionary[entity.name] = entity_data
             current_power_source.remaining_power_log[str(self.env.now + self.start_time_index)] = current_power_source.get_current_power()
         current_power_source_dictionary["Total Carbon Released"] = current_power_source_carbon_released
+        current_power_source_dictionary["Power Available"] = current_power_source.get_current_power()
+
         return current_power_source_dictionary
 
     def update_logs(self):
         time = str(self.env.now + self.start_time_index)
-        for power_source in self.logging_data:
-            for node in self.logging_data[power_source]:
-                self.insert_power_reading(time, power_source, node, self.logging_data[power_source][node])
-        self.logging_data = {}
+        remaining_entries = {}
+        for time_occur_at in self.logging_data:
+            if time == time_occur_at:
+                for power_source in self.logging_data[time_occur_at]:
+                    for node in self.logging_data[time_occur_at][power_source]:
+                        self.insert_power_reading(time, power_source, node, self.logging_data[time_occur_at][power_source][node])
+                remaining_entries[time_occur_at] = self.logging_data[time_occur_at]
+        for time_occur_at in remaining_entries:
+            self.logging_data.pop(time_occur_at)
+
 
     def insert_power_reading(self, time, power_source, node, reading):
         if power_source in self.captured_data[time]:
@@ -807,7 +815,7 @@ class SolarPower(PowerSource):
                     (All arguments relate to the abstract class)
 
     """
-    SOLAR_DATASET_FILENAME: str = "08-08-2020 Glasgow pv data.csv"
+    SOLAR_DATASET_FILENAME: str = "12-10-2023 Ireland solar data.csv"
 
     def __init__(self, env: Environment, name: str = "Solar", data_set_filename: str = SOLAR_DATASET_FILENAME,
                  power_domain: PowerDomain = None, priority: int = 0, powered_infrastructure=None, static: bool = False):
@@ -901,19 +909,22 @@ class BatteryPower(PowerSource):
     """A concrete example class of the PowerSource class
 
                         Args:
-                            total_power_available: The total amount of power (Watts) the battery can hold
+                            total_power_available: The total amount of energy the battery can hold
                             charge_rate: The rate at which (Watts/Hour) the battery can be recharged at
 
     """
     def __init__(self, env: Environment, name: str = "Battery",
                  power_domain: PowerDomain = None, priority: int = 10,
-                 total_power_available=40, charge_rate=132, powered_infrastructure=None, static: bool = False):
+                 total_power_available=40, charge_rate=None, powered_infrastructure=None, static: bool = False):
         super().__init__(env, name,PowerType.BATTERY, None, power_domain, priority, powered_infrastructure, remaining_power=0,
                          static=static)
 
         self.carbon_intensity: float = 0  # Assumed that carbon intensity comes from power source charging it
-        self.total_power: float = total_power_available  #
-        self.recharge_rate: float = charge_rate  #
+        self.total_power: float = total_power_available*60  #
+        if charge_rate is None:
+            self.recharge_rate: float = total_power_available/30  #
+        else:
+            self.recharge_rate = charge_rate
 
     def get_total_power(self):
         return self.total_power/60

@@ -89,11 +89,12 @@ def main():
         INFO	- DataFlow(bit_rate=1000) on [Link('Sensor0' -> 'Microprocessor13', bandwidth=0/86940505.92221098)].
         INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor13' -> 'Server', bandwidth=0/29825751.67980145)].
         ...
-        DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=4.86W, static=100.14W)
-        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=4.86W, static=100.14W)
-        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=4.80W, static=100.01W)
-        INFO	Total infrastructure power usage: 92021.08064590898 Ws
-        INFO	Total carbon emitted: 321.038799999999 gCo2
+
+        DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=13.37W, static=300.35W)
+        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=13.37W, static=300.35W)
+        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=13.37W, static=300.35W)
+        INFO	Total infrastructure power usage: 167737.76212396252 Ws
+        INFO	Total carbon emitted: 201.14651237393718 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -114,7 +115,7 @@ def main():
                                start_time_str="10:00:00", update_interval=1)
     grid_power = GridPower(env, power_domain=power_domain, priority=5,
                            powered_infrastructure=[server] + links_to_server, static=True)
-    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=175,
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=15,
                                  powered_infrastructure=sensors + microprocessors + links_from_sensors, static=True)
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(grid_power)
@@ -128,13 +129,13 @@ def main():
     event_domain = EventDomain(env, update_interval=1, start_time_str="10:00:00")
     event_domain.add_event(
         Event(event=battery_power.recharge_battery, args=[grid_power], time_str="10:30:00", repeat=True,
-              repeat_counter=100))
+              repeat_counter=240))
 
     infrastructure_pm = PowerMeter(infrastructure.nodes(), name="infrastructure_meter", measurement_interval=1)
 
     # Run simulation
-    env.process(power_domain.run(env))
     env.process(event_domain.run())
+    env.process(power_domain.run(env))
 
     env.process(infrastructure_pm.run(env))
 
@@ -167,9 +168,13 @@ def main():
                                                             title_attribute="Carbon Released")
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                             power_sources=[grid_power, battery_power],
-                                                            axis_label="Energy Consumed (Wh)",
+                                                            axis_label="Energy Available (Wh)",
                                                             title_attribute="Energy Available")
-    figs = [fig0, fig1, fig2, fig3,fig4,fig5]
+
+    figs = [fig0, fig1, fig2, fig3, fig4, fig5]
+    for i, fig in enumerate(figs):
+        main_fig = FigurePlotter.aggregate_subplots([fig], title="")
+        file_handler.write_figure_to_file(main_fig, 1, filename=f"example_6-{i}")
 
     main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))

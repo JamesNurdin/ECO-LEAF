@@ -123,7 +123,7 @@ class FileHandler:
             filename = "figure_" + str(self.repeated_figures)
             self.repeated_figures = self.repeated_figures + 1
         # Create and save the figure as a PDF
-        figure.update_layout(height=pdf_height, width=0.5*pdf_width)
+        figure.update_layout(height=pdf_height, width=pdf_width)
         figure.update_layout(showlegend=True)
         if self.results_dir is None:
             self.results_dir = self.create_results_dir()
@@ -190,29 +190,24 @@ class FigurePlotter:
             for trace in figure_data:
                 main_fig.add_trace(trace, row=plot_index + 1, col=1)
 
-            # Update x-axis properties
             main_fig.update_xaxes(title_text=layout.xaxis.title.text, row=plot_index+1, col=1)
             main_fig.update_yaxes(title_text=layout.yaxis.title.text, row=plot_index+1, col=1)
             xaxis_ticks = layout.xaxis.tickvals
             xaxis_ticktext = layout.xaxis.ticktext
 
-            # Apply x-axis tick information to the main subplot
             main_fig.update_xaxes(tickvals=xaxis_ticks, ticktext=xaxis_ticktext, row=plot_index+1, col=1)
             for shape in layout.shapes:
                 main_fig.add_shape(shape, row=plot_index+1, col=1)
 
-            # Update layout of the main subplot based on the individual layout of each subplot
             main_fig.update_layout(title_text=title)
         return main_fig
 
     def add_events_updated(self, fig, offset) -> go.Figure:
-        # iterate through all the unique event types
         for name, unique_events in self.unique_events.items():
             x_values = []
             middle_value = 0
             y_values = []
             scaling_factor = 0.3
-            # go through each time and check if they only occur at that point (if not offset)
             for event in unique_events:
                 event_time = event.time_int
                 x_values.append(event_time - offset)
@@ -221,9 +216,7 @@ class FigurePlotter:
                 else:
                     total_events = len(self.unique_event_times[event_time])
                     index = self.unique_event_times[event_time].index(event)
-                    # Adjust the normalized index to center the events and reduce distance
                     normalized_index = (index + 0.5) / total_events * scaling_factor
-                    # Center around the fixed middle value
                     y_values.append(middle_value - (normalized_index - 0.5* scaling_factor))
 
             fig.add_trace(go.Scatter(
@@ -284,7 +277,6 @@ class FigurePlotter:
 
         fig = self.add_event_lines(fig, offset)
 
-        # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
@@ -294,17 +286,19 @@ class FigurePlotter:
                 tickvals=[int(value) - offset for value in np.linspace(start_time, end_time-1, self.number_of_divisions)]),
         )
 
-        # Update layout to add a title
         fig.update_layout(
             title_text=f"Timeseries of events.",
-            title_x=0.5,  # Adjust the horizontal position of the title
-            title_font=dict(size=16),  # Adjust the font size of the title
+            title_x=0.5,
+            title_font=dict(size=16),
         )
         return fig
 
     def subplot_time_series_entities(self, captured_attribute="Carbon Released",
                                      entities=None, axis_label="Carbon Released (gC02/kWh)",
-                                     title_attribute="Carbon Released") -> go.Figure:
+                                     title_attribute="Carbon Released",
+                                     title=None) -> go.Figure:
+        if title is None:
+            title = f"Timeseries of {title_attribute} for Powered Infrastructure."
         if entities is None:
             raise ValueError(f"Error: No entities provided to plot.")
 
@@ -319,17 +313,14 @@ class FigurePlotter:
         data = self.retrieve_select_data_entities(self.power_domain.captured_data, entities)
         time = list(range(end_time-start_time))
 
-        # Go through each node and add its trace to the same subplot
         for node_index, node in enumerate(data.keys()):
             x = time
             y = data[node][captured_attribute]
 
-            # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
 
         fig = self.add_event_lines(fig, offset)
 
-        # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
@@ -340,11 +331,10 @@ class FigurePlotter:
                 title=dict(text=axis_label, standoff=0))
         )
 
-        # Update layout to add a title
         fig.update_layout(
-            title_text=f"Timeseries of {title_attribute} for Powered Infrastructure.",
-            title_x=0.5,  # Adjust the horizontal position of the title
-            title_font=dict(size=16),  # Adjust the font size of the title
+            title_text=title,
+            title_x=0.5,
+            title_font=dict(size=16),
         )
         return fig
 
@@ -352,7 +342,7 @@ class FigurePlotter:
                                           axis_label="Carbon Released (gC02/kWh)",
                                           title_attribute="Carbon Released", title= None) -> go.Figure:
         if title is None:
-            title = f"Timeseries of {title_attribute} for power sources."
+            title = f"Timeseries Of {title_attribute} For Power Sources."
         if power_sources is None:
             raise ValueError(f"Error: No power sources were provided.")
 
@@ -371,12 +361,10 @@ class FigurePlotter:
         for node_index, node in enumerate(data.keys()):
             x = time
             y = data[node][captured_attribute]
-            # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{node}", line=dict(width=1)))
 
         fig = self.add_event_lines(fig, offset)
 
-        # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
@@ -387,11 +375,10 @@ class FigurePlotter:
                 title=dict(text=axis_label, standoff=0))
         )
 
-        # Update layout to add a title
         fig.update_layout(
             title_text= title,
-            title_x=0.5,  # Adjust the horizontal position of the title
-            title_font=dict(size=16),  # Adjust the font size of the title
+            title_x=0.5,
+            title_font=dict(size=16),
         )
         return fig
 
@@ -412,12 +399,10 @@ class FigurePlotter:
         for power_meter in power_meters:
             y = [float(measurement) for measurement in power_meter.measurements[1:-1]]
             x = list(range(end_time-start_time))
-            # Add the trace to the subplot
             fig.add_trace(go.Scatter(x=x, y=y, name=f"{power_meter.name}", line=dict(width=1)))
 
         fig = self.add_event_lines(fig, offset)
 
-        # Update layout and show the figure
         fig.update_layout(
             showlegend=True,
             xaxis=dict(
@@ -428,11 +413,10 @@ class FigurePlotter:
                 title=dict(text="Energy Used (Wh)", standoff=0))
         )
 
-        # Update layout to add a title
         fig.update_layout(
             title_text=f"Timeseries of power used for Power Meters.",
-            title_x=0.5,  # Adjust the horizontal position of the title
-            title_font=dict(size=16),  # Adjust the font size of the title
+            title_x=0.5,
+            title_font=dict(size=16),
         )
         return fig
 
@@ -444,14 +428,10 @@ class FigurePlotter:
                                     "Carbon Intensity": [None] * len(list(time_series.keys())),
                                     "Carbon Released": [None] * len(list(time_series.keys())),
                                     "Total Carbon Released": [None] * len(list(time_series.keys()))}
-        # Go through each time series
         for time_index, (time, power_sources) in enumerate(time_series.items()):
-            # Go through each power source to isolate nodes
             for power_source_index, power_source in enumerate(power_sources):
-                # Go through nodes
                 for node_index, node in enumerate(power_sources[power_source]):
                     if node in list(nodes.keys()):
-                        # Go through node details and append each attribute value to the corresponding list
                         for attribute_index, (attribute, values) in enumerate(
                                 power_sources[power_source][node].items()):
 
@@ -462,36 +442,25 @@ class FigurePlotter:
         power_source_results = {}
         for power_source in desired_power_sources:
             if power_source is not None:
-                power_available = []
-                for time_index, time in enumerate(time_series.keys()):
-                    if time in power_source.remaining_power_log.keys():
-                        power_available.append(power_source.get_remaining_power_at_time(time))
-                    else:
-                        if time_index in power_source.remaining_power_log.keys():
-                            power_available.append(power_source.get_power_at_time(time_index))
-                        else:
-                            power_available.append(None)
-
                 power_source_results[power_source.name] = {"Power Used": [None] * len(list(time_series.keys())),
                                     "Carbon Intensity": [power_source.get_carbon_intensity_at_time(time) for time in range(len(list(time_series.keys())))],
-                                    "Power Available": power_available,
+                                    "Power Available": [None] * len(list(time_series.keys())),
                                     "Carbon Released": [None] * len(list(time_series.keys())),
                                     "Total Carbon Released": [None] * len(list(time_series.keys()))}
-        # Go through each time series
         running_carbon_released_totals = [0] * len(list(power_source_results.keys()))
         for time_index, (time, power_sources) in enumerate(time_series.items()):
-            # Go through each power source to isolate nodes
             for power_source_index, power_source in enumerate(power_sources):
                 if power_source in list(power_source_results.keys()):
                     power_used: float = 0
                     carbon_released: float = 0
-                    # Go through nodes
                     for node_index, node in enumerate(power_sources[power_source]):
-                        if node != "Total Carbon Released":
+                        if node != "Total Carbon Released" and node != "Power Available":
                             power_used = power_used + power_sources[power_source][node]["Power Used"]
                             carbon_released = carbon_released + power_sources[power_source][node]["Carbon Released"]
                     power_source_results[power_source]["Power Used"][time_index] = power_used
                     power_source_results[power_source]["Carbon Released"][time_index] = carbon_released
-                    running_carbon_released_totals[power_source_index] = running_carbon_released_totals[power_source_index] + carbon_released
-                    power_source_results[power_source]["Total Carbon Released"][time_index] = running_carbon_released_totals[power_source_index]
+                    if power_source_index in running_carbon_released_totals:
+                        running_carbon_released_totals[power_source_index] = running_carbon_released_totals[power_source_index] + carbon_released
+                        power_source_results[power_source]["Total Carbon Released"][time_index] = running_carbon_released_totals[power_source_index]
+                    power_source_results[power_source]["Power Available"][time_index] = float(power_sources[power_source]["Power Available"])
         return power_source_results

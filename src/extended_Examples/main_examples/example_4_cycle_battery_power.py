@@ -39,7 +39,7 @@ def main():
         DEBUG	1440: Sink Task: PowerMeasurement(dynamic=0.20W, static=20.00W)
         INFO	Total application power usage: 17494.150650000203 Ws
         INFO	Total infrastructure power usage: 36099.26245000072 Ws
-        INFO	Total carbon emitted: 87.37827750000042 gCo2
+        INFO	Total carbon emitted: 86.54591236833302 gCo2
     """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -63,7 +63,7 @@ def main():
                                start_time_str="11:00:00", update_interval=1)
     grid = GridPower(env, power_domain=power_domain, priority=5)
     solar_power = SolarPower(env, power_domain=power_domain, priority=0)
-    battery_power = BatteryPower(env, power_domain=power_domain, priority=1)
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=1, total_power_available=50,charge_rate=50)
     power_domain.add_power_source(solar_power)
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(grid)
@@ -84,10 +84,10 @@ def main():
 
     event_domain = EventDomain(env, update_interval=1, start_time_str="11:00:00")
     event_domain.add_event(Event(event=battery_power.recharge_battery,
-                                 args=[solar_power],
+                                 args=[grid],
                                  time_str="11:00:00",
                                  repeat=True,
-                                 repeat_counter=1440))
+                                 repeat_counter=770))
     event_domain.add_event(Event(event=orchestrator.place,
                                  args=[application],
                                  time_str="12:00:00",
@@ -108,8 +108,8 @@ def main():
     sink_task_pm = PowerMeter(sink_task, name="Sink Task")
 
     # Run simulation
-    env.process(power_domain.run(env))
     env.process(event_domain.run())
+    env.process(power_domain.run(env))
 
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
@@ -147,12 +147,19 @@ def main():
                                                             power_sources=[solar_power, grid, battery_power],
                                                             axis_label="Carbon Released (gC02/kWh)",
                                                             title_attribute="Carbon Released")
-    fig5 = figure_plotter.subplot_time_series_power_meter(power_meters=[source_task_pm, processing_task_pm, sink_task_pm])
+
+    fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
+                                                            power_sources=[battery_power],
+                                                            axis_label="Energy Available (Wh)",
+                                                            title_attribute="Energy Available")
 
     figs = [fig0, fig1, fig2, fig3, fig4, fig5]
     main_fig = FigurePlotter.aggregate_subplots(figs)
     file_handler.write_figure_to_file(main_fig, len(figs))
     main_fig.show()
+    for i, fig in enumerate(figs):
+        main_fig = FigurePlotter.aggregate_subplots([fig], title="")
+        file_handler.write_figure_to_file(main_fig, 1, filename=f"example_4-{i}")
 
 def custom_distribution_method(current_power_source: PowerSource, power_domain):
     """Update renewable sources"""

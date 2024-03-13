@@ -42,9 +42,9 @@ def main():
         DEBUG	599: Source Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	599: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	599: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
-        INFO	Total application power usage: 10211.317180000045 Ws
-        INFO	Total infrastructure power usage: 10900.000000000027 Ws
-        INFO	Total carbon emitted: 14.428666666666608 gCo2
+        INFO	Total application power usage: 3550.8730799999776 Ws
+        INFO	Total infrastructure power usage: 4239.6 Ws
+        INFO	Total carbon emitted: 9.322360000000003 gCo2
 
 
     """

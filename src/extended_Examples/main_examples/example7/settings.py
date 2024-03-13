@@ -23,18 +23,18 @@ START_TIME = "11:00:00"
 """ Farm scenario parameters """
 NUMBER_OF_PLOTS = 4
 PLOT_NAMES = ["Plot_1", "Plot_2", "Plot_3", "Plot_4"]
-PLOT_SIZES = [(500, 500), (1500, 1500), (500, 500), (500, 500)]   # (Width, Height) in meters.
+PLOT_SIZES = [(500, 500), (500, 500), (500, 500), (500, 500)]   # (Width, Height) in meters.
 POWER_SOURCES_AVAILABLE = [[SolarPower, WindPower, GridPower],
                            [SolarPower, GridPower],
-                           [WindPower, GridPower],
-                           [SolarPower]]
+                           [WindPower],
+                           [GridPower]]
 STATIC_CONFIG = [False, False, False, True]
-DRONE_DISTRIBUTION = [True, True, False, False]
-DRONE_RUN_TIMES = ["12:00:00", "13:00:00", None, None]
+DRONE_DISTRIBUTION = [True, True, True, True]
+DRONE_RUN_TIMES = ["12:00:00", "12:00:00", "12:00:00", "12:00:00"]
 SENSORS_PER_AXIS = [5, 5, 5, 5]  # Accounts for scrutiny of measurements, more sensors = more detail, more power
 
 """ Drone Configurations """
-END_OF_DAY = "19:00:00" #  time in which drones will stop carrying out applications
+END_OF_DAY = "16:00:00" #  time in which drones will stop carrying out applications
 
 """ Plot Infrastructure """
 
@@ -56,8 +56,8 @@ DRONE_STATIC_POWER = 5  # for flying the drone
 DRONE_SPEED = 5  # m/s
 DRONE_BATTERY_THRESHOLD = 0.2  # battery percent before recharging
 DRONE_MEASURE_DENSITY = 1
-POWER_PER_UNIT_TRAVELLED = 0.00046
-DRONE_BATTERY_SIZE = 274 #
+POWER_PER_UNIT_TRAVELLED = 0.02
+DRONE_BATTERY_SIZE = 35
 
 RECHARGE_STATION_STATIC_POWER = 300
 

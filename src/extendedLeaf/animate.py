@@ -4,10 +4,10 @@ import networkx as nx
 import matplotlib
 import numpy as np
 
-matplotlib.use('TkAgg')  # You can replace 'TkAgg' with another backend that works for you
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
-from src.extendedLeaf.power import PowerDomain, validate_str_time
+from src.extendedLeaf.power import PowerDomain
 
 
 class Animation:
@@ -32,7 +32,7 @@ class Animation:
         slider_ax = self.fig.add_axes([0.15, 0.065, 0.65, 0.03])
         self.slider = Slider(slider_ax, 'Time Step', 0, len(self.time_series_data) - 1, valinit=0, valstep=1)
         self.slider.on_changed(self.update_time_step)
-        self.slider.valtext.set_text("")  # Set initial tick label
+        self.slider.valtext.set_text("")
 
         self.fig.add_axes([0.15, 0.05, 0.65, 0.02])
         self.tick_labels, self.tick_positions = self.get_axis_labels()
@@ -92,7 +92,6 @@ class Animation:
         plt.sca(self.ax)
         self.ax.clear()
         self.g.clear()
-        # Move nodes between power sources (simplified for demonstration)
         data = self.time_series_data[str(self.current_time_increment)]
         for power_source_key, power_source_values in data.items():
             self.g.add_node(power_source_key)

@@ -3,7 +3,7 @@ import simpy
 
 from src.extendedLeaf.animate import Animation, AllowCertainDebugFilter
 from src.extendedLeaf.application import Task, Application, SourceTask, ProcessingTask, SinkTask
-from src.extendedLeaf.file_handler import FileHandler
+from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
 from src.extendedLeaf.infrastructure import Node, Link, Infrastructure
 from src.extendedLeaf.orchestrator import Orchestrator
 from src.extendedLeaf.power import PowerModelNode, PowerMeasurement, PowerMeter, PowerModelLink, SolarPower, \
@@ -37,7 +37,7 @@ def main():
         DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
         INFO	Total application power usage: 3063.3751499999935 Ws
         INFO	Total infrastructure power usage: 3063.350949999993 Ws
-        INFO	Total carbon emitted: 6.722968472500006 gCo2
+        INFO	Total carbon emitted: 8.90024335583334 gCo2
     """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -93,8 +93,35 @@ def main():
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
 
-    animation = Animation(power_domains=[power_domain], env=env, speed_sec=2.5)
-    animation.run_animation()
+    file_handler = FileHandler()
+    filename = "Results.Json"
+    file_handler.write_out_results(filename=filename, power_domain=power_domain)
+
+    figure_plotter = FigurePlotter(power_domain)
+    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02/kWh)",
+                                                       title_attribute="Carbon Released")
+    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+                                                       entities=entities,
+                                                       axis_label="Energy Consumed (Wh)",
+                                                       title_attribute="Energy Consumed")
+    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                            power_sources=[grid, solar_power],
+                                                            axis_label="Energy Consumed (Wh)",
+                                                            title_attribute="Energy Consumed")
+    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
+                                                            power_sources=[grid, solar_power],
+                                                            axis_label="Carbon Released (gC02/kWh)",
+                                                            title_attribute="Carbon Released")
+
+    figs = [fig1, fig2, fig3, fig4]
+    main_fig = figure_plotter.aggregate_subplots(figs)
+    file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
+    main_fig.show()
+    for i, fig in enumerate(figs):
+        main_fig = FigurePlotter.aggregate_subplots([fig], title="")
+        file_handler.write_figure_to_file(main_fig, 1, filename=f"example_2-{i}")
 
 
 class ExampleOrchestrator(Orchestrator):

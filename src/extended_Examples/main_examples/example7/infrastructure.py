@@ -39,7 +39,8 @@ class Drone(Node):
         self.application = DroneApplication(f"Plot_{plot.plot_index}_Drone_Application", self, cloud)
         self.power_per_unit_traveled = POWER_PER_UNIT_TRAVELLED
         self.battery_power = BatteryPower(env, name=f"{plot.name}_Battery", power_domain=power_domain, priority=1,
-                                          total_power_available=DRONE_BATTERY_SIZE, static=True, powered_infrastructure=[self])
+                                          total_power_available=DRONE_BATTERY_SIZE, static=True, powered_infrastructure=[self],
+                                          charge_rate=DRONE_BATTERY_SIZE/120)
         self.locations_iterator = plot.get_drone_path()
 
 

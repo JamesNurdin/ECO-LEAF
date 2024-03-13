@@ -36,7 +36,7 @@ def main():
         DEBUG	49: infrastructure_meter: PowerMeasurement(dynamic=120.73W, static=40.00W)
         INFO	Total application power usage: 1536.5209999999997 Ws
         INFO	Total infrastructure power usage: 8036.499999999993 Ws
-        INFO	Total carbon emitted: 11.124292868666663 gCo2
+        INFO	Total carbon emitted: 12.021292868666656 gCo2
 
     """
     env = simpy.Environment()  # creating SimPy simulation environment
@@ -60,7 +60,7 @@ def main():
 
     power_domain = PowerDomain(env, name="Power Domain 1", powered_infrastructure=entities,
                                start_time_str="10:00:00", update_interval=1, powered_infrastructure_distributor=PoweredInfrastructureDistributor())
-    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=500)
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=100)
     grid1 = GridPower(env, power_domain=power_domain, priority=5)
     sol = SolarPower(env, power_domain=power_domain, priority=1)
     power_domain.add_power_source(battery_power)
