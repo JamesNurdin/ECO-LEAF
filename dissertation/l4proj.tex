@@ -105,7 +105,7 @@
 \section{Motivation}\label{intro:subsec:motivation}
 Over the past decade, the information and communication technology (ICT) industry has drastically increased its share of global energy consumption and, consequently, its emission of greenhouse gasses.
 A recent study approximates that the ICT industry emits around 2.1-3.9 \% of global greenhouse gas emissions \citep{current_energy_consumption}.
-With the ever-increasing energy requirements from power-intensive services like large-scale data centres, worst-case projections expect that the ICT industry will produce 14\% of global greenhouse gas emissions by 2040\citep{co2Challenges}.
+With the ever-increasing energy requirements from power-intensive services like large-scale data centres, the ICT industry is expected to consume even more of global greenhouse gas emissions in the future \citep{co2Challenges}.
 Consequently, as the industry continues to demand larger energy requirements, it imposes a more significant environmental threat to meet this demand.
 In an attempt to circumvent this, the discipline of sustainable computing has become a vital area of study within computer science to reduce the industry's impact on the environment.
 
@@ -115,12 +115,11 @@ In order to facilitate research and industrial applications of the technique, a 
 In order to effectively model their environments, many tools take into account a range of considerations that are unique to edge/fog computing.
 These considerations might reflect the granularity and reliability of communications within the network \citep{FogNetSim}, the representation of network infrastructure \citep{ENIGMA}, and even the optimisation of a network's performance \citep{EdgeCloudSim}.
 However, only a few available tools currently place an emphasis on how power can be modelled.
-One such tool, LEAF (Large Energy-Aware Fog computing environments) \citep{leaf2021}, was previously developed to provide power modelling inside an edge/fog computing simulation.
-During the simulation, LEAF captures the power requirements of devices within the network environment, which the user can then analyse.
+One such tool, LEAF (Large Energy-Aware Fog computing environments) \citep{leaf2021}, was previously developed to provide analytical power modelling inside an edge/fog computing simulation.
 
-Despite the variety of edge/fog computing simulation tools that do incorporate power modelling into their environments, many of these tools, such as LEAF, are yet to model how power can be provided to network infrastructure and the estimated carbon footprint produced as a result.
-As such, a gap exists to offer this functionality within an edge/fog computing environment.
-The proposed solution, Extended LEAF, seeks to expand upon the LEAF framework by introducing the ability to model various battery, grid and on-site renewable power sources.
+Despite the variety of edge/fog computing simulation tools that do incorporate power modelling into their environments, many of these tools, are yet to model how power can be provided to network infrastructure and estimate the carbon footprint produced as a result.
+As such, a gap exists to offer this functionality within an edge/fog computing simulation environment.
+The proposed solution, Extended LEAF, seeks to introduce the ability to model various battery, grid and on-site renewable power sources.
 In addition, Extended LEAF also models how these power sources have varying carbon intensities that can fluctuate as a consequence of generating power at various times and locations.
 By introducing the tools necessary to estimate the potential carbon footprints of model networks, Extended LEAF aims to provide further research and industrial opportunities to utilise fog computing by being able to take into consideration the carbon produced as a result of running the environment.
 
@@ -130,7 +129,7 @@ By introducing the tools necessary to estimate the potential carbon footprints o
 \section{Goals}\label{intro:subsec:goals}
 \textbf{Introduce a means of modelling power sources}.
 The first main goal in extending LEAF is to introduce a means of modelling power sources within the current LEAF environment.
-Extended LEAF should allow for modelling any kind of power source inside the environment, such as the national grid, solar power, or even battery power.
+Extended LEAF should consider the heterogeneity of real power sources and allow for modelling any kind of power source inside the environment, such as the national grid, solar power, or even battery power.
 Users should be able to express precisely what type of power sources they want to use by defining their own or configuring the sources provided by Extended LEAF.
 This is important because the unique properties of a power source can provide different outcomes for a given simulation.
 In addition to this, power sources should be able to fluctuate in their power availability as a consequence of environmental conditions.
@@ -194,81 +193,112 @@ The structure of the dissertation consists of eight chapters, which are outlined
 \chapter{Background}
 
 \section{Edge/Fog Computing}
-Fog computing, a platform model introduced by Cisco in 2012 \citep{fog_computing}, is an extension of the cloud computing paradigm that allows for the distribution of computing resources and services across various edge devices in a network.
-The proposal for fog computing aimed to provide a new platform to meet the emerging requirements introduced by the increasing adoption of the Internet of Things (IoTs).
-The IoTs, as defined by \cite{iot}, describe the term as ``scenarios in which Internet connectivity and computing capability extend to a variety of objects, devices, sensors, and everyday items''.
-While originally conceptualised to satisfy the requirements of IoTs in providing features such as low latency and mobility support \citep{fog_computing}, the need for fog computing has become more apparent in the context of sustainable computing to help prevent an overdependency on cloud services by offloading workload away from the centre of the network.
+The most familiar description of the Internet to many has always been a ``network of networks''; this describes an extensive topology of interconnecting routers, switches and end-host devices from which data travels around to fulfil the user's request.
+This data is structured as a series of quanta called packets, each containing a segment of the original data along with routing information to traverse the Internet.
+For a user on a network to receive any data, communications between the user and the device holding the desired data must occur.
+In most cases, the device in question is a specialised server that offers cloud computing services such as accessing data, using software, and networking \citep{cloud_computing}.
+The Internet of Things (IoT), as defined by \cite{iot}, describes the term as ``scenarios in which Internet connectivity and computing capability extend to a variety of objects, devices, sensors, and everyday items''.
+In the late 2000s, due to the rapid adoption of the IoT \citep{iotboom}, new requirements from IoT devices, such as low latency and increased mobility support \citep{fog_computing} required changes to traditional cloud computing practises of the time.
+
+In 2012, the networking company Cisco introduced the Fog computing platform \citep{fog_computing}.
+Fog computing aimed to extend the cloud computing paradigm by distributing computing resources and services across various edge devices in a network.
 Figure \ref{fig:fog-diagram} illustrates the concept by depicting the three primary agents of the paradigm.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.7\textwidth]{images/fog-computing-diagram}
+    \includegraphics[width=0.55\textwidth]{images/fog-computing-diagram}
     ~
     \caption{Diagram showing the layers in fog computing.}
     \label{fig:fog-diagram}
 \end{figure}
+By moving computations away from the centre of he network, fog computing could reduce latencies, improve security and offer increased mobility support by providing services closer to the end user \citep{fog_computing}.
+As a result of this, research within the discipline of sustainable computing \citep{sustainableFog} is being conducted exploring ways in further reducing the demand from traditional cloud computing services.
 
 \section{Discrete Event Simulations}
 
-Unlike continuous event simulation, which sees a system change as a consequence of time elapsing \cite{simpy}, Discrete Event Simulation (DES) is a technique that models an environment by changing the simulation's state at specific points in time through ``events'' and therefore progressing the simulation forward in time as a result.
-These events describe actions within the simulation space that directly transition the simulation from one state to another.
-In between state changes, the simulation's state remains exact.
-In order to maintain the sequence of events, DESs typically utilise a future event list to track upcoming events, which are ordered through the DES's internal clock time \citep{Des}.
-\cite{des-old} defines the following concepts:
-\begin{itemize}
-	\item \textbf{Model}, `` a representation of a system. The model may be mathematical, descriptive, logical, or some combination of these elements''.
-	\item \textbf{System state}, ``is a collection of variables that contain all the information necessary to describe the system at any point in time''.
-	\item \textbf{Entity}, ``an entity is any object or component of the system which requires explicit representation in the model.''
-\end{itemize}
+To depict real-life systems within an application, software models can imitate the characteristics and behaviours of objects within an environment with varying levels of detail.
+A simulation refers to the processing of such models.
+As such, simulations of edge/fog networks process the qualities and interactions between nodes in a network environment.
+As a core philosophy of simulating a model is defining only the essential aspects \citep{simulations}, simulations can abstract unnecessary details to reduce complexity within the model.
+The term system state (aso commonly referred to as just state), is used to define the model at any moment during the simulation through a collection of variables \citep{des-old}.
+A common approach to executing simulations is Discrete Event Simulation (DES).
+
+Unlike continuous event simulations, which see a model defined as a collection of temporal equations to represent the simulation's environment and, as such, continuously change as time passes \cite{simpy}, DESs represent a model through a numerical approach and process this by changing the simulation's state at specific points in time through ``events''.
+As a consequence, these events progress the model forward in time.
+Events describe singular actions within the simulation space that directly transition the simulation from one state to another.
+As a consequence of this, the simulation's environment remains the same in between state changes.
+
+To maintain the sequence of events, DESs typically utilise an internal structure, the future event list (FEL), to keep track of upcoming events.
+This is kept in order through the DES's internal clock \citep{Des}.
+Depending on the length of an event, the current time within the internal clock is incremented by the next event in the FEL.
+The simulation terminates once the FEL is empty or the internal clock reaches a predetermined point.
+
+\section{Power Modelling}
+Electrical power is commonly defined as the rate of energy transfer.
+The standardised unit for power is the watt (W), which defines the rate of work done needed to pass a current of one ampere through an electrical potential difference of one volt.
+The standardised unit for energy is the joule (J).
+When a component consumes power over a period of time, energy is used to pass the current across the device.
+However, as a consequence, energy can also be measured in terms of watt-hours (Wh) to describe the energy needed to provide one watt of power for an entire hour.
+In order for a simulation environment to determine the possible energy requirements of devices, power modelling is required.
+
+Power modelling is the technique for representing power requirements for a device at any given moment during a simulation.
+The model can consider various empirical, mathematical and predictive representations about a device's CPU utilisation and other characteristics in order to define its power usage \citep{IET_Power_System_Modeling}.
+As such, harkening back to the simulation design philosophy \citep{simulations}, a power model is bound in its accuracy to the environment in which it retrieves information.
+As each device in the environment may have different attributes to describe itself, the simulation should provide each device with a unique power model that reflects these attributes in order to determine its power requirements.
+
+Power models can serve various purposes within a simulation.
+Examples of these include predicting future power requirements based on current and previous states, along with being used to help inform decisions about how an event may change the simulation's state.
+In the case of modelling network infrastructure, power models can allow power distribution processes to effectively route power between network devices and optimise CPU utilisation \citep{etap}.
 
 \section{Carbon Intensity}
 
-Carbon Intensity (CI) is a metric used to measure the amount of carbon dioxide emitted per unit of energy.
-For instance, carbon-intensive processes to generate power, such as burning fossil fuels, produce significantly more carbon than those without a byproduct.
-As a result, processes that release carbon will have a higher CI as the amount of carbon released to provide the same quantity of energy is much higher than processes that produce no such byproduct.
+Carbon Intensity (CI) is a fundamental metric used in many industrial, political, and academic contexts to quantify the environmental impact of generating electricity.
+This value measures the amount of carbon dioxide (CO2) emitted per unit of energy generated.
+The CI value provides insight into the carbon emissions produced by the processes and technologies involved in generating the energy.
 
-The units of CI follow gC02eq/kWh, which describes the ratio of carbon dioxide equivalent emissions from the generation of public electricity production and gross electricity production \citep{EEA_CO2_emission_intensity}.
+CI is often used in industrial applications as a means of regulatory compliance; with many government bodies requiring disclosure of greenhouse gas emissions from companies, many use CI to report on their carbon footprint \citep{industry_ci}.
+CI is also used politically through international policies and agreements.
+In order for countries to meet global climate agreements, many often reflect on two fundamental approaches to reducing carbon emissions: reducing their greenhouse gas-producing activities and by considering the CI of existing energy generation processes \cite{political_ci}.
+Finally, CI can be used within academic settings to research how impactful particular technologies are on the environment.
+For instance, \cite{academic_ci} provide a framework to measure the CI of artificial intelligences, which is then subsequently used alongside regional and temporal data in calculating the carbon emissions involved in training these models.
 
-Since national power grids use various energy sources and power demands vary, CI values fluctuate.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.80\textwidth]{images/CarbonIntensityScotland}
+    ~
+    \caption{Graph showing the carbon intensity for Scotland's national grid for the 8th of August 2020.}
+    \label{fig:carbonIntensityScotland}
+\end{figure}
+
+The units of CI can vary depending on the circumstances; however, in this context, follow gC02eq/kWh, which describes the ratio of carbon dioxide equivalent emissions from the generation of public electricity production and gross electricity production \citep{EEA_CO2_emission_intensity}.
+Since national power grids use various energy sources and power demands vary.
+As a result, CI values fluctuate, this can be seen in Figure \ref{fig:carbonIntensityScotland}.
 However, factors other than electricity production methods are also considered, such as the life cycle assessment of the technologies used to generate power, as discussed by \cite{PEHNT200655}.
 
-\section{Power Modelling}
-Power modelling, or energy modelling, is a technique used to calculate the power usage for objects within a simulation using a relevant power model at a specific time.
-Because a simulation considers many different aspects within a simulation space, a unique power model should be defined to reflect on each object's states to provide accurate representations of its power requirements.
-Like simulation models, power models can be described through empirical, mathematical or predictive techniques with many software tools existing \citep{IET_Power_System_Modeling}.
+\section{Directed Acyclic Graphs}
+Historically in the networking industry, there have been many discussions about modelling network topologies \citep{modellingNetworks}.
+A common approach formulates them as mathematical graphs.
+A Graph describes how a set of vertices $\mathbf(V)$ are connected to each other.
+These connections occur through direct relationships called edges $\mathbf(E)$.
+In terms of networking, vertices and edges are commonly referred to as nodes and links.
+A graph $\mathbf(G)$ can be mathematically represented as $\mathbf(V,E)$, which defines the set of nodes and links.
+To define a link, the tuple $\mathbf(u,v)$ is used to describe the relation between the nodes $u$ and $v$.
+A Link can further describe the relation by considering the direction the link occurs, this is done by using a directed graph and ordering the nodes in the tuple where $(u,v)$ signals there is a one-way association from $u$ to $v$, i.e. $u \rightarrow v$.
 
-Power models can be used for various purposes, such as predicting future power requirements and retrieving current power usage.
-In the case of modelling network infrastructure, power models can allow power distribution processes to route power effectively between network devices \citep{etap}.
-\chapter{Related Work}
-\section{LEAF}\label{leaf}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/DAG}
+    ~
+    \caption{Graph showing an example directed acyclic graph of 7 nodes.}
+    \label{fig:dag}
+\end{figure}
 
-\subsection{Previous LEAF Extension}
-A LEAF User Interface with Streamlit
+To describe traversal through a graph, paths are used to define the unique set of directed links required to start at one node and arrive at another.
+As such, a cycle is a path describing the set of links used to leave a particular node and return to back to it.
+A Directed Acyclic Graph (DAG) describes a collection of nodes and directed links in which no cycles are formed.
+DAGS often describe nodes with no incoming links as source nodes, these often define a starting point within the network due to the fact that data can only exit the node.
+DAGS also describes nodes with no outgoing links as sink nodes, these often define an end point within the network as data can never leave the node.
 
-\section{Related Work}
-
-\subsection{greenCloud}
-- des cloud computing simulator, not ideal for Fog networks
-
-% power distribution servvice
-\subsection{DSSnet}
-- power distribution service no carbon awareness
-
-% fog node simulators
-\subsection{FogNetSim++}
-- performance driven fog node power model, no carbon awareness
-
-\subsection{EdgeCloudSim}
-- simulating fog nodes, no carbon awareness, no power modeling
-
-% application orchestrators
-\subsection{Cucumber}
-- admission control policy, not a simulator
-
-% carbon emission calculators
-\subsection{codecarbon}
--measures carbon emissions however does not model environments but rather the actual coding running
-\subsection{eco2AI}
---measures carbon emissions however does not model environments but rather the actual coding running
+\chapter{Related Work}\label{ch:background}
 %What did other people do, and how is it relevant to what you want to do?
 %\section{Guidance}
 %\begin{itemize}
@@ -283,6 +313,94 @@ A LEAF User Interface with Streamlit
 %      \textbf{Don't write a tutorial}; provide background and cite
 %      references for further information.
 %\end{itemize}
+\section{LEAF}\label{leaf}
+To introduce power source modelling and carbon emission estimations into edge/fog computing simulations, as the name of the proposed software suggests, Extended LEAF seeks to expand on the works of the  LEAF framework.
+Originally submitted as a master's thesis \citep{leafMasters}, LEAF was proposed by Philipp Wiesner back in 2020 under the supervision of Dr Lauritz Thamsen.
+The goal of LEAF was to provide a realistic fog computing environment that employed a holistic energy consumption model to asses the power usages of nodes and links within the network environment at any given moment during the simulation \citep{leafMasters}.
+
+At the time, existing fog computing models that were able to model power usage faced a trade-off between the accuracy in determining power requirements of devices and modelling large numbers of them \citep{leafMasters}.
+Models that accurately represented power usage were often limited to modelling a small number of devices in a network due to performance issues, such as IFogSim \citep{IFOGSIM}.
+Conversely, models that could depict large-scale fog computing environments had to sacrifice accuracy in power requirements by simplifying power models to run the simulation effectively, such as ICanCloud \citep{ICanCloud}.
+
+LEAF addressed this trade-off by combining approaches from numerical and analytical modelling \citep{leafMasters}.
+By modelling network traffic and power usage as mathematical equations whilst simulating the environment through a DES, LEAF allows for the simulation of thousands of devices and applications and ensures that the state of simulations is easy to analyse at any point in time \cite{leafMasters}.
+LEAF models the fog computing environment by representing network infrastructure (which, from now on, we will refer to as just infrastructure) and applications through graphs.
+
+For infrastructure, LEAF defines the topology of a fog computing environment as a weighted undirected graph in which devices are considered nodes, and the various types of links between them as edges.
+Nodes on the infrastructure graph describe the characteristics of a device by representing their available compute units in terms of the millions of instructions processed per second (MIPS).
+Links are weighted in the graph to model attributes and characteristics such as bandwidth and packet loss, respectively \cite{leaf2021}.
+Since links are undirected, characteristics defining a given link describe both the uplink and downlink attributes for a given connection.
+
+For applications, LEAF considers them to be a sequence of computational tasks interconnected by data flows.
+LEAF implements this by modelling applications as DAGs.
+Vertices represent the tasks on the graph by describing the compute units required to carry out the process.
+Edges on the application graph describe the requirements for a network link to transmit the data across the topology \cite{leaf2021}.
+As the application is considered a DAG, applications must have a source and sink task to describe where an application begins and terminates at on the infrastructure.
+
+Finally, LEAF models the processing of applications on infrastructure by placing tasks on top of nodes.
+When a task is placed on a node, its required compute units are added to the device node's current load to model the further power required to execute the task on the device.
+Similarly, when a data flow is placed on top of a link, the bandwidth requirements of the flow are added to the active amount of bandwidth currently being used by the link.
+
+\section{Energy Aware Fog Computing Models}\label{relWork:sec:models}
+
+Since the publication of LEAF in 2020, more energy-aware fog computing environments have been released.
+Despite this, when looking at the current analytics of widespread and contemporary fog computing simulators \citep{fogSimToolAnalysis}, we can still see that most simulators are yet to model heterogeneous power sources and carbon emissions.
+This can be seen in Figure \ref{fig:fogtoolsanalysis}, which was taken from the recent article published by \cite{fogSimToolAnalysis}.
+At the moment, the current focus of fog computing simulations is focused towards optimising performance of devices within the environment rather than capturing their energy requirements.
+Regardless, we will still discuss what related simulators have to offer.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/fog_sim_tools_analysis}
+    ~
+    \caption{Insert of Table 4 from the article published by \cite{fogSimToolAnalysis} depicting the overview in performance metrics used on recent and popular fog computing simulators in 2023.}
+    \label{fig:fogtoolsanalysis}
+\end{figure}
+
+\subsection{MintEDGE}
+MintEdge \citep{mintedge} is one of the most recent energy-aware simulators to be released.
+Published in 2023, the simulator focuses on the energy efficiency of fog nodes in a network and provides accurate modelling of end-user mobility.
+The simulation framework, implemented in Python, is structured into four key levels: Orchestrator, Infrastructure, Users, and Roads.
+MintEDGE draws upon LEAF by expanding its power model to reflect the energy required to turn on devices in the network infrastructure.
+With an increased focus on the mobility of end devices, as seen through the user and road levels of its architecture, MintEdge differs from Extended LEAF by providing more emphasis on how processes are provided to the fog network and the means of controlling how they are deployed in the infrastructure.
+Whilst these aspects are highly relevant for MintEDGE to provide a focus on user mobility, as the focus of Extended LEAF is to introduce various power sources and carbon awareness, these conflicting goals result in the two frameworks focusing on providing different aspects when simulating fog computing environments.
+
+\subsection{iFogSim2}
+iFogSim2 \citep{IFOGSIM2} was released in 2022 and saw to expand upon its popular predecessor iFogSim \citep{IFOGSIM}.
+The framework was implemented using Java and incorporates the cloud simulation tool Cloudsim \citep{cloudsim}.
+Both iFogSim and iFogSim2 focus on providing resource allocation techniques for applications on the network infrastructure.
+In particular, the expansion to iFogSim saw the introduction of distributed clustering, mobility and microservices management features.
+Unlike other fog simulators, iFogSim2 seeks to remove the dependency of using synthetic data (data that reflects statistical properties of actual data) and utilises real datasets.
+While Extended LEAF aims to introduce real data for existing power sources to model both the power availability and carbon intensity, a key difference between iFogSim and Extended LEAF is that Extended LEAF will still formulate infrastructure and application power models through mathematical expressions.
+It does this because, as seen with other fog computing simulators in Subsection \ref{leaf}, producing accurate power models can demand large resources to represent power sources in the simulation.
+
+\subsection{PureEdgeSim}
+PureEdgeSim \citep{pureedgesim} was initially released back in 2019 and is also implemented using CloudSim and Java.
+PureEdgeSim aims to provide performance evaluation regarding resource utilisation, network congestion, energy consumption, and task success rates.
+PureEdgeSim achieves this by introducing three core aspects to Cloudsim: EdgeNetworking, Networking and the simulation core.
+Despite not incorporating the capabilities to model power generation, PureEdgeSim does introduce a key concept required by Extended LEAF and considers the remaining power of battery-powered devices such as smartphones.
+While this feature is intended only for end devices and seeks to utilise the feature as a lifetime for mobile devices in the simulation, it is worth noting that similar features aim to be included within Extended LEAF in a bid to consider the heterogeneity of devices in a fog network and how they could be powered.
+In addition to this, PureEdgeSim also introduces visualisation features to show the analytics of the simulation.
+It achieves this by providing live graphs of the environment and how metrics such as network and CPU utilisation of devices change over time.
+While a key goal of Extended LEAF also seeks to introduce visualisation tools, rather than displaying the performance of a network, Extended LEAF aims to provide the ability to show how emissions and power availability vary as a consequence of power sources present in the environment.
+%\section{Other Related Topics}
+%% power distribution servvice
+%
+%\subsection{DSSnet}
+%As the system sees to allow for power sources to be distributed amongst infrastructure of the network, it is also worth considering how other simulators achieve this in a network environment.
+%2016
+%sdf \citep{dssNet}
+%- power distribution service no carbon awareness, little focus on fog networks, utilises mininet
+%
+%\subsection{Cucumber}
+%Despite carbon-aware load balancing policies not being a main goal for Extended LEAF, it is still beneficial to consider how these policies consider CI and use this to inform decisions about distributing work to the fog network.
+%
+%2022 - \citep{cucumber}
+%- admission control policy, not a simulator
+%
+%\subsection{Eco2AI}
+%As no other fog computing simulators are consider carbon emissions we will need to look elsewhere to reflect on how other systems estimate carbon emissions.
+%20203 \citep{eco2ai}
+%- ecotoAI, realtime api calls ember apo to retrieve temporal and reigonal carbon intentsities
 
 %==================================================================================================================================
 \chapter{Analysis/Requirements}\label{ch:analysis/requirements}
@@ -315,11 +433,6 @@ A LEAF User Interface with Streamlit
 - examples should demonstrate to users how each aspect of Extended LEAF works
 - Extended LEAF should not hinder performance of running simulations
 
-\section{Assumptions}
-- Assume grid power is unlimited
-- assume that carbon released is a product of the infrastructure not the power source
-- recharging the battery occurs instantaneously
-
 %==================================================================================================================================
 \chapter{Design}\label{ch:design}
 
@@ -348,27 +461,28 @@ This is essential as, the simulation model considers many different aspects need
 As a result of this, it is important to consider how the layers in the framework function and how the model allows for interactions between them to occur.
 
 \section{LEAF}\label{sec:LEAF}
-As Extended LEAF sees to continue upon the work written in the paper published by \cite{leaf2021}, the original model already defines the Infrastructure and Application Layers.
+As discussed in Chapter \ref{ch:background}, LEAF's model already defines the Infrastructure and Application Layers.
 However as both layers play an essential role in generating power measurements and carbon emissions, with the infrastructure layer being particularly important, it is also necessary to briefly discuss the intentions of these layers before focusing on what Extended LEAF sees to introduce.
 
 \subsection{Applications}\label{subsec:applications}
-At the top of the architecture we have the Application layer, applications $\mathbf{(A)}$ are represented in the model as directed acyclic graphs \citep{leaf2021}, which describe the flow of data F between tasks T of the graph.
+At the top of the architecture we have the Application layer, applications $\mathbf{(A)}$ are represented in the model as a weighted DAG \citep{leaf2021}, which describe the flow of data $\mathbf{(F)}$ between tasks $\mathbf{(T)}$ of the graph.
 Applications are considered as streaming applications as the simulation treats data travelling between tasks to be a continuous process as the simulation moves forward in time.
 An application begins at source tasks where data is generated and travels between processing tasks through dataflows before reaching sink tasks.
 Finally applications interact with the overall model by being placed on top of entities within the Infrastructure Layer.
 
 \subsection{Infrastructure}\label{subsec:infrastructure}
-The Infrastructure $\mathbf{(I)}$ of the model describes the physical entities $\mathbf{(e)}$ of the simulation, in particular these consist of Nodes $\mathbf{(N)}$ and Links $\mathbf{(L)}$ respectively.
-The Infrastructure of the model is represented as a weighted directed multigraph \citep{leaf2021}, which specifies how nodes and links inter-connect between each other.
+The Infrastructure $\mathbf{(I)}$ of the model describes the physical devices or entities $\mathbf{(e)}$ of the simulation, in particular these consist of Nodes $\mathbf{(N)}$ and Links $\mathbf{(L)}$ respectively.
+The Infrastructure of the model is represented as a weighted graph, which specifies how nodes and links inter-connect between each other.
+The graph in this representation is undirected and cyclic to allow for the multiplexing of transmissions between network devices and to be able to represent the complexities of real network topologies.
 A node in the infrastructure describes physical hardware on which tasks are placed on, nodes are able to be configured in a manner to represent a variety of computing hardware required by the user.
 A link describes the means in which nodes within the infrastructure can communicate, because of this dataflows are placed on these entities to describe the potential network requirements in transferring data between tasks.
 To simplify the process of modeling complex network systems between nodes in the infrastructure, LEAF allows for large networking systems to be described as a single link.
 
 \subsection{Power Model}\label{subsec:power-model}
-As Extended LEAF considers the power consumption of various entities within the infrastructure layer, it is important to consider how power is represented and consumed in the model.
-As discussed in the LEAF paper \cite{leaf2021}, every node and link in the infrastructure is assigned a unique power model to describe the power requirements of the entity being considered.
+As Extended LEAF considers the power consumption of both the applications and infrastructure of the environment, it is important to consider how LEAF actually represents in the model.
+As discussed in Chapter \ref{ch:background}, every model in the environment is assigned a unique power model to describe the power requirements of the device or application being considered at that moment in the simulation.
 These are used to model how much power is required by the entity at any given moment in time based on the current state of the entity and its type.
-For what is needed by Extended LEAF, power for an entity at any given moment in time is considered to be the sum of their static $\mathbf{P_{static}}$ and dynamic $\mathbf{P_{dynamic}}$ power requirements where:
+For what information is needed by Extended LEAF, power for an entity at any given moment in time is considered to be the sum of their static $\mathbf{P_{static}}$ and dynamic $\mathbf{P_{dynamic}}$ power requirements where:
 \begin{itemize}
     \item $\mathbf{P_{static}}$ is the idle power requirement.\\
     \item $\mathbf{P_{dynamic}}$ is defined as $\mathbf{C(t) \times \sigma}$, which describes the current load of the node at time $\mathbf{t}$ multiplied by the energy consumed per unit load \citep{leaf2021}.
@@ -1073,12 +1187,15 @@ This makes sense as when examining the equation for carbon intensity as defined 
 %==================================================================================================================================
 \chapter{Conclusion}
 
-\section{limitations}
+\section{Limitations}
 - Assume grid power is unlimited
 - assume that carbon released is a product of the infrastructure not the power source
 - recharging the battery occurs instantaneously
 
 \section{Future Work}\label{conc:sec:Future Work}
+- introduce a more robust means of storing data
+- redfine batteries and produce the idea of an energy store as in reality they are too different from power sources and require too much work around to incorporate a different kind of logic
+- introduce the ability to allow power modelling on power sources, potentially allowing carbon intensity to be modelled too
 \section{Personal Reflection}\label{conc:sec:Personal Reflection}
 
 %Summarise the whole project for a lazy reader who didn't read the rest (e.g. a prize-awarding committee).
@@ -1104,7 +1221,6 @@ This makes sense as when examining the equation for carbon intensity as defined 
 % 
 %==================================================================================================================================
 %  APPENDICES  
-\begin{appendices}
 \chapter{Appendices}
 
 \section{Dictionary log Example}
@@ -1162,530 +1278,99 @@ This makes sense as when examining the equation for carbon intensity as defined 
     }
 }
 \end{lstlisting}
-Typical inclusions in the appendices are:
-
-\begin{itemize}
-\item
-  Copies of ethics approvals (required if obtained)
-\item
-  Copies of questionnaires etc. used to gather data from subjects.
-\item
-  Extensive tables or figures that are too bulky to fit in the main body of
-  the report, particularly ones that are repetitive and summarised in the body.
-
-\item Outline of the source code (e.g. directory structure), or other architecture documentation like class diagrams.
-
-\item User manuals, and any guides to starting/running the software.
-
-\end{itemize}
-
-\textbf{Don't include your source code in the appendices}. It will be
-submitted separately.
 
 \clearpage
-\section{Scenario 1 Results}\label{apen:subsec:scen1}
-The Following appendices are the results for scenario 1.
-\clearpage
+\section{Results for Scenarios}\label{apen:subsec:scen1}
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_1/figure}
     ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_1/example_1-0}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example1-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_1/example_1-1}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example1-1}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_1/example_1-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example1-2}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_1/example_1-3}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example1-3}
+    \caption{Graph showing the results for example scenario 1.}
+    \label{fig:example1}
 \end{figure}
 
 \clearpage
-\section{Scenario 2 Results}\label{apen:subsec:scen2}
-The Following appendices are the results for scenario 2.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_2/figure}
     ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
+    \caption{Graph showing the results for example scenario 2.}
+    \label{fig:example2}
 \end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_2/example_2-0}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_2/example_2-1}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example2-1}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_2/example_2-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example2-2}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_2/example_2-3}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example2-3}
-\end{figure}
-\clearpage
-\section{Scenario 3 Results}\label{apen:subsec:scen3}
-The Following appendices are the results for scenario 3.
+
 \clearpage
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_3/figure}
     ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-0}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example3-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-1}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example3-1}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example3-2}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_3/example_3-3}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example3-3}
+    \caption{Graph showing the results for example scenario 3.}
+    \label{fig:example3}
 \end{figure}
 
-\clearpage
-\section{Scenario 4 Results}\label{apen:subsec:scen4}
-The Following appendices are the results for scenario 4.
 \clearpage
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_4/figure}
     ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-0}
-    ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example4-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-1}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example4-1}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example4-2}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example4-3}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example4-4}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_4/example_4-5}
-    ~
-    \caption{Graph showing the timeseries of power used for power meters.}
-    \label{fig:example4-5}
+    \caption{Graph showing the results for example scenario 4.}
+    \label{fig:example4}
 \end{figure}
 
-\clearpage
-\section{Scenario 5 Results}\label{apen:subsec:scen5}
-The Following appendices are the results for scenario 5.
 \clearpage
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_5/figure}
     ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-0}
-    ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example5-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-1}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example5-1}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example5-2}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example5-3}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example5-4}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_5/example_5-5}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example5-5}
+    \caption{Graph showing the results for example scenario 5.}
+    \label{fig:example5}
 \end{figure}
 
 \clearpage
-\section{Scenario 6 Results}\label{apen:subsec:scen6}
-The Following appendices are the results for scenario 6.
-\clearpage
-\begin{figure}[htbp]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_6/figure}
     ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example2-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-0}
-    ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example6-0}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example6-1}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example6-2}
-\end{figure}
-\clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_6/example_6-5}
-    ~
-    \caption{Graph showing the timeseries of energy available for power sources.}
-    \label{fig:example6-3}
+    \caption{Graph showing the results for example scenario 6.}
+    \label{fig:example6}
 \end{figure}
 
 \clearpage
-\section{Scenario 7 Results}\label{apen:subsec:scen7}
-\subsection{Plot 1 Results}\label{apen:subsec:scen7plot1}
-The Following appendices are the results for plot 1 of scenario 7.
-\clearpage
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-0}
+    \includegraphics[width=\textwidth]{images/examples/example_7/plot0}
     ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example_pd0_7-0}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-1}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example_pd0_7-1}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example_pd0_7-2}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example_pd0_7-3}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example_pd0_7-4}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_1/example_pd0_7-5}
-    ~
-    \caption{Graph showing the timeseries of energy available for power sources.}
-    \label{fig:example_pd0_7-5}
+    \caption{Graph showing the results for example scenario 7 plot 1.}
+    \label{fig:example7_plot1}
 \end{figure}
 
 \clearpage
-\subsection{Plot 2 Results}\label{apen:subsec:scen7plot2}
-The Following appendices are the results for plot 2 of scenario 7.
-\clearpage
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-0}
+    \includegraphics[width=\textwidth]{images/examples/example_7/plot1}
     ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example_pd1_7-0}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-1}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example_pd1_7-1}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example_pd1_7-2}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example_pd1_7-3}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example_pd1_7-4}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_2/example_pd1_7-5}
-    ~
-    \caption{Graph showing the timeseries of energy available for power sources.}
-    \label{fig:example_pd1_7-5}
+    \caption{Graph showing the results for example scenario 7 plot 2.}
+    \label{fig:example7_plo2}
 \end{figure}
 
 \clearpage
-\subsection{Plot 3 Results}\label{apen:subsec:scen7plot3}
-The Following appendices are the results for plot 3 of scenario 7.
-\clearpage
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-0}
+    \includegraphics[width=\textwidth]{images/examples/example_7/plot2}
     ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example_pd2_7-0}
+    \caption{Graph showing the results for example scenario 7 plot 3.}
+    \label{fig:example7_plot3}
 \end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-1}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example_pd2_7-1}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example_pd2_7-2}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example_pd2_7-3}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example_pd2_7-4}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_3/example_pd2_7-5}
-    ~
-    \caption{Graph showing the timeseries of energy available for power sources.}
-    \label{fig:example_pd2_7-5}
-\end{figure}
-\end{appendices}
-
 
 \clearpage
-\subsection{Plot 4 Results}\label{apen:subsec:scen7plot4}
-The Following appendices are the results for plot 4 of scenario 7.
-\clearpage
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-0}
+    \includegraphics[width=\textwidth]{images/examples/example_7/plot3}
     ~
-    \caption{Graph showing the timeseries of events.}
-    \label{fig:example_pd3_7-0}
+    \caption{Graph showing the results for example scenario 7 plot 4.}
+    \label{fig:example7_plot4}
 \end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-1}
-    ~
-    \caption{Graph showing the timeseries of carbon released for powered infrastructure.}
-    \label{fig:example_pd3_7-1}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-2}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for powered infrastructure.}
-    \label{fig:example_pd3_7-2}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-3}
-    ~
-    \caption{Graph showing the timeseries of energy consumed for power sources.}
-    \label{fig:example_pd3_7-3}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-4}
-    ~
-    \caption{Graph showing the timeseries of carbon released for power sources.}
-    \label{fig:example_pd3_7-4}
-\end{figure}
-    \clearpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.5\textwidth,angle=270]{images/examples/example_7/pd_4/example_pd3_7-5}
-    ~
-    \caption{Graph showing the timeseries of energy available for power sources.}
-    \label{fig:example_pd3_7-5}
-\end{figure}
+
 %==================================================================================================================================
 %   BIBLIOGRAPHY   
 

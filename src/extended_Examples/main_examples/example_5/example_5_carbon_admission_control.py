@@ -205,10 +205,10 @@ def main():
                                                             axis_label="Carbon Released (gC02eq/kWh)",
                                                             title_attribute="Carbon Released")
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
-                                                            power_sources=[battery_power],
+                                                            power_sources=[battery_power,solar_power],
                                                             axis_label="Energy Available (Wh)",
                                                             title_attribute="Energy Available")
-    figs = [fig0, fig1, fig2, fig3, fig4, fig5, fig2_1, fig2_2]
+    figs = [fig0, fig1, fig2, fig3, fig4, fig5]
     main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 5.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()

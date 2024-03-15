@@ -344,3 +344,12 @@ Holiday break
 * *3 Hours* Finished the implementation.
 ### 10th March 
 * *5 Hours* Worked on the introduction.
+
+## Week 26
+
+### 11th March
+* *8 Hours* Finshed, the introduction and reworked the sections given feedback by Lauritz. Also added to the background section.
+### 13th March
+* *6 Hours* Following the meeting with Lauritz, I have reworked the figures and rewrote the introduction 
+### 14th March
+* 8 Hours* Continued work on the background and related works.
