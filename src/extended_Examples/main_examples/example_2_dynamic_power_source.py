@@ -42,11 +42,11 @@ def main():
     env = simpy.Environment()
     infrastructure = Infrastructure()
     # Source task node
-    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
+    sensor = Node("Sensor", cu=10, power_model=PowerModelNode(max_power=0.5, static_power=0.007))
     # Processing task node
-    microprocessor = Node("microprocessor", cu=40, power_model=PowerModelNode(max_power=6.25, static_power=4.8))
+    microprocessor = Node("Microprocessor", cu=400, power_model=PowerModelNode(max_power=6.25, static_power=4.8))
     # Sink task node
-    server = Node("server", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
+    server = Node("Server", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
 
     # #two Wi-Fi links between (Wired WAN) Source -> Microprocessor and (Wireless WIFI) Microprocessor -> Server
     wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
@@ -66,8 +66,8 @@ def main():
 
     # Initialise three tasks
     source_task = SourceTask(cu=9, bound_node=sensor)
-    processing_task = ProcessingTask(cu=5)
-    sink_task = SinkTask(cu=10, bound_node=server)
+    processing_task = ProcessingTask(cu=50)
+    sink_task = SinkTask(cu=150, bound_node=server)
 
     # Build Application
     application = Application()
@@ -126,7 +126,7 @@ def main():
 
 class ExampleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
-        return self.infrastructure.node("microprocessor")
+        return self.infrastructure.node("Microprocessor")
 
 
 if __name__ == '__main__':

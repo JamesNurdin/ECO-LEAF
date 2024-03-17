@@ -23,9 +23,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s\t%(message)s', ha
 def create_application_type_1(sensor, server):
     applications = []
     for i in range(NO_TYPE1_APPLICATIONS):
-        app1_source_task = SourceTask(cu=int(0.1 * sensor.power_model.max_power), bound_node=sensor)
-        app1_processing_task = ProcessingTask(cu=3)
-        app1_sink_task = SinkTask(cu=12, bound_node=server)
+        app1_source_task = SourceTask(cu=int(0.4 * sensor.power_model.max_power), bound_node=sensor)
+        app1_processing_task = ProcessingTask(cu=50)
+        app1_sink_task = SinkTask(cu=150, bound_node=server)
 
         application = Application(name=f"{i}_Application_Type_1")
 
@@ -40,10 +40,10 @@ def create_application_type_1(sensor, server):
 def create_application_type_2(sensor, server):
     applications = []
     for i in range(NO_TYPE2_APPLICATIONS):
-        app1_source_task = SourceTask(cu=int(0.1 * sensor.power_model.max_power), bound_node=sensor)
-        app1_processing_task_1 = ProcessingTask(cu=2)
-        app1_processing_task_2 = ProcessingTask(cu=3)
-        app1_sink_task = SinkTask(cu=12, bound_node=server)
+        app1_source_task = SourceTask(cu=int(0.4 * sensor.power_model.max_power), bound_node=sensor)
+        app1_processing_task_1 = ProcessingTask(cu=50)
+        app1_processing_task_2 = ProcessingTask(cu=50)
+        app1_sink_task = SinkTask(cu=150, bound_node=server)
 
         application = Application(name=f"{i}_Application_Type_2")
 
@@ -80,11 +80,11 @@ def main():
     sensor = Node("Sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
 
     # Processing task nodes
-    solar_microprocessor = Node("SolarMicroprocessor", cu=40,
+    solar_microprocessor = Node("SolarMicroprocessor", cu=400,
                                 power_model=PowerModelNode(max_power=6.25, static_power=4.8))
-    battery_microprocessor = Node("BatteryMicroprocessor", cu=40,
+    battery_microprocessor = Node("BatteryMicroprocessor", cu=400,
                                   power_model=PowerModelNode(max_power=6.25, static_power=4.8))
-    grid_microprocessor = Node("GridMicroprocessor", cu=40,
+    grid_microprocessor = Node("GridMicroprocessor", cu=400,
                                power_model=PowerModelNode(max_power=6.25, static_power=4.8))
 
     # Sink task node

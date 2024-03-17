@@ -35,7 +35,7 @@ class MobilityManager:
         drone = plot.drone
         while ((env.now + plot.power_domain.start_time_index) % 1440) < PowerDomain.get_current_time(END_OF_DAY):
             if drone.battery_power.get_current_power() < drone.battery_power.get_total_power() * DRONE_BATTERY_THRESHOLD:
-                self.move_drone(drone, plot, location=plot.recharge_station.location)
+                self.move_drone(drone, plot, location=plot.recharge_station_location)
                 recharge_time = drone.battery_power.find_and_recharge_battery()
                 yield env.timeout(recharge_time)
             else:

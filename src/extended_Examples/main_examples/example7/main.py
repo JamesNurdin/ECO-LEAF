@@ -8,13 +8,6 @@ from src.extended_Examples.main_examples.example7.settings import START_TIME
 
 
 def main():
-    """
-    Printed Output:
-        Plot_1 Total carbon emitted: 47.513345375535216 gCo2
-        Plot_2 Total carbon emitted: 93.50254168220009 gCo2
-        Plot_3 Total carbon emitted: 35.18273642840013 gCo2
-        Plot_4 Total carbon emitted: 4.856636146666527 gCo2
-    """
     # ----------------- Set up experiment -----------------
     env = simpy.Environment()
     farm = Farm(env)

@@ -11,5 +11,5 @@ The following data sets where retrieved from the following sites and rightfully 
 
 * `08-08-2023 national carbon intensity.csv`
  * Author: Carbon Intensity Organisation
-  * Data for date 08-08-2023 in Scotland
+  * Data for date 08-08-2023
   * Attained from: [Here](https://carbonintensity.org.uk/)

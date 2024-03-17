@@ -49,16 +49,16 @@ def main():
     env = simpy.Environment()
     infrastructure = Infrastructure()
     # Source task node
-    sensor = Node("sensor", cu=10, power_model=PowerModelNode(max_power=0.15, static_power=0.007))
+    sensor = Node("Sensor", cu=10, power_model=PowerModelNode(max_power=0.5, static_power=0.007))
     # Processing task node
-    microprocessor = Node("microprocessor", cu=40, power_model=PowerModelNode(max_power=6.25, static_power=4.8))
+    microprocessor = Node("Microprocessor", cu=400, power_model=PowerModelNode(max_power=6.25, static_power=4.8))
     # Sink task node
-    server = Node("node3", power_model=PowerModelNode(power_per_cu=20e-3, static_power=20))
+    server = Node("Server", power_model=PowerModelNode(power_per_cu=200e-6, static_power=20))
 
     # #two Wi-Fi links between (Wired WAN) Source -> Microprocessor and (Wireless WIFI) Microprocessor -> Server
-    wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
+    wired_link_from_source = Link(name="Wired Link", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
                                   power_model=PowerModelLink(0))
-    wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=30e6,
+    wifi_link_to_server = Link(name="Wireless Link", src=microprocessor, dst=server, latency=10, bandwidth=30e6,
                                power_model=PowerModelLink(400e-9))
     infrastructure.add_link(wifi_link_to_server)
     infrastructure.add_link(wired_link_from_source)
@@ -72,8 +72,8 @@ def main():
 
     # Initialise three tasks
     source_task = SourceTask(cu=9, bound_node=sensor)
-    processing_task = ProcessingTask(cu=5)
-    sink_task = SinkTask(cu=10, bound_node=server)
+    processing_task = ProcessingTask(cu=50)
+    sink_task = SinkTask(cu=150, bound_node=server)
 
     # Build Application
     application = Application()
@@ -107,32 +107,36 @@ def main():
     fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
                                                        axis_label="Carbon Released (gC02eq/kWh)",
-                                                       title_attribute="Carbon Released")
+                                                       title_attribute="Carbon Released",
+                                                       title="(1.1) Timeseries of Carbon Released for Infrastructure.")
     fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
                                                        axis_label="Energy Consumed (Wh)",
-                                                       title_attribute="Energy Consumed")
+                                                       title_attribute="Energy Consumed",
+                                                       title="(1.2) Timeseries of Energy Consumed for Infrastructure.")
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
                                                             power_sources=[grid],
                                                             axis_label="Energy Consumed (Wh)",
-                                                            title_attribute="Energy Consumed")
+                                                            title_attribute="Energy Consumed",
+                                                            title="(1.3) Timeseries of Energy Consumed for Grid Power.")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[grid],
                                                             axis_label="Carbon Released (gC02eq/kWh)",
-                                                            title_attribute="Carbon Released")
+                                                            title_attribute="Carbon Released",
+                                                            title="(1.4) Timeseries of Carbon Released for Grid Power.")
 
     figs = [fig1, fig2, fig3, fig4]
-    main_fig = figure_plotter.aggregate_subplots(figs,title="Results for Example 1.")
-    file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     for i, fig in enumerate(figs):
         main_fig = FigurePlotter.aggregate_subplots([fig], title="")
         file_handler.write_figure_to_file(main_fig, 1, filename=f"example_1-{i}")
+    main_fig = figure_plotter.aggregate_subplots(figs,title="Results for Example 1.")
+    file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
 
 
 class ExampleOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:
-        return self.infrastructure.node("microprocessor")
+        return self.infrastructure.node("Microprocessor")
 
 
 if __name__ == '__main__':

@@ -66,8 +66,8 @@ def create_applications(sensors, server):
     applications = []
     for sensor in sensors:
         app1_source_task = SourceTask(cu=0.9 * sensor.power_model.max_power, bound_node=sensor)
-        app1_processing_task = ProcessingTask(cu=3)
-        app1_sink_task = SinkTask(cu=12, bound_node=server)
+        app1_processing_task = ProcessingTask(cu=50)
+        app1_sink_task = SinkTask(cu=150, bound_node=server)
 
         application = Application(name=f"Application{sensor.name}")
 

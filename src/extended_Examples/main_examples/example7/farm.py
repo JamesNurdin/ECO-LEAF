@@ -28,10 +28,6 @@ class Plot:
 
         infrastructure.add_link(LinkEthernet(self.fog_node, cloud, f"Link_{self.fog_node.name}_to_{cloud.name}"))
 
-        global _recharge_station_counter
-        self.recharge_station = RechargeStation(self.recharge_station_location, cloud, _recharge_station_counter)
-        _recharge_station_counter += 1
-
         self.power_domain = PowerDomain(self.env, name=f"{self.name}_power_domain", start_time_str=start_time,
                                         update_interval=1)
         self.power_sources = [self._choose_power_source(power_source_type) for power_source_type in

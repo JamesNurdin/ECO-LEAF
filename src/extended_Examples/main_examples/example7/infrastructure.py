@@ -44,11 +44,6 @@ class Drone(Node):
         self.locations_iterator = plot.get_drone_path()
 
 
-class RechargeStation(Node):
-    def __init__(self, location: Location, application_sink: Node, _recharge_station_counter):
-        super().__init__(name=f"Recharge Station {_recharge_station_counter}", location=location,
-                         power_model=PowerModelNode(power_per_cu=0, static_power=RECHARGE_STATION_STATIC_POWER))
-
 class LinkEthernet(Link):
     def __init__(self, src: Node, dst: Node, name: str):
         super().__init__(src=src,
@@ -68,32 +63,3 @@ class LinkWanUp(Link):
                          power_model=PowerModelLink(WAN_WATT_PER_BIT_UP),
                          name=name)
 
-
-class LinkWanDown(Link):
-    def __init__(self, src: Node, dst: Node, name: str):
-        super().__init__(src=src,
-                         dst=dst,
-                         bandwidth=WAN_BANDWIDTH,
-                         latency=WAN_LATENCY,
-                         power_model=PowerModelLink(WAN_WATT_PER_BIT_DOWN),
-                         name=name)
-
-
-class LinkWifiBetweenTrafficLights(Link):
-    def __init__(self, src: Node, dst: Node, name: str):
-        super().__init__(src=src,
-                         dst=dst,
-                         bandwidth=WIFI_BANDWIDTH,
-                         latency=WIFI_LATENCY,
-                         power_model=PowerModelLink(WIFI_TL_TO_TL_WATT_PER_BIT),
-                         name=name)
-
-
-class LinkWifiTaxiToTrafficLight(Link):
-    def __init__(self, src: Node, dst: Node, name: str):
-        super().__init__(src=src,
-                         dst=dst,
-                         bandwidth=WIFI_BANDWIDTH,
-                         latency=WIFI_LATENCY,
-                         power_model=PowerModelLink(WIFI_TAXI_TO_TL_WATT_PER_BIT),
-                         name=name)
