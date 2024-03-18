@@ -32,14 +32,14 @@ def main():
         DEBUG	1: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	1: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         ...
-        DEBUG	1440: application_meter: PowerMeasurement(dynamic=3.63W, static=24.81W)
+        DEBUG	1440: application_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
         DEBUG	1440: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
         DEBUG	1440: Source Task: PowerMeasurement(dynamic=0.44W, static=0.01W)
         DEBUG	1440: Processing Task: PowerMeasurement(dynamic=0.18W, static=4.80W)
         DEBUG	1440: Sink Task: PowerMeasurement(dynamic=3.00W, static=20.00W)
-        INFO	Total application power usage: 19646.615650000196 Ws
+        INFO	Total application power usage: 19646.477450000162 Ws
         INFO	Total infrastructure power usage: 38251.72745000068 Ws
-        INFO	Total carbon emitted: 92.53529443166693 gCo2
+        INFO	Total carbon emitted: 92.53524367833367 gCo2
     """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -54,7 +54,7 @@ def main():
     wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
                                   power_model=PowerModelLink(0))
     wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=30e6,
-                               power_model=PowerModelLink(400e-9))
+                               power_model=PowerModelLink(0))
     infrastructure.add_link(wifi_link_to_server)
     infrastructure.add_link(wired_link_from_source)
     entities = infrastructure.nodes() + infrastructure.links()

@@ -2,7 +2,7 @@
 
 \documentclass{l4proj}
 
-    
+
 %
 % put any additional packages here
 %
@@ -138,7 +138,7 @@ This is important because the unique properties of a power source can provide di
 \textbf{\textit{(2) Provide carbon footprints for consuming power}}
 (2.1)\label{goal2.1} The second main goal in extending LEAF is to provide estimations of carbon footprints from entities within the simulation.
 (2.2)\label{goal2.2} Therefore, ECO-LEAF should provide a direct means to translate energy consumed into greenhouse gas emissions.
-(2.3)\label{goal2.3} The user should also be able to define how their power sources determine the quantity of emissions released.
+(2.3)\label{goal2.3} The user should also be able to define how applications are placed on the infrastructure by considering power sources.
 (2.4)\label{goal2.4} Finally, the simulation should also model how the quantity of greenhouse gas emissions can vary due to environmental conditions.
 
 \textbf{\textit{(3) Capturing and displaying results}}
@@ -395,12 +395,12 @@ However, a key difference here is that ECO-LEAF seeks to distribute power based 
 
 \subsection{Cucumber}
 Renewable-aware admission control policies are used to dictate how various workloads are processed on a single device in order to minimise excess energy available from renewable energy sources.
-While ECO-LEAF does not intend to utilise these policies, it is still beneficial to consider how these policies consider energy sources and use this to inform decisions about distributing work to devices.
+While ECO-LEAF does not intend to utilise these policies entirely, it is still beneficial to consider how these policies consider energy sources and use this to inform decisions about distributing work to devices.
 One such policy Cucumber \citep{cucumber}, was released in 2022 and aims to increase renewable excess power utilisation.
 It achieves this by considering delay-tolerant workloads and using probabilistic forecasts in energy production, computational load and energy consumption to determine whether a workload can be completed in time using renewable excess energy.
 In particular, Cucumber achieves power generation forecasting by considering the various short- mid- and long-term weather forecasts.
-ECO-LEAF relates to Cucumber as a result of the model aiming to optimise power utilisation from renewable sources,
-However, ECO-LEAF will not consider future forecasts when determining energy distributions to network devices due to the final product only being a simulation tool.
+ECO-LEAF relates to Cucumber as a result of goal 2.3, while the policy considers only single devices, ECO-LEAF aims to allow applications to be CI aware when being placed on devices.
+However, ECO-LEAF will not consider future energy demand forecasts when determining application distributions on network devices due to the final product only being a simulation tool.
 %\subsection{Eco2AI}
 %As no other fog computing simulators are consider carbon emissions we will need to look elsewhere to reflect on how other systems estimate carbon emissions.
 %The final related product is
@@ -1045,7 +1045,7 @@ Finally, the class can reduce the number of figures present by aggregating the g
 Figure \ref{fig:dev-example7-results} shows an example of the graphs that can be generated from this class.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{images/dev_examaple7_results.pdf}
+    \includegraphics[width=0.6\textwidth]{images/dev_examaple7_results.pdf}
     ~
     \caption{Example figure generated from 7\_extended\_file\_writer.py in the development\_examples folder.}
     \label{fig:dev-example7-results}
@@ -1079,7 +1079,7 @@ Northern Ireland was chosen due to its variability in short-term weather and acc
 Throughout the chapter, the evaluation will cover particular scenarios that effectively demonstrate the features proposed in ECO-LEAF.
 Using the goals as a reference, scenarios will identify when and why a particular goal has been met.
 The scenarios were designed to slowly introduce fundamental concepts of ECO-LEAF before moving on to more advanced examples.
-While not all scenarios could be fully evaluated, their diagrams and results will be attached as appendices.
+While not all scenarios could be evaluated to ensure that enough detail was given to those that were, all diagrams and results will be attached as appendices.
 
 \subsection{Precision Agriculture}\label{eval:subsec:precision-agriculture}
 Precision agriculture, also known as smart farming, is a farming technique that uses technology and data processing to optimise the various aspects of production in agriculture.
@@ -1095,19 +1095,25 @@ As precision agriculture utilises large-area data capturing and analysis, a netw
 Because of this, fog computing networks are able to be utilised to improve the sustainability of the practice \citep{fog_smart_farming}.
 
 \subsection{Defining Models}\label{eval:subsec:modelling}
-As the goal behind the scenarios is to demonstrate the functionality of ECO-LEAF, for the sake of consistency and unless specified otherwise, applications, infrastructure, and power sources will retain the same parameters used to model individual components throughout the evaluation.
+
 \subsubsection{Applications}
 Applications represent the first two stages of precision agriculture: Data Capture and Interpretation.
 They describe streams of data being captured by sensors, which then travel to fog nodes for pre-processing before finally being handled by the cloud.
-Application tasks are modelled with pseudo-arbitrary values that consider the purpose of the hardware they run on.
+Application tasks are modelled with pseudo-arbitrary values that consider the current stage of precision agriculture it is in.
 
 As LEAF allows for the CU of devices to be defined in any context, rather than use MIPS as discussed in Section \ref{leaf}, CU will be considered a generic value for computing load.
 This can occur as the accuracy of these values is irrelevant in the context of evaluating the aims of the project.
-As such, a task's required CU will represent the ratio of CU needed from the device to carry out the task.
-Source tasks are modelled to consume 9 CU (90\% of a sensor's computational load). As the sensor's primary goal is to take continuous measurements, the task can therefore consume most of the sensor's resources.
-Processing tasks are modelled to consume 50 CU (12.5\% of a fog node's computational load). This is because fog nodes are designed to receive data from multiple sensors.
-Finally, sink tasks are modelled to consume 150 CU; because servers have infinite CU, this value cannot be modelled as a proportion of the available load.
-Instead, this value is based on the processing task's CU. 150 CU was chosen to follow the assumption that, despite the server doing most of the processing, 25\% of this can be allocated to the fog node to merit the use of fog computing.
+As such, a task's required CU will represent a ratio of CU needed to carry out the current stage of the application.
+The Capture stage is represented as the sink task, its required CU reflects the hardware they run on in order to capture measurements.
+The interpretation stage is represented through processing and sink tasks, where the combined CU of all these tasks should equal 200.
+
+Source tasks are modelled to consume 90\% of a sensor's computational load.
+As the sensor's primary goal is to take continuous measurements, the task can therefore consume most of the sensor's resources.
+Processing tasks are modelled to consume a static 50 CU (12.5\% of a fog node's computational load).
+As the scenarios only consider one type of fog node this value will remain at 50.
+Finally, sink tasks as a result, model their CU ($CU_{server}$) through the formula $CU_{server} = 200 - (n \times 50)$ where n is defined as the number of processing tasks in an application.
+As the Interpretation stage of the application requires 200 CU, a sink task is required to carry out the remaining computations needed to process the data.
+
 
 \subsubsection{Infrastructure}
 Network topologies in the scenarios can consider four types of devices: Sensors, Drones, Microprocessors, and Servers.
@@ -1141,7 +1147,7 @@ As the context of the battery varies from scenario to scenario, the value will b
 
 \section{Scenario 1 - A Singular Static Power Source}\label{eval:subsec:scenario1}
 Scenario 1 provides the simplest use case of ECO-LEAF and defines a static grid power source with a sensor, microprocessor, and server connected together.
-A single application runs on top of this, with the simulation lasting 10 minutes.
+A single application runs on top of this, with the simulation lasting 11 minutes.
 The goals explicitly demonstrated here are 1.1, 1.2, 2.1, and 2.2.
 The aim is to show that entities within the infrastructure are allocated power and produce carbon emissions due to consuming this energy.
 Figure \ref{fig:example1_diagram} in the appendices illustrates how the power, infrastructure and application layers interact.
@@ -1154,15 +1160,15 @@ Figure \ref{fig:example1_diagram} in the appendices illustrates how the power, i
     \label{fig:example1_results_energy}
 \end{figure}
 Looking at Figure \ref{fig:example1_results_energy}, we can see that despite the basic nature of the scenario, Graphs 1.1 and 1.2 indicate that the correct amount of energy is being consumed from the power source.
-This can be seen as, at any given moment, the energy consumption for entities in Graph 1.1, when summed, equals the corresponding energy provided by the grid power source in Graph 1.2.
+This can be seen as, at any given moment, the energy consumption for entities in Graph 1.1, when summed, equal the corresponding energy provided by the grid power source in Graph 1.2.
 The same relationship can also be seen in the carbon released for Graphs 1.3 and 1.4 in the appendices.
 This can be explained with the equation for carbon released defined in Section \ref{subsec:carbon-released}.
 As power and carbon emissions produced are proportional to one another, the carbon released is a scalar value of power consumed.
 Because of these results, goals 1.1, 1.2, 2.1, and 2.2 have all been met, as power sources can supply energy to network infrastructure and, as a consequence, produce carbon emissions.
 
 \section{Scenario 3 - A Custom Infrastructure Distributor}\label{eval:subsec:scenario3}
-Scenario 3 is designed to showcase the infrastructure's capability to assign nodes to different power sources, thereby fulfilling goals 1.3, 1.5, and 2.3.
-In the simulation, solar, wind, and grid energy sources are utilised, with power sources being prioritised in the same order.
+Scenario 3 is designed to showcase the infrastructure's capability to assign nodes to different power sources, thereby fulfilling goals 1.3, 1.5.
+In the simulation, solar, wind, and grid energy sources are utilised, being preferenced by the power domain in the same order.
 The simulation runs between the time 7pm and 8pm.
 In addition to the normal allocation process, the custom distribution method also assigns nodes with no max power requirement to power sources with infinite power availability.
 To see these changes, while the scenario's topology remains the same, the server's power model is modified to no longer consider a maximum power requirement.
@@ -1176,35 +1182,83 @@ Figure \ref{fig:example3_diagram} illustrates an overview of the scenario.
 \end{figure}
 
 \subsection{Scenario 3 Results and Analysis}
-Figure \ref{fig:example2_switch} displays the connections between various power sources and the infrastructure at two different times - 19:00:00 and 19:30:00.
+Figure \ref{fig:example2_switch} displays the connections between various power sources and the infrastructure at two different times - 7pm and 7:30pm.
 This figure was created by capturing individual frames from the animation tool provided by ECO-LEAF.
-At 19:00:00, we can see that the distribution method successfully supplied power to all entities in the infrastructure.
+At 7pm, we can see that the distribution method successfully supplied power to all entities in the infrastructure.
 As expected, all devices were running on solar power except for the server, which was connected to the grid.
 At exactly 7:30 pm, the distributor method correctly switched renewables and dynamically distributed power from the wind power source as the solar supply could no longer provide enough energy.
 However, as the links do not consume energy we still see associations between them and the solar power source.
 This can also be seen in Figure \ref{apen:scen3} as Graph 3.2 depicts the energy provided by power sources throughout the simulation.
 As expected, the desired characteristics can be seen: Grid power provided a consistent amount of energy (indicating that it always provided power to the server), solar power provided power up until 19:30:00 (as it could no longer generate power from the sun), and finally wind power (as the second most preferable power source) started to provide power once solar could no longer do so.
-Because of this, ECO-LEAF achieves goals 1.3, 1.5, and 2.3.
-Specifically, we see the solar power source fluctuate in power availability as a consequence of time, the power domain dynamically distributing infrastructure to other power sources, and finally, we see the ability to adjust the carbon emissions produced by defining the static CI of solar and wind power.
+Because of this, ECO-LEAF achieves goals 1.3, 1.5.
+Specifically, we see the solar power source fluctuate in power availability as a consequence of time and that the power domain dynamically distributes infrastructure to other power sources.
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth]{images/examples/example_3/switch}
+    \includegraphics[width=0.85\textwidth]{images/examples/example_3/switch}
     \caption{Graphs showing associations between infrastructure and power sources at the start of the simulation and 30 minutes through. For the full results please refer to Appendix \ref{fig:example3}.}
     \label{fig:example2_switch}
 \end{figure}
 
 \section{Scenario 5 - A Carbon Aware Application Orchestrator}\label{eval:subsec:scenario 5}
+Inspired by Cucumber \citep{cucumber}, Scenario 5 aims to consider the deployment of applications over infrastructure by considering the CI of available power sources.
+As such, the scenario aims to demonstrate user goal 2.3 by allowing users to consider power sources when placing applications on infrastructure.
+It aims to achieve this by evaluating the number of processing tasks and the current CI of power sources.
+As tasks cannot switch between infrastructure on their own, the scenario utilises the Events class to periodically place applications on devices and then subsequently remove them after a period of time.
+In the scenario, this describes sensors taking measurements and idling for 10— and 30-minute intervals between 2 pm and midnight.
+The scenario uses static solar, grid, and battery power sources as we wish to only evaluate the placement of applications on the infrastructure.
+As application placement now considers the number of tasks and the power source used, the scenario utilises two applications and defines a new network topology.
+
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/examples/example_5/example5_diagram.pdf}
+    \includegraphics[width=0.72\textwidth]{images/examples/example_5/example5_diagram.pdf}
     ~
     \caption{Illustration depicting scenario 5.}
     \label{fig:example5_diagram}
 \end{figure}
-5)	2.4
 
+Application 1 (A1) is the application used in previous scenarios, Application 2 (A2) is an application that contains two processing tasks.
+A new topology has been designed to consider one sensor, three fog nodes and one server.
+The exact structure of the network can be seen illustrated in Figure \ref{fig:example5_diagram}.
+The goal is to demonstrate that the placement algorithm developed will always place an application on the infrastructure using the path with the smallest CIs.
+For the sake of evidence, we will use the events mechanism to introduce the solar microprocessor at 4 pm, causing the simulation to transition from Config 1 to Config 2.
+As such, the following characteristics should occur:
+\begin{itemize}
+    \item When the solar microprocessor is available, A1 should always follow the path outlined in config 2.
+    \item When the solar microprocessor is unavailable, A1 should follow the path in config 1.
+    \item A2 should always use the path containing the solar and battery microprocessors. This is because A2 always requires two microprocessors to run.
+\end{itemize}
+
+\subsection{Scenario 5 Results and Analysis}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/examples/example_5/example_5_processors.pdf}
+    ~
+    \caption{Graphs showing the power consumed by the solar and grid microprocessors. For the full results please refer to Appendix \ref{fig:example5}.}
+    \label{fig:example5_microprocessors}
+\end{figure}
+
+Both graphs in Figure \ref{fig:example5_microprocessors} show periodic rising and falling energy consumption as tasks are placed and removed from the devices, respectively.
+As we can see in Graph 5.7, the energy consumption for the grid microprocessor occurs continuously for the entirety of the simulation, unlike that for the solar one, which is introduced at 4 pm and runs out of power at 8 pm.
+Because of this, we can see the desired outcome from the application placement algorithm.
+At the start of the simulation, we see Config 1, where A1 and A2 both have tasks that execute on the grid microprocessor, as there is no other available path to the server.
+Once we see the solar power source introduced into the simulation, the solar microprocessor is available to run tasks.
+Because of this, when A1's processing task is later deployed, the algorithm chooses the solar microprocessor as the CI for this power source is smaller than that of the grid.
+Consequently, we see that the solar microprocessor now periodically runs the processing task, resulting in the results in Graph 5.6.
+As the task is no longer run on the grid microprocessor, the amount of energy consumed falls, as seen in Graph 5.7.
+Finally, at 8 pm, the solar power source no longer provides sufficient energy to its microprocessor.
+This causes the model to revert to placing the application back onto the grid microprocessor, reflecting Config 1.
+Because of this, we can claim that goal 2.3 has been met because the user is able to consider how applications are placed on the infrastructure as a consequence of power sources.
 
 \section{Scenario 6 - Cyclic Infrastructure Pausing}\label{eval:subsec:scenario 6}
+Scenario 6 aims to demonstrate how applications and infrastructure can halt when power availability no longer exists
+The aim is to demonstrate example 1.4,
+to achieve this we consider static two power sources, grid and battery.
+In this context rather than use a single sensor, we expand into many.
+To mimic a more realistic topology in prepearation for the final scenario we consider a tree like network.
+The idea is that we utilise a tree like structure to gradually aggregate and process data before finally arriving at the server.
+At the leaves we consider many sensor devices all taking measurements, this then follows a handful of fog nodes which finally resolve to a single server.
+As such the network topology again needs to be redesigned
+The benefit of using batteries is that their size can be predetermined to fit needs the needs of the scenario.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/examples/example_6/example6_diagram.pdf}
@@ -1212,10 +1266,18 @@ Specifically, we see the solar power source fluctuate in power availability as a
     \caption{Illustration depicting scenario 6.}
     \label{fig:example6_diagram}
 \end{figure}
-6)	1.4
 
+\subsection{Scenario 6 Results and Analysis}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/examples/example_5/example_5_processors.pdf}
+    ~
+    \caption{Graphs showing the power consumed by the solar and grid microprocessors. For the full results please refer to Appendix \ref{fig:example5}.}
+    \label{fig:example5_microprocessors}
+\end{figure}
 
 \section{Scenario 7 - Precision Agriculture}\label{eval:subsec:scenario 7}
+2.4
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/examples/example_7/example7_diagram.pdf}
@@ -1223,6 +1285,7 @@ Specifically, we see the solar power source fluctuate in power availability as a
     \caption{Illustration depicting scenario 7.}
     \label{fig:example7_diagram}
 \end{figure}
+\subsection{Scenario 7 Results and Analysis}
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_7/Main_results}
@@ -1264,13 +1327,14 @@ Specifically, we see the solar power source fluctuate in power availability as a
 
 \section{Limitations}
 - Assume grid power is unlimited
+- plotter does not display the infinite power availability of grid.
+
 - assume that carbon released is a product of the infrastructure not the power source
 - ECO-LEAF as a consequence of DES already knows what the power consumption will be, therefore would potentially introduce modelling features to assume that power requirements can could potentially increase, i.e. power sources are aware that the power req from devices can increase and decrease between readings
-
 \section{Future Work}\label{conc:sec:Future Work}
 - introduce a more robust means of storing data
 - redfine batteries and produce the idea of an energy store as in reality they are too different from power sources and require too much work around to incorporate a different kind of logic
-- introduce the ability to allow power modelling on power sources, potentially allowing carbon intensity to be modelled too
+- introduce the ability to allow power modelling on power sources rather than rely on datasets., potentially allowing carbon intensity to be modelled too
 \section{Personal Reflection}\label{conc:sec:Personal Reflection}
 
 %Summarise the whole project for a lazy reader who didn't read the rest (e.g. a prize-awarding committee).
@@ -1297,6 +1361,7 @@ Specifically, we see the solar power source fluctuate in power availability as a
 %==================================================================================================================================
 %  APPENDICES  
 \chapter{Appendices}
+\clearpage
 
 \section{Dictionary log Example}
 \begin{lstlisting}[caption={Example dictionary structure used by the power domain.},label={lst:dic-log}]
@@ -1354,11 +1419,11 @@ Specifically, we see the solar power source fluctuate in power availability as a
 }
 \end{lstlisting}
 \clearpage
-\section{Results for Scenarios}\label{apen:subsec:scen1}
+\section{Scenarios}\label{apen:subsec:scen1}
 \subsection{Scenario 1}\label{apen:scen1}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/examples/example_1/example1_diagram.pdf}
+    \includegraphics[width=0.55\textwidth]{images/examples/example_1/example1_diagram.pdf}
     ~
     \caption{Diagram depicting scenario 1.}
     \label{fig:example1_diagram}
@@ -1403,7 +1468,7 @@ Specifically, we see the solar power source fluctuate in power availability as a
 \subsection{Scenario 4}\label{apen:scen4}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth,angle=270]{images/examples/example_4/example4_diagram.pdf}
+    \includegraphics[width=1.1\textwidth,angle=270]{images/examples/example_4/example4_diagram.pdf}
     ~
     \caption{Diagram depicting scenario 4.}
     \label{fig:example4_diagram}
@@ -1421,7 +1486,7 @@ Specifically, we see the solar power source fluctuate in power availability as a
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{images/examples/example_5/figure}
+    \includegraphics[width=0.90\textwidth]{images/examples/example_5/figure}
     ~
     \caption{Graph showing the full results for Scenario 5.}
     \label{fig:example5}

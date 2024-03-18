@@ -21,25 +21,23 @@ def main():
     """
     Log Output:
         INFO	Placing Application(tasks=3):
-        INFO	- SourceTask(id=0, cu=9) on Node('sensor', cu=0/10).
-        INFO	- ProcessingTask(id=1, cu=5) on Node('server', cu=0/inf).
-        INFO	- SinkTask(id=2, cu=10) on Node('server', cu=5/inf).
-        INFO	- DataFlow(bit_rate=100) on [Link('sensor' -> 'microprocessor', bandwidth=0/50000000.0), Link('microprocessor' -> 'server', bandwidth=0/30000000.0, latency=10)].
+        INFO	- SourceTask(id=0, cu=9) on Node('Sensor', cu=0/10).
+        INFO	- ProcessingTask(id=1, cu=50) on Node('Server', cu=0/inf).
+        INFO	- SinkTask(id=2, cu=150) on Node('Server', cu=50/inf).
+        INFO	- DataFlow(bit_rate=100) on [Link('Sensor' -> 'Microprocessor', bandwidth=0/50000000.0), Link('Microprocessor' -> 'Server', bandwidth=0/30000000.0, latency=10)].
         INFO	- DataFlow(bit_rate=500) on [].
-        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
-        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
-        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
-        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=4.44W, static=20.01W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=4.44W, static=24.81W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=4.44W, static=20.01W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=4.44W, static=24.81W)
         ...
-        DEBUG	118: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
-        DEBUG	118: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
-        DEBUG	119: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
-        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
-        DEBUG	120: application_meter: PowerMeasurement(dynamic=0.43W, static=20.01W)
-        DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.43W, static=24.81W)
-        NFO	Total application power usage: 1226.1443999999992 Ws
-        INFO	Total infrastructure power usage: 1514.1420000000007 Ws
-        INFO	Total carbon emitted: 4.538085299999998 gCo2
+        DEBUG	59: application_meter: PowerMeasurement(dynamic=4.44W, static=20.01W)
+        DEBUG	59: infrastructure_meter: PowerMeasurement(dynamic=4.44W, static=24.81W)
+        DEBUG	60: application_meter: PowerMeasurement(dynamic=4.44W, static=20.01W)
+        DEBUG	60: infrastructure_meter: PowerMeasurement(dynamic=4.44W, static=24.81W)
+        INFO	Total application power usage: 1491.4926999999993 Ws
+        INFO	Total infrastructure power usage: 1784.2927000000009 Ws
+        INFO	Total carbon emitted: 5.4345204400000044 gCo2
         """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -54,7 +52,7 @@ def main():
     wired_link_from_source = Link(name="Link1", src=sensor, dst=microprocessor, latency=0, bandwidth=50e6,
                                   power_model=PowerModelLink(0))
     wifi_link_to_server = Link(name="Link2", src=microprocessor, dst=server, latency=10, bandwidth=30e6,
-                               power_model=PowerModelLink(400e-9))
+                               power_model=PowerModelLink(0))
     infrastructure.add_link(wifi_link_to_server)
     infrastructure.add_link(wired_link_from_source)
     entities = infrastructure.nodes() + infrastructure.links()

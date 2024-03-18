@@ -83,18 +83,18 @@ def main():
     """
     Log Output:
         INFO	Placing Application(tasks=3):
-        INFO	- SourceTask(id=0, cu=0.15313193982744164) on Node('Sensor0', cu=0/11.018082741964426).
-        INFO	- ProcessingTask(id=1, cu=3) on Node('Microprocessor13', cu=0/42.774389116874744).
-        INFO	- SinkTask(id=2, cu=12) on Node('Server', cu=0/inf).
-        INFO	- DataFlow(bit_rate=1000) on [Link('Sensor0' -> 'Microprocessor13', bandwidth=0/86940505.92221098)].
-        INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor13' -> 'Server', bandwidth=0/29825751.67980145)].
+        INFO	- SourceTask(id=0, cu=0.135) on Node('Sensor_0', cu=0/10.40723309678577).
+        INFO	- ProcessingTask(id=1, cu=50) on Node('Microprocessor_19', cu=0/413.73667893270886).
+        INFO	- SinkTask(id=2, cu=150) on Node('Server', cu=0/inf).
+        INFO	- DataFlow(bit_rate=1000) on [Link('Sensor_0' -> 'Microprocessor_19', bandwidth=0/43199872.458395794)].
+        INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor_19' -> 'Server', bandwidth=0/30199540.800222687)].
         ...
 
-        DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=13.37W, static=300.35W)
-        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=13.37W, static=300.35W)
-        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=13.37W, static=300.35W)
-        INFO	Total infrastructure power usage: 167737.76212396252 Ws
-        INFO	Total carbon emitted: 201.14651237393718 gCo2
+        DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=126.85W, static=300.35W)
+        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=126.85W, static=300.35W)
+        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=126.85W, static=300.35W)
+        INFO	Total infrastructure power usage: 233890.81363972806 Ws
+        INFO	Total carbon emitted: 395.8367950031961 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -115,7 +115,7 @@ def main():
                                start_time_str="10:00:00", update_interval=1)
     grid_power = GridPower(env, power_domain=power_domain, priority=5,
                            powered_infrastructure=[server] + links_to_server, static=True)
-    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=15,
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=15, charge_rate=15,
                                  powered_infrastructure=sensors + microprocessors + links_from_sensors, static=True)
     power_domain.add_power_source(battery_power)
     power_domain.add_power_source(grid_power)
@@ -149,29 +149,30 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
-    fig0 = figure_plotter.subplot_events(event_domain.event_history)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
-                                                       entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
-                                                       title_attribute="Carbon Released")
+    fig1 = figure_plotter.subplot_events(event_domain.event_history,
+                                         title="(6.1) Time Series of Events.")
     fig2 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
                                                        axis_label="Energy Consumed (Wh)",
-                                                       title_attribute="Energy Consumed")
+                                                       title="(6.2) Time Series of Energy Consumed for Infrastructure.")
     fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
                                                             power_sources=[grid_power, battery_power],
                                                             axis_label="Energy Consumed (Wh)",
-                                                            title_attribute="Energy Consumed")
-    fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
+                                                            title="(6.3) Time Series of Energy Provided by Power Sources.")
+    fig4 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       title="(6.4) Time Series of Carbon Released for Infrastructure.")
+    fig5 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[grid_power, battery_power],
                                                             axis_label="Carbon Released (gC02eq/kWh)",
-                                                            title_attribute="Carbon Released")
-    fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
+                                                            title="(6.5) Time Series of Carbon Released for Power Sources.")
+    fig6 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                             power_sources=[grid_power, battery_power],
                                                             axis_label="Energy Available (Wh)",
-                                                            title_attribute="Energy Available")
+                                                            title="(6.6) Time Series of Energy Available for Battery Power.")
 
-    figs = [fig0, fig1, fig2, fig3, fig4, fig5]
+    figs = [fig1, fig2, fig3, fig4, fig5, fig6]
     for i, fig in enumerate(figs):
         main_fig = FigurePlotter.aggregate_subplots([fig], title="")
         file_handler.write_figure_to_file(main_fig, 1, filename=f"example_6-{i}")
@@ -179,7 +180,8 @@ def main():
     main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 6.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
-
+    main_fig = FigurePlotter.aggregate_subplots([fig3,fig6], title="Results for Example 6.")
+    file_handler.write_figure_to_file(figure=main_fig, number_of_figs=2,filename="example_6_cutoff")
 
 class CustomOrchestrator(Orchestrator):
     def _processing_task_placement(self, processing_task: ProcessingTask, application: Application) -> Node:

@@ -26,9 +26,7 @@ def create_application_type_1(sensor, server):
         app1_source_task = SourceTask(cu=int(0.4 * sensor.power_model.max_power), bound_node=sensor)
         app1_processing_task = ProcessingTask(cu=50)
         app1_sink_task = SinkTask(cu=150, bound_node=server)
-
         application = Application(name=f"{i}_Application_Type_1")
-
         application.add_task(app1_source_task)
         application.add_task(app1_processing_task, incoming_data_flows=[(app1_source_task, 1000)])
         application.add_task(app1_sink_task, incoming_data_flows=[(app1_processing_task, 300)])
@@ -43,7 +41,7 @@ def create_application_type_2(sensor, server):
         app1_source_task = SourceTask(cu=int(0.4 * sensor.power_model.max_power), bound_node=sensor)
         app1_processing_task_1 = ProcessingTask(cu=50)
         app1_processing_task_2 = ProcessingTask(cu=50)
-        app1_sink_task = SinkTask(cu=150, bound_node=server)
+        app1_sink_task = SinkTask(cu=100, bound_node=server)
 
         application = Application(name=f"{i}_Application_Type_2")
 
@@ -100,17 +98,17 @@ def main():
     grid_wired_link_from_source = Link(name="GridWiredLink", src=sensor, dst=grid_microprocessor, latency=0,
                                        bandwidth=50e6, power_model=PowerModelLink(0))
     grid_wifi_link_to_server = Link(name="GridWirelessLink", src=grid_microprocessor, dst=server, latency=10,
-                                    bandwidth=30e6, power_model=PowerModelLink(400e-9))
+                                    bandwidth=30e6, power_model=PowerModelLink(0))
     # Path2
     bat_wired_link_from_source = Link(name="BatteryWiredLink", src=sensor, dst=battery_microprocessor, latency=0,
                                       bandwidth=50e6, power_model=PowerModelLink(0))
     bat_wifi_link_to_grid = Link(name="BatteryWirelessLink", src=battery_microprocessor, dst=grid_microprocessor, latency=10,
-                                 bandwidth=30e6, power_model=PowerModelLink(400e-9))
+                                 bandwidth=30e6, power_model=PowerModelLink(0))
     # Path 3
     solar_wired_link_from_source = Link(name="SolarWiredLink", src=sensor, dst=solar_microprocessor, latency=0,
                                         bandwidth=50e6, power_model=PowerModelLink(0))
     solar_wifi_link_to_server = Link(name="SolarWirelessLink", src=solar_microprocessor, dst=server, latency=10,
-                                     bandwidth=30e6, power_model=PowerModelLink(400e-9))
+                                     bandwidth=30e6, power_model=PowerModelLink(0))
     infrastructure.add_link(grid_wired_link_from_source)
     infrastructure.add_link(grid_wifi_link_to_server)
     infrastructure.add_link(bat_wired_link_from_source)
@@ -127,7 +125,7 @@ def main():
     grid_power = GridPower(env, power_domain=power_domain, priority=5,
                            powered_infrastructure=[grid_microprocessor, grid_wired_link_from_source,
                                                    grid_wifi_link_to_server, server], static=True)
-    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=30,
+    battery_power = BatteryPower(env, power_domain=power_domain, priority=0, total_power_available=30, charge_rate=30,
                                  powered_infrastructure=[sensor, battery_microprocessor, bat_wired_link_from_source,
                                                          bat_wifi_link_to_grid], static=True)
     power_domain.add_power_source(battery_power)
@@ -195,22 +193,18 @@ def main():
                                                             power_sources=[solar_power, grid_power, battery_power],
                                                             axis_label="Carbon Released (gC02eq/kWh)",
                                                             title="(5.4) Time Series of Carbon Released for Power Sources.")
-    fig6 = figure_plotter.subplot_time_series_power_sources("Power Available",
-                                                            power_sources=[battery_power,solar_power],
-                                                            axis_label="Energy Available (Wh)",
-                                                            title="(5.5) Time Series of Energy Available for Power Sources.")
     fig7 = figure_plotter.subplot_time_series_entities("Power Used",
                                                          entities=[solar_microprocessor],
                                                          axis_label="Energy Consumed (Wh)",
                                                          title_attribute="Energy Consumed",
-                                                         title="(5.6) Time Series of Energy Provided by the Solar Microprocessor.")
+                                                         title="(5.6) Time Series of Energy Consumed by the Solar Microprocessor.")
     fig8 = figure_plotter.subplot_time_series_entities("Power Used",
                                                          entities=[grid_microprocessor],
                                                          axis_label="Energy Consumed (Wh)",
                                                          title_attribute="Energy Consumed",
-                                                         title="(5.7) Time Series of Energy Provided for Grid Microprocessor.")
+                                                         title="(5.7) Time Series of Energy Consumed by the Grid Microprocessor.")
 
-    figs = [fig1, fig2, fig3, fig4, fig5, fig6]
+    figs = [fig1, fig2, fig3, fig4, fig5]
     main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 5.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
