@@ -92,7 +92,7 @@ def main():
     env.process(power_domain.run(env))
     env.process(application_pm.run(env))
     env.process(infrastructure_pm.run(env))
-    env.run(until=60)  # run simulation until 20:00:00
+    env.run(until=61)  # run simulation until 20:00:00
 
     logger.info(f"Total application power usage: {float(PowerMeasurement.sum(application_pm.measurements))} Ws")
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
@@ -103,28 +103,28 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
-                                                       entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
-                                                       title_attribute="Carbon Released")
-    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+    fig1 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
                                                        axis_label="Energy Consumed (Wh)",
-                                                       title_attribute="Energy Consumed")
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                       title="(3.1) Time Series of Energy Consumed for Infrastructure.")
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used",
                                                             power_sources=[solar_power,grid, wind_power],
                                                             axis_label="Energy Consumed (Wh)",
-                                                            title_attribute="Energy Consumed")
-    fig3_5 = figure_plotter.subplot_time_series_power_sources("Power Available",
-                                                            power_sources=[solar_power, wind_power],
-                                                            axis_label="Energy Available (Wh)",
-                                                            title_attribute="Energy Available")
+                                                            title="(3.2) Time Series of Energy Provided by Power Sources.")
+    fig3 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       title="(3.3) Time Series of Carbon Released for Infrastructure.")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid, wind_power],
                                                             axis_label="Carbon Released (gC02eq/kWh)",
-                                                            title_attribute="Carbon Released")
+                                                            title="(3.4) Time Series of Carbon Released for Power Sources.")
+    fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
+                                                            power_sources=[solar_power, wind_power],
+                                                            axis_label="Energy Available (Wh)",
+                                                            title="(3.5) Time Series of Energy Available for Power Sources.")
 
-    figs = [fig1, fig2, fig3, fig4, fig3_5]
+    figs = [fig1, fig2, fig3, fig4, fig5]
     main_fig = figure_plotter.aggregate_subplots(figs,title="Results for Example 3.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()

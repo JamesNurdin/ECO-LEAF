@@ -96,7 +96,7 @@ class Animation:
         for power_source_key, power_source_values in data.items():
             self.g.add_node(power_source_key)
             for node in data[power_source_key]:
-                if node == "Total Carbon Released":
+                if node == "Total Carbon Released" or node == "Power Available":
                     continue
                 self.g.add_node(node)
                 self.g.add_edge(power_source_key, node)

@@ -32,14 +32,14 @@ def main():
         DEBUG	1: Processing Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	1: Sink Task: PowerMeasurement(dynamic=0.00W, static=0.00W)
         ...
-        DEBUG	1440: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	1440: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	1440: Source Task: PowerMeasurement(dynamic=0.13W, static=0.01W)
+        DEBUG	1440: application_meter: PowerMeasurement(dynamic=3.63W, static=24.81W)
+        DEBUG	1440: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
+        DEBUG	1440: Source Task: PowerMeasurement(dynamic=0.44W, static=0.01W)
         DEBUG	1440: Processing Task: PowerMeasurement(dynamic=0.18W, static=4.80W)
-        DEBUG	1440: Sink Task: PowerMeasurement(dynamic=0.20W, static=20.00W)
-        INFO	Total application power usage: 17494.150650000203 Ws
-        INFO	Total infrastructure power usage: 36099.26245000072 Ws
-        INFO	Total carbon emitted: 86.54591236833302 gCo2
+        DEBUG	1440: Sink Task: PowerMeasurement(dynamic=3.00W, static=20.00W)
+        INFO	Total application power usage: 19646.615650000196 Ws
+        INFO	Total infrastructure power usage: 38251.72745000068 Ws
+        INFO	Total carbon emitted: 92.53529443166693 gCo2
     """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -130,28 +130,28 @@ def main():
 
     figure_plotter = FigurePlotter(power_domain, event_domain, show_event_lines=True)
 
-    fig0 = figure_plotter.subplot_events(event_domain.event_history)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
-                                                       entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
-                                                       title_attribute="Carbon Released")
-    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+    fig0 = figure_plotter.subplot_events(event_domain.event_history,
+                                         title="(4.1) Time Series of Events.")
+    fig1 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
                                                        axis_label="Energy Consumed (Wh)",
-                                                       title_attribute="Energy Consumed")
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                       title="(4.2) Time Series of Energy Consumed for Infrastructure.")
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used",
                                                             power_sources=[solar_power, battery_power],
                                                             axis_label="Energy Consumed (Wh)",
-                                                            title_attribute="Energy Consumed")
+                                                            title="(4.3) Time Series of Energy Provided by Power Sources.")
+    fig3 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       title="(4.4) Time Series of Carbon Released for Infrastructure.")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid, battery_power],
                                                             axis_label="Carbon Released (gC02eq/kWh)",
-                                                            title_attribute="Carbon Released")
-
+                                                            title="(4.5) Time Series of Carbon Released for Power Sources.")
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                             power_sources=[battery_power],
                                                             axis_label="Energy Available (Wh)",
-                                                            title_attribute="Energy Available")
+                                                            title="(4.6) Time Series of Energy Available for Battery Power.")
 
     figs = [fig0, fig1, fig2, fig3, fig4, fig5]
     main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 4.")

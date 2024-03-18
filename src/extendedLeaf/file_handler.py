@@ -286,8 +286,9 @@ class FigurePlotter:
                     )
         return fig
 
-    def subplot_events(self, events) -> go.Figure:
-
+    def subplot_events(self, events, title=None) -> go.Figure:
+        if title is None:
+            title = f"Time Series of Events."
         fig = subplot_figure()
         keys = self.power_domain.captured_data.keys()
         start_time = int(list(keys)[0])
@@ -310,7 +311,7 @@ class FigurePlotter:
         )
 
         fig.update_layout(
-            title_text=f"Timeseries of Events.",
+            title_text=title,
             title_x=0.5,
             title_font=dict(size=16),
         )
@@ -321,7 +322,7 @@ class FigurePlotter:
                                      title_attribute="Carbon Released",
                                      title=None) -> go.Figure:
         if title is None:
-            title = f"Timeseries of {title_attribute} for Powered Infrastructure."
+            title = f"Time Series of {title_attribute} for Powered Infrastructure."
         if entities is None:
             raise ValueError(f"Error: No entities provided to plot.")
 
@@ -369,7 +370,7 @@ class FigurePlotter:
                                           axis_label="Carbon Released (gC02/kWh)",
                                           title_attribute="Carbon Released", title= None) -> go.Figure:
         if title is None:
-            title = f"Timeseries of {title_attribute} for Power Sources."
+            title = f"Time Series of {title_attribute} for Power Sources."
         if power_sources is None:
             raise ValueError(f"Error: No power sources were provided.")
 
@@ -444,7 +445,7 @@ class FigurePlotter:
         )
 
         fig.update_layout(
-            title_text=f"Timeseries of power used for Power Meters.",
+            title_text=f"Time Series of Power Used for Power Meters.",
             title_x=0.5,
             title_font=dict(size=16),
         )

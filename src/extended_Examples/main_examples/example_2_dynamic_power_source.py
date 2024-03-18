@@ -19,25 +19,24 @@ def main():
     """
     Log Output:
         INFO	Placing Application(tasks=3):
-        INFO	- SourceTask(id=0, cu=9) on Node('sensor', cu=0/10).
-        INFO	- ProcessingTask(id=1, cu=5) on Node('microprocessor', cu=0/40).
-        INFO	- SinkTask(id=2, cu=10) on Node('node3', cu=0/inf).
-        INFO	- DataFlow(bit_rate=100) on [Link('sensor' -> 'microprocessor', bandwidth=0/50000000.0)].
-        INFO	- DataFlow(bit_rate=500) on [Link('microprocessor' -> 'node3', bandwidth=0/30000000.0, latency=10)].
-        DEBUG	0: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	1: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
+        INFO	- SourceTask(id=0, cu=9) on Node('Sensor', cu=0/10).
+        INFO	- ProcessingTask(id=1, cu=50) on Node('Microprocessor', cu=0/400).
+        INFO	- SinkTask(id=2, cu=150) on Node('Server', cu=0/inf).
+        INFO	- DataFlow(bit_rate=100) on [Link('Sensor' -> 'Microprocessor', bandwidth=0/50000000.0)].
+        INFO	- DataFlow(bit_rate=500) on [Link('Microprocessor' -> 'Server', bandwidth=0/30000000.0, latency=10)].
+        DEBUG	0: application_meter: PowerMeasurement(dynamic=3.63W, static=24.81W)
+        DEBUG	0: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
+        DEBUG	1: application_meter: PowerMeasurement(dynamic=3.63W, static=24.81W)
+        DEBUG	1: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
         ...
-        DEBUG	118: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	118: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	119: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	120: application_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=0.51W, static=24.81W)
-        INFO	Total application power usage: 3063.3751499999935 Ws
-        INFO	Total infrastructure power usage: 3063.350949999993 Ws
-        INFO	Total carbon emitted: 8.90024335583334 gCo2
+        DEBUG	118: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
+        DEBUG	119: application_meter: PowerMeasurement(dynamic=3.63W, static=24.81W)
+        DEBUG	119: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
+        DEBUG	120: application_meter: PowerMeasurement(dynamic=3.63W, static=24.81W)
+        DEBUG	120: infrastructure_meter: PowerMeasurement(dynamic=3.62W, static=24.81W)
+        INFO	Total application power usage: 3440.290149999994 Ws
+        INFO	Total infrastructure power usage: 3440.265949999994 Ws
+        INFO	Total carbon emitted: 9.995321605833325 gCo2
     """
     env = simpy.Environment()
     infrastructure = Infrastructure()
@@ -98,22 +97,22 @@ def main():
     file_handler.write_out_results(filename=filename, power_domain=power_domain)
 
     figure_plotter = FigurePlotter(power_domain)
-    fig1 = figure_plotter.subplot_time_series_entities("Carbon Released",
-                                                       entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
-                                                       title_attribute="Carbon Released")
-    fig2 = figure_plotter.subplot_time_series_entities("Power Used",
+    fig1 = figure_plotter.subplot_time_series_entities("Power Used",
                                                        entities=entities,
                                                        axis_label="Energy Consumed (Wh)",
-                                                       title_attribute="Energy Consumed")
-    fig3 = figure_plotter.subplot_time_series_power_sources("Power Used",
+                                                       title="(2.1) Time Series of Energy Consumed for Infrastructure.")
+    fig2 = figure_plotter.subplot_time_series_power_sources("Power Used",
                                                             power_sources=[grid, solar_power],
                                                             axis_label="Energy Consumed (Wh)",
-                                                            title_attribute="Energy Consumed")
+                                                            title="(2.2) Time Series of Energy Produced by Power Sources.")
+    fig3 = figure_plotter.subplot_time_series_entities("Carbon Released",
+                                                       entities=entities,
+                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       title="(2.3) Time Series of Carbon Released for Infrastructure.")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[grid, solar_power],
                                                             axis_label="Carbon Released (gC02eq/kWh)",
-                                                            title_attribute="Carbon Released")
+                                                            title="(2.4) Time Series of Carbon Released for Power Sources.")
 
     figs = [fig1, fig2, fig3, fig4]
     main_fig = figure_plotter.aggregate_subplots(figs,title="Results for Example 2.")

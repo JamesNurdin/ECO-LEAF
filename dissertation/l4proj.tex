@@ -128,24 +128,24 @@ By introducing the tools necessary to estimate the potential carbon footprints o
 
 \section{Goals}\label{intro:subsec:goals}
 \textbf{\textit{(1) Introduce a means of modelling power sources}}
-(1.1) The first main goal ECO-LEAF should consider the heterogeneity of real power sources and allow for modelling any kind of power source inside the environment, such as grid, solar, or even battery power.
-(1.2) Users should be able to express precisely what type of power sources they want by defining their own or configuring the sources provided by ECO-LEAF.
+(1.1)\label{goal1.1} The first main goal ECO-LEAF should consider the heterogeneity of real power sources and allow for modelling any kind of power source inside the environment, such as grid, solar, or even battery power.
+(1.2)\label{goal1.2} Users should be able to express precisely what type of power sources they want by defining their own or configuring the sources provided by ECO-LEAF.
 This is important because the unique properties of a power source can provide different values for a given simulation.
-(1.3) In addition to this, power sources should be able to fluctuate in their power availability as a consequence of environmental conditions.
-(1.4) Because of this, power sources should only be able to distribute the power they can provide.
-(1.5) Finally, ECO-LEAF should also be able to determine how power from these various sources is distributed amongst devices in the environment.
+(1.3)\label{goal1.3} In addition to this, power sources should be able to fluctuate in their power availability as a consequence of environmental conditions.
+(1.4)\label{goal1.4} Because of this, power sources should only be able to distribute the power they can provide.
+(1.5)\label{goal1.5} Finally, ECO-LEAF should also be able to determine how power from these various sources is distributed amongst devices in the environment.
 
 \textbf{\textit{(2) Provide carbon footprints for consuming power}}
-(2.1) The second main goal in extending LEAF is to provide estimations of carbon footprints from entities within the simulation.
-(2.2) Therefore, ECO-LEAF should provide a direct means to translate energy consumed into greenhouse gas emissions.
-(2.3) The user should also be able to define how their power sources determine the quantity of emissions released.
-(2.4) Finally, the simulation should also model how the quantity of greenhouse gas emissions can vary due to environmental conditions.
+(2.1)\label{goal2.1} The second main goal in extending LEAF is to provide estimations of carbon footprints from entities within the simulation.
+(2.2)\label{goal2.2} Therefore, ECO-LEAF should provide a direct means to translate energy consumed into greenhouse gas emissions.
+(2.3)\label{goal2.3} The user should also be able to define how their power sources determine the quantity of emissions released.
+(2.4)\label{goal2.4} Finally, the simulation should also model how the quantity of greenhouse gas emissions can vary due to environmental conditions.
 
 \textbf{\textit{(3) Capturing and displaying results}}
 Another goal for ECO-LEAF is to provide the user with a means to capture and display the simulation results.
-(3.1) First, ECO-LEAF should keep track of values that describe the state of the environment at any given moment during the simulation.
-(3.2) The user should be able to probe the model afterwards and retrieve information concerning carbon emissions and power measurements from devices and power sources.
-(3.3) The user should also be able to request that data about the simulation be saved to a file and stored in a convenient structure for later use.
+(3.1)\label{goal3.1} First, ECO-LEAF should keep track of values that describe the state of the environment at any given moment during the simulation.
+(3.2)\label{goal3.2} The user should be able to probe the model afterwards and retrieve information concerning carbon emissions and power measurements from devices and power sources.
+(3.3)\label{goal3.3} The user should also be able to request that data about the simulation be saved to a file and stored in a convenient structure for later use.
 This is particularly important because the simulation models many aspects of the environment and will handle large amounts of data.
 
 \textbf{\textit{(4) Introduce example scenarios}}
@@ -195,11 +195,11 @@ The most familiar description of the Internet to many has always been a ``networ
 This data is structured as a series of quanta called packets, each containing a segment of the original data along with routing information to traverse the Internet.
 For a user on a network to receive any data, communications between the user and the device holding the desired data must occur.
 In most cases, the device in question is a specialised server that offers cloud computing services such as accessing data, using software, and networking \citep{cloud_computing}.
-The Internet of Things (IoT), as defined by \cite{iot}, describes the term as ``scenarios in which Internet connectivity and computing capability extend to a variety of objects, devices, sensors, and everyday items''.
+The Internet of Things (IoT), as defined by \cite{iot}, describe the term as ``scenarios in which Internet connectivity and computing capability extend to a variety of objects, devices, sensors, and everyday items''.
 In the late 2000s, due to the rapid adoption of the IoT \citep{iotboom}, new requirements from IoT devices, such as low latency and increased mobility support \citep{fog_computing} required changes to traditional cloud computing practises of the time.
 
 In 2012, the networking company Cisco introduced the Fog computing platform \citep{fog_computing}.
-Fog computing aimed to extend the cloud computing paradigm by distributing computing resources and services across various edge devices in a network.
+Fog computing aims to extend the cloud computing paradigm by distributing computing resources and services across various edge devices in a network.
 Figure \ref{fig:fog-diagram} illustrates the concept by depicting the three primary agents of the paradigm.
 \begin{figure}[h]
     \centering
@@ -208,8 +208,8 @@ Figure \ref{fig:fog-diagram} illustrates the concept by depicting the three prim
     \caption{Diagram showing the layers in fog computing.}
     \label{fig:fog-diagram}
 \end{figure}
-By moving computations away from the centre of he network, fog computing could reduce latencies, improve security and offer increased mobility support by providing services closer to the end user \citep{fog_computing}.
-As a result of this, research within the discipline of sustainable computing \citep{sustainableFog} is being conducted exploring ways in further reducing the demand from traditional cloud computing services.
+By moving computations away from the centre of the network, fog computing could reduce latencies, improve security and offer increased mobility support by providing services closer to the end user \citep{fog_computing}.
+As a result of this, research within the discipline of sustainable computing \citep{sustainableFog} is being conducted exploring ways to further reduce the demand for traditional cloud computing services.
 
 \section{Discrete Event Simulations}
 
@@ -217,13 +217,13 @@ To depict real-life systems within an application, software models can imitate t
 A simulation refers to the processing of such models.
 As such, simulations of edge/fog networks process the qualities and interactions between nodes in a network environment.
 As a core philosophy of simulating a model is defining only the essential aspects \citep{simulations}, simulations can abstract unnecessary details to reduce complexity within the model.
-The term system state (aso commonly referred to as just state), is used to define the model at any moment during the simulation through a collection of variables \citep{des-old}.
+The term system state (also commonly referred to as just state), is used to define the model at any moment during the simulation through a collection of variables \citep{des-old}.
 A common approach to executing simulations is Discrete Event Simulation (DES).
 
 Unlike continuous event simulations, which see a model defined as a collection of temporal equations to represent the simulation's environment and, as such, continuously change as time passes \cite{simpy}, DESs represent a model through a numerical approach and process this by changing the simulation's state at specific points in time through ``events''.
 As a consequence, these events progress the model forward in time.
 Events describe singular actions within the simulation space that directly transition the simulation from one state to another.
-As a consequence of this, the simulation's environment remains the same in between state changes.
+As a consequence of this, the simulation's environment remains the same in-between state changes.
 
 To maintain the sequence of events, DESs typically utilise an internal structure, the future event list (FEL), to keep track of upcoming events.
 This is kept in order through the DES's internal clock \citep{Des}.
@@ -255,9 +255,9 @@ The CI value provides insight into the carbon emissions produced by the processe
 
 CI is often used in industrial applications as a means of regulatory compliance; with many government bodies requiring disclosure of greenhouse gas emissions from companies, many use CI to report on their carbon footprint \citep{industry_ci}.
 CI is also used politically through international policies and agreements.
-In order for countries to meet global climate agreements, many often reflect on two fundamental approaches to reducing carbon emissions: reducing their greenhouse gas-producing activities and by considering the CI of existing energy generation processes \cite{political_ci}.
+In order for countries to meet global climate agreements, many often reflect on two fundamental approaches to reducing carbon emissions: reducing their greenhouse gas-producing activities and considering the CI of existing energy generation processes \cite{political_ci}.
 Finally, CI can be used within academic settings to research how impactful particular technologies are on the environment.
-For instance, \cite{academic_ci} provide a framework to measure the CI of artificial intelligences, which is then subsequently used alongside regional and temporal data in calculating the carbon emissions involved in training these models.
+For instance, \cite{academic_ci} provide a framework to measure the CI of artificial intelligence, which is then subsequently used alongside regional and temporal data in calculating the carbon emissions involved in training these models.
 
 \begin{figure}[h]
     \centering
@@ -316,7 +316,7 @@ To introduce power source modelling and carbon emission estimations into edge/fo
 Originally submitted as a master's thesis \citep{leafMasters}, LEAF was proposed by Philipp Wiesner back in 2020 under the supervision of Dr Lauritz Thamsen.
 The goal of LEAF was to provide a realistic fog computing environment that employed a holistic energy consumption model to asses the power usages of nodes and links within the network environment at any given moment during the simulation \citep{leafMasters}.
 
-At the time, existing fog computing models that were able to model power usage faced a trade-off between the accuracy in determining power requirements of devices and modelling large numbers of them \citep{leafMasters}.
+At the time, existing fog computing models that were able to model power usage faced a trade-off between the accuracy in determining the power requirements of devices and modelling large numbers of them \citep{leafMasters}.
 Models that accurately represented power usage were often limited to modelling a small number of devices in a network due to performance issues, such as IFogSim \citep{IFOGSIM}.
 Conversely, models that could depict large-scale fog computing environments had to sacrifice accuracy in power requirements by simplifying power models to run the simulation effectively, such as ICanCloud \citep{ICanCloud}.
 
@@ -344,11 +344,11 @@ Similarly, when a data flow is placed on top of a link, the bandwidth requiremen
 Since the publication of LEAF in 2020, more energy-aware fog computing environments have been released.
 Despite this, when looking at the current analytics of widespread and contemporary fog computing simulators \citep{fogSimToolAnalysis}, we can still see that most simulators are yet to model heterogeneous power sources and carbon emissions.
 This can be seen in Figure \ref{fig:fogtoolsanalysis}, which was taken from the recent article published by \cite{fogSimToolAnalysis}.
-At the moment, the current focus of fog computing simulations is focused towards optimising performance of devices within the environment rather than capturing their energy requirements.
+At the moment, the current focus of fog computing simulations is focused towards optimising the performance of devices within the environment rather than capturing their energy requirements.
 Regardless, we will still discuss what related simulators have to offer.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{images/fog_sim_tools_analysis}
+    \includegraphics[width=\textwidth]{images/fog_sim_tool_analysis}
     ~
     \caption{Insert of Table 4 from the article published by \cite{fogSimToolAnalysis} depicting the overview in performance metrics used on recent and popular fog computing simulators in 2023.}
     \label{fig:fogtoolsanalysis}
@@ -383,7 +383,7 @@ While a key goal of ECO-LEAF also seeks to introduce visualisation tools, rather
 
 \section{Other Related Products}
 % power distribution servvice
-Before moving onto exploring discussing the requirements of ECO-LEAF, we will also consider other related software products and reflect on how ECO-LEAF relates to them.
+Before moving on to exploring discussing the requirements of ECO-LEAF, we will also consider other related software products and reflect on how ECO-LEAF relates to them.
 \subsection{DSSnet}
 As ECO-LEAF seeks to allow for power sources to be distributed amongst the infrastructure of the network, it is worth considering how other simulators achieve this in a network environment.
 DSSnet \citep{dssNet} was released in 2016 and provides a modelling tool for power distribution on communication networks.
@@ -394,11 +394,11 @@ ECO-LEAF aims to consider how power sources distribute energy to available netwo
 However, a key difference here is that ECO-LEAF seeks to distribute power based on the state of the network devices rather than applications used by DSSnet.
 
 \subsection{Cucumber}
-Renewable-Aware Admission Control policies are used to dictate how various workloads are processed on a single device in order to minimise excess energy available from renewable energy sources.
+Renewable-aware admission control policies are used to dictate how various workloads are processed on a single device in order to minimise excess energy available from renewable energy sources.
 While ECO-LEAF does not intend to utilise these policies, it is still beneficial to consider how these policies consider energy sources and use this to inform decisions about distributing work to devices.
 One such policy Cucumber \citep{cucumber}, was released in 2022 and aims to increase renewable excess power utilisation.
 It achieves this by considering delay-tolerant workloads and using probabilistic forecasts in energy production, computational load and energy consumption to determine whether a workload can be completed in time using renewable excess energy.
-In particular Cucumber achieves power generation forecasting by considering the various short- mid- and long-term weather forecasts.
+In particular, Cucumber achieves power generation forecasting by considering the various short- mid- and long-term weather forecasts.
 ECO-LEAF relates to Cucumber as a result of the model aiming to optimise power utilisation from renewable sources,
 However, ECO-LEAF will not consider future forecasts when determining energy distributions to network devices due to the final product only being a simulation tool.
 %\subsection{Eco2AI}
@@ -413,13 +413,13 @@ However, ECO-LEAF will not consider future forecasts when determining energy dis
 \section{Problem Specification}
 In LEAF's IEEE conference paper, \cite{leaf2021} conclude with possible extensions to LEAF, in which they discuss a plan to introduce temporal and regional calculations of carbon emissions for network infrastructure.
 In 2023, Thamsen, co-author of the conference paper and lecturer at the University of Glasgow, provided the basis for the project.
-The key goals for this project intended to see the extension of LEAF with features to enable future research on infrastructures and algorithms optimised for a low environmental footprint.
+The key goals for this project are to see the extension of LEAF with features to enable future research on infrastructures and algorithms optimised for a low environmental footprint.
 Following this, materials, such as publications about LEAF, were provided to help introduce the tool and cover broader aspects of fog computing.
 During development, the project saw weekly meetings to review ECO-LEAF's progress and discuss any ideas or questions.
 By producing examples alongside development, the ability to determine any extra requirements for the project helped identify potential oversights in the original goals.
 
 The initial goals of the project were to provide a means of modelling power sources, functionality to translate estimates of power consumption into carbon footprints, and to provide example scenarios that could demonstrate the added features.
-The remaining sections of the chapter discuss the functional and non functional requirements needed for ECO-LEAF to achieve this.
+The remaining sections of the chapter discuss the functional and non-functional requirements needed for ECO-LEAF to achieve this.
 In order to evaluate these requirements and goals later on, the aforementioned examples will be used to demonstrate the functionality along side addressing when the goals of the project are met.
 %What is the problem that you want to solve, and how did you arrive at it?
 %\section{Guidance}
@@ -433,10 +433,10 @@ In order to evaluate these requirements and goals later on, the aforementioned e
     \item Power sources must only be able to provide the energy they have available. ECO-LEAF must ensure that when a power source distributes energy to devices in the network, it does not exceed its power availability at that moment. In addition, if a power source is unable to continue powering a device, then the association between the two must be removed.
     \item ECO-LEAF must provide a means to allow users to define how power is distributed amongst devices. Just as Cucumber \citep{cucumber} proposed a renewable admission control policy for delay-tolerant tasks, ECO-LEAF must allow users to implement their own distribution systems to determine how power is distributed across devices.
     \item As ECO-LEAF must allow for multiple heterogeneous power sources, it also must provide a mediator to manage associations between power sources and network devices. This feature must be introduced so that the user has a singular point of interaction when configuring power distribution services.
-    \item When a network device draws energy from a power source, ECO-LEAF must calculate the carbon emissions the particular exchange produces. As a primary goal for ECO-LEAF, this must happen in order to report the emissions produced to the user. As CI and energy usage potentially varies over time, the calculation must occur when power is consumed in order to use the correct values.
+    \item When a network device draws energy from a power source, ECO-LEAF must calculate the carbon emissions the particular exchange produces. As a primary goal for ECO-LEAF, this must happen in order to report the emissions produced to the user. As CI and energy usage potentially vary over time, the calculation must occur when power is consumed in order to use the correct values.
     \item Once a value for carbon emissions has been calculated, ECO-LEAF must record this value along with the power consumed. It must do this in order to allow users to look at past states of the simulation without needing to interfere with the running of the simulation to inspect values.
     \item When a simulation has finished, the user must be able to retrieve the results in a readable format. As the results of the simulation record the power usage and emissions released from entities and power sources, if the user wishes to carry out analytics on the data using an external service, then they must have a means of retrieving the data from the simulation.
-    \item ECO-LEAF should also be able to visualise the simulation results by allowing for both graphs on power sources and network devices to be made. In particular values such as power consumed and carbon emissions released should be able to be plotted. Despite not being a key aspect outlined by Thamsen, the feature should be introduced since, during the development of scenario examples, only a graph could demonstrate that particular particular features worked as intended.
+    \item ECO-LEAF should also be able to visualise the simulation results by allowing for both graphs on power sources and network devices to be made. In particular values such as power consumed and carbon emissions released should be able to be plotted. Despite not being a key aspect outlined by Thamsen, the feature should be introduced since, during the development of scenario examples, only a graph could demonstrate that particular features worked as intended.
     \item Finally, ECO-LEAF should also be able to visualise results through network graphs to represent relations between devices and power sources at any given moment. This is important as, despite graph plots being able to show changes in numerical values, they fail to represent the relations between devices and power sources.
 \end{itemize}
 \section{Non-Functional Requirements}
@@ -444,7 +444,7 @@ In order to evaluate these requirements and goals later on, the aforementioned e
     \item As a main goal of ECO-LEAF, the product must provide examples of scenarios using the features introduced. This should occur to demonstrate the new features supplied by ECO-LEAF and teach existing users how these features work.
     \item ECO-LEAF must use the same design philosophies used to produce models in LEAF, for instance, the abstract nature of network nodes. As ECO-LEAF extends upon LEAF, a user must be able to develop simulations using the same design principles when possible. This is important as it allows for simulations to be produced coherently without needing to adapt to accommodate ECO-LEAF.
     \item As a result of the previous requirement, existing examples from LEAF should also be able to be run on ECO-LEAF with as few changes as possible. This is important as ECO-LEAF aims only to offer new features and not seek to change the underlying workings of LEAF. While this may not be feasible, only the most minor changes to the existing framework should occur.
-    \item ECO-LEAF must allow for introduced features to be as independent of each other as possible. This is important as the user must not be forced to incorperate features into their simulation if they do not want to use them.
+    \item ECO-LEAF must allow for introduced features to be as independent of each other as possible. This is important as the user must not be forced to incorporate features into their simulation if they do not want to use them.
     \item Finally, the features introduced into ECO-LEAF must not significantly impact the performance of running simulations. This is important as a core aspect of LEAF is the ability to simulate thousands of devices \citep{leaf2021}. Therefore, ECO-LEAF must be able to achieve a similar level of performance.
 \end{itemize}
 %==================================================================================================================================
@@ -456,10 +456,10 @@ In order to evaluate these requirements and goals later on, the aforementioned e
 
 \section{Archtecture Overview}\label{sec:architecture-overview}
 % overview
-Fundamentally ECO-LEAF approaches the issues identified in Chapter \ref{ch:analysis/requirements} through a structured approach, dividing the logic of the simulation into three layers: Application, Infrastructure, and Power.
+Fundamentally, ECO-LEAF approaches the issues identified in Chapter \ref{ch:analysis/requirements} through a structured approach, dividing the logic of the simulation into three layers: Application, Infrastructure, and Power.
 Each layer in the model is designed to carry out a necessary role in the simulation.
 As illustrated in Figure \ref{fig:generic-overview}, these layers are utilised by the user in order to carry out a simulation.
-For instance, a single application is ran over a section of infrastructure, whilst power is supplied to entities from various power sources.
+For instance, a single application is run over a section of infrastructure, while power is supplied to entities from various sources.
 
 \begin{figure}[htbp]
     \centering
@@ -469,32 +469,32 @@ For instance, a single application is ran over a section of infrastructure, whil
     \label{fig:generic-overview}
 \end{figure}
 
-ECO-LEAF sees to provide the user with the options necessary to configure simulations according to their requirements.
-This is essential as, the simulation model considers many different aspects needed in order to arrive at both an estimation for power consumption and carbon footprint.
-As a result of this, it is important to consider how the layers in the framework function and how the model allows for interactions between them to occur.
+ECO-LEAF seeks to provide the user with the options necessary to configure simulations according to their requirements.
+This is essential as the simulation model considers many different aspects needed to arrive at an estimation of power consumption and carbon footprint.
+Consequently, it is important to consider how the layers in the framework function and how the model allows interactions between them.
 
 \section{LEAF}\label{sec:LEAF}
 As discussed in Chapter \ref{ch:background}, LEAF's model already defines the Infrastructure and Application Layers.
-However as both layers play an essential role in generating power measurements and carbon emissions, with the infrastructure layer being particularly important, it is also necessary to briefly discuss the intentions of these layers before focusing on what ECO-LEAF sees to introduce.
+However, as both layers play an essential role in generating power measurements and carbon emissions, with the infrastructure layer being crucial, it is also necessary to briefly discuss the intentions of these layers before focusing on what ECO-LEAF sees to introduce.
 
 \subsection{Applications}\label{subsec:applications}
-At the top of the architecture we have the Application layer, applications $\mathbf{(A)}$ are represented in the model as a weighted DAG \citep{leaf2021}, which describe the flow of data $\mathbf{(F)}$ between tasks $\mathbf{(T)}$ of the graph.
-Applications are considered as streaming applications as the simulation treats data travelling between tasks to be a continuous process as the simulation moves forward in time.
+At the top of the architecture we have the Application layer, applications $\mathbf{(A)}$ are represented in the model as a weighted DAG \citep{leaf2021}, which describes the flow of data $\mathbf{(F)}$ between tasks $\mathbf{(T)}$ of the graph.
+Applications are considered streaming applications as the simulation treats data travelling between tasks as a continuous process as the simulation moves forward in time.
 An application begins at source tasks where data is generated and travels between processing tasks through dataflows before reaching sink tasks.
-Finally applications interact with the overall model by being placed on top of entities within the Infrastructure Layer.
+Finally, applications interact with the overall model by being placed on top of entities within the Infrastructure Layer.
 
 \subsection{Infrastructure}\label{subsec:infrastructure}
-The Infrastructure $\mathbf{(I)}$ of the model describes the physical devices or entities $\mathbf{(e)}$ of the simulation, in particular these consist of Nodes $\mathbf{(N)}$ and Links $\mathbf{(L)}$ respectively.
-The Infrastructure of the model is represented as a weighted graph, which specifies how nodes and links inter-connect between each other.
+The infrastructure $\mathbf{(I)}$ of the model describes the physical devices or entities $\mathbf{(e)}$ of the simulation. In particular, these consist of Nodes $\mathbf{(N)}$ and Links $\mathbf{(L)}$ respectively.
+The model's infrastructure is represented as a weighted graph, which specifies how nodes and links interconnect.
 The graph in this representation is undirected and cyclic to allow for the multiplexing of transmissions between network devices and to be able to represent the complexities of real network topologies.
-A node in the infrastructure describes physical hardware on which tasks are placed on, nodes are able to be configured in a manner to represent a variety of computing hardware required by the user.
-A link describes the means in which nodes within the infrastructure can communicate, because of this dataflows are placed on these entities to describe the potential network requirements in transferring data between tasks.
-To simplify the process of modeling complex network systems between nodes in the infrastructure, LEAF allows for large networking systems to be described as a single link.
+A node in the infrastructure describes the physical hardware on which tasks are placed. Nodes can be configured to represent a variety of computing hardware required by the user.
+A link describes how nodes within the infrastructure can communicate, because of this dataflows are placed on these entities to describe the potential network requirements in transferring data between tasks.
+LEAF allows for large networking systems to be described as a single link, simplifying the process of modelling complex network systems between nodes in the infrastructure.
 
 \subsection{Power Model}\label{subsec:power-model}
-As ECO-LEAF considers the power consumption of both the applications and infrastructure of the environment, it is important to consider how LEAF actually represents in the model.
-As discussed in Chapter \ref{ch:background}, every model in the environment is assigned a unique power model to describe the power requirements of the device or application being considered at that moment in the simulation.
-These are used to model how much power is required by the entity at any given moment in time based on the current state of the entity and its type.
+As ECO-LEAF considers the power consumption of both applications and infrastructure of the environment, it is important to consider how LEAF is represented in the model.
+As discussed in Chapter \ref{ch:background}, every model in the simulation is assigned a unique power model to describe the power requirements of the device or application being considered at that moment in the simulation.
+These are used to model how much power an entity requires at any given moment based on its current state and type.
 For what information is needed by ECO-LEAF, power for an entity at any given moment in time is considered to be the sum of their static $\mathbf{P_{static}}$ and dynamic $\mathbf{P_{dynamic}}$ power requirements where:
 \begin{itemize}
     \item $\mathbf{P_{static}}$ is the idle power requirement.\\
@@ -503,9 +503,9 @@ For what information is needed by ECO-LEAF, power for an entity at any given mom
 
 \section{Power Domains}\label{sec:power-domains}
 The main goal of the power domain is to allow for configurations and manage how entities in the infrastructure layer should be distributed amongst power sources.
-Conceptually, the power domain in a real life scenario can be considered to be a power management system such as etap \citep{etap}.
-Power domains should be defined in order to separate the different power options available to a simulation's infrastructure.
-For instance when considering power distribution policies for different parts of the infrastructure, individual power domains should be present in order to handle how power sources are allocated, as large scenarios may mean that power sources are present to only part of the infrastructure, see Figure \ref{fig:seperatePDs}.
+Conceptually, the power domain in a real-life scenario can be considered a power management system such as etap \citep{etap}.
+Power domains should be defined to separate the different power options available to a simulation's infrastructure.
+For instance, when considering power distribution policies for different parts of the infrastructure, individual power domains should be present in order to handle how power sources are allocated, as large scenarios may mean that power sources are present in only part of the infrastructure, see Figure \ref{fig:seperatePDs}.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{images/seperatePDDiagram.pdf}
@@ -514,11 +514,11 @@ For instance when considering power distribution policies for different parts of
     \label{fig:seperatePDs}
 \end{figure}
 
-Whilst the framework can carry out simulations without including the new additions of ECO-LEAF, if the user wants to provide power sources to the infrastructure, then a power domain must be present to allow for interactions to occur and results to be logged.
+Whilst the framework can carry out simulations without including the new additions of ECO-LEAF, if the user wants to provide power sources to the infrastructure, then a power domain must be present to allow interactions to occur and results to be logged.
 
 \subsection{Workflow}\label{subsec:power-domain-workflow}
 In order to ensure that power can be correctly distributed to entities in the infrastructure, the power domain consistently adheres to a predefined workflow as the simulation moves forward in time.
-By utilising a DES space, ECO-LEAF can ensure that the workflow can be completed before the simulation takes a step forward in time.
+By utilising a DES space, ECO-LEAF can ensure that the workflow is completed before the simulation moves forward in time.
 Therefore, the tasks of the power domain are executed in the following order:
 \begin{enumerate}
     \item Execute any defined events allocated by the user \emph{(see section \ref{sec:events}}).
@@ -530,7 +530,7 @@ Therefore, the tasks of the power domain are executed in the following order:
 \end{enumerate}
 
 \subsection{Distributing Entities}\label{subsec:distributing-entities}
-As described in the workflow, a power domain funnels their entities within the infrastructure into particular power sources.
+As described in the workflow, a power domain funnels its entities within the infrastructure into particular power sources.
 When a power source is considering entities to allocate power to at time $\mathbf{t}$, the default distribution method separates nodes into three categories:
 \begin{enumerate}
     \item Entities that were previously provided power by the power source.
@@ -539,23 +539,24 @@ When a power source is considering entities to allocate power to at time $\mathb
 \end{enumerate}
 
 The distribution method considers a power domain's infrastructure entities $\mathbf{I_{pd}}$ in this order to ensure that nodes and links which have an existing association remain powered before the power source allocates any remaining power to other entities.
-Despite this, when an entity $\mathbf{e_{i} \in I_{pd}}$ is being considered at the appropriate time, the entity will only be allowed to join if its power requirements are able to be met.
-However, whilst the provided approach always preferences existing entities first to ensure consistency and fairness, the model also allows for users to define their own distribution methods to allow for other attributes of the simulation's state to be deciding factors.
-For example \ref{eval:subsec:scenario3} demonstrates the ability to dynamically assign infrastructure with uncapped power consumption to power sources with unlimited power available to them.\\
+Despite this, when an entity $\mathbf{e_{i} \in I_{pd}}$ is being considered at the appropriate time, the entity will only be allowed to join if its power requirements can be met.
+However, while the provided approach always prefers existing entities first to ensure consistency and fairness, the model also allows users to define their own distribution methods, allowing other attributes of the simulation's state to be deciding factors.
+For example, section \ref{eval:subsec:scenario3} demonstrates the ability to dynamically assign infrastructure with high computational load to power sources with unlimited power availability.\\
 
-In addition to this, the power domain also considers the order in which power sources are allocated entities.
-As one of the goals of the project is to introduce carbon awareness into the simulation, the power domain utilises a priority queue to order when power sources receive entities.
-This has been done to ensure that the user can specify which power sources are allocated entities first, for instance the examples demonstrated in chapter \ref{chp:evaluation} prioritise power sources that have a small inherent carbon intensities to optimise utilisation of cleaner energy.
-This will ensure that power sources with a higher carbon intensity at any moment in time, always choose from the smallest set of entities.
-This can is formulated as $\mathbf{I_{pd}^j(t) \in I_{r}(t)}$ where:
+In addition, the power domain also considers the order in which power sources are allocated entities.
+As one of the project's goals is to introduce carbon awareness into the simulation, the power domain utilises a priority queue to order when power sources receive entities.
+This has been done to ensure that the user can specify which power sources are allocated entities first.
+For instance, the examples demonstrated in Chapter \ref{chp:evaluation} prioritise power sources with a small inherent carbon intensity to optimise the utilisation of cleaner energy.
+This will ensure that power sources with a higher carbon intensity at any moment in time always choose from the smallest set of entities.
+This can be formulated as $\mathbf{I_{pd}^j(t) \in I_{r}(t)}$ where:
 \begin{itemize}
     \item $\mathbf{I_{pd}^j(t)}$ is the set of infrastructure entities associated to power domain $\mathbf{j}$ at time $\mathbf{t}$.\\
     \item $\mathbf{I_{r}(t)}$ is defined as $\mathbf{I \setminus \left( \bigcup_{j-1} I_{pd}^{j-1}(t) \right)}$, which describes the entities that are yet to be allocated a power source.
 \end{itemize}
 
 \subsection{Calculating Carbon Emissions}\label{subsec:carbon-released}
-Another role the power domain takes on is generating estimations for how much carbon was released during the step in time for entities within the infrastructure.
-In order to achieve this, the power domain inspects the infrastructure present at time $t$ within a given power source ($\mathbf{I_{ps}(t)}$) and individually measures the power for each entity.
+Another role the power domain takes on is generating estimations of how much carbon was released during the step-in-time for entities within the infrastructure.
+To achieve this, the power domain inspects the infrastructure present at time $t$ within a given power source ($\mathbf{I_{ps}(t)}$) and individually measures the power for each entity.
 As carbon intensity is defined as the amount of carbon dioxide equivalent released per kilowatt-hour of energy \citep{owid-electricity-mix}, the power measurement is converted into a discrete amount of energy consumed within the timestep.
 This can be described as $\mathbf{Energy_{i}} = \mathbf{Power_{i}} \times \mathbf{10^{-3}} \times \mathbf{\varDelta T}$, where:
 \begin{itemize}
@@ -564,22 +565,22 @@ This can be described as $\mathbf{Energy_{i}} = \mathbf{Power_{i}} \times \mathb
     \item $\mathbf{\varDelta T}$ is the step in time in hours.
     \item $\mathbf{10^{-3}}$ is used to change to the kilo prefix.
 \end{itemize}
-From this, the power domain can calculate the carbon emitted by finding the product of this and the carbon intensity of the source through $\mathbf{Carbon Released = Energy_{i} \times CI_{ps(t)}}$.
+From this, the power domain can calculate the carbon emitted by finding the product of this and the carbon intensity of the source through $\mathbf{Carbon_Released = Energy_{i} \times CI_{ps(t)}}$.
 
 \subsection{Recording Measurements}\label{subsec:power-domain-recording-measurements}
 The final responsibility of the power domain is to record measurements generated during the simulation.
-Once an entity within the infrastructure has had their carbon emission calculated, the power domain gathers information about the current state of the entity and composes an entry log.
-In particular the following information about the entity's state is logged:
+Once the carbon emission of an entity within the infrastructure has been calculated, the power domain gathers information about its current state and composes an entry log.
+In particular, the following information about the entity's state is logged:
 \begin{itemize}
     \item The current time step.
     \item The associated power source.
     \item The energy consumed (in watt-hours).
     \item The carbon emitted.
-    \item The the remaining power available.
+    \item The remaining power available.
 \end{itemize}
 
-The power domain then proceeds to store this entry so it can be used later on.
-As ECO-LEAF allows for power consumption outside the power domain's workflow, the framework also provides a means to allow for these actions to be logged, ensuring that the file results of a simulation reflect the events that occurred.
+The power domain then stores this entry to be used later.
+As ECO-LEAF allows for power consumption outside the power domain's workflow, the framework also provides a means for logging these actions, ensuring that the file results of a simulation reflect the events that occurred.
 The structure of these logs can be seen in the example provided by Figure \ref{tree:log}:
 \begin{figure}[h]
 \centering
@@ -623,28 +624,29 @@ for tree={
 \end{figure}
 
 \section{Power Sources}
-The responsibility of a power source in ECO-LEAF is to provide power to entities in the infrastructure they are associated to.
+In ECO-LEAF, a power source's responsibility is to provide power to entities within the infrastructure it is associated with.
 The model classifies power sources as one of three types:
 \begin{enumerate}
     \item Renewable
     \item Mixed
     \item Battery
 \end{enumerate}
-Where each type is characterised based on their real life counter-parts.
-As power sources are used to describe the means of providing power to entities within the infrastructure (for instance onsite solar panels, a rechargeable battery for a mobile device, or even an external power grid), ECO-LEAF only considers carbon emissions from the power utilised from these sources by entities and not the supplies themselves.
-This is because the goal of the project is to estimate carbon emissions for executing applications on the infrastructure and not for generating power in general.
-As a consequence of this, the amount of carbon dioxide emitted because of an entity will be proportional to the power it consumed in the time step.
-This amount of carbon being proportional to it's current CI.
+where each type is characterised based on their real-life counterparts.
+As power sources describe the means of providing power to entities within the infrastructure (for instance, onsite solar panels, a rechargeable battery for a mobile device, or even an external power grid), ECO-LEAF only considers carbon emissions from the power utilised from these sources by entities and not the supplies themselves.
+This is because the project aims to estimate carbon emissions for executing applications on the infrastructure rather than for generating power in general.
+Consequently, the amount of carbon dioxide an entity emits will be proportional to the power it consumes in the time step.
+This amount of carbon is proportional to its current CI.
 
-As power sources are able to be distributed amongst infrastructure present in the power domain, it is assumed contextually that when an association occurs, a direct and appropriate power line is utilised from the power source to the device.
-Conceptualising this in a real life scenario, we would see that for every power source and entity pairing present in the power domain, a medium to carry the power (for instance a cable) would need to exist.
-However, for the simulation model, ECO-LEAF assumes that the rate of power transmission is instantaneous, as the latency in the transmission of electricity is negligible \citep{speed-of-electricity} and therefore is not required in the model.
-As ECO-LEAF operates in discrete periods of time ($\varDelta T$) power in reality, once measured by the model, is considered as energy consumed.
-\textit{However for the sake of readability the two terms are used interchangeably throughout the dissertation}.\\
+As power sources can be distributed amongst infrastructure present in the power domain, it is assumed contextually that when an association occurs, a direct and appropriate power line is utilised from the power source to the device.
+Conceptualising this in a real-life scenario, we would see that for every power source and entity pairing present in the power domain, a medium to carry the power (for instance, a cable) would need to exist.
+However, for the simulation model, ECO-LEAF assumes that the power transmission rate is instantaneous, as the latency in the transmission of electricity is negligible \citep{speed-of-electricity} and therefore is not required in the model.
+As ECO-LEAF operates in discrete periods ($\varDelta T$), power in reality, once measured by the model, is considered as energy consumed.
+However, for the sake of readability, the two terms are used interchangeably throughout the dissertation.\\
 
 While Section \ref{subsec:distributing-entities} discusses the idea that entities can be distributed amongst power sources, power sources can also retain a static relationship with entities in the infrastructure.
-For instance Figure \ref{fig:staticPower} shows how entities in a power domain are distributed over time, in particular the entities allocated to the national grid power supply have been permanently allocated and we can see as time moves forward in the simulation the entities remain locked to that power source.
-This feature has been designed to particularly address the scenario identified in \ref{DOMEWHER} when considering entities in the infrastructure that are mobile and would only require the use of a battery.
+For instance, Figure \ref{fig:staticPower} shows how entities in a power domain are distributed over time.
+In particular, the entities allocated to the national grid power supply have been permanently allocated, and we can see as time moves forward in the simulation, the entities remain locked to that power source.
+This feature has been designed to address the scenario identified in Section \ref{eval:subsec:scenario 7} when considering mobile entities in the infrastructure that would only require a battery.
 
 \begin{figure}[h]
     \centering
@@ -655,33 +657,33 @@ This feature has been designed to particularly address the scenario identified i
 \end{figure}
 
 \section{Event Domain}\label{sec:events}
-ECO-LEAF also introduces easier approaches in allowing actions to occur during the execution of the simulation.
-Events see to allow for changes in the model state at predefined periods of time.
-Events can be used in two approaches, act as singular atomic actions that occurs at a particular moment during the simulation or can be actions that occur periodically every $\mathbf{k\varDelta t}$.
-For instance events may be utilised to manage when applications are ran and terminated in the simulation, or could see to introduce or remove parts of any layer of the model to simulate real life situations such as compute nodes going down.
-As discussed in Section \ref{subsec:distributing-entities}, the power domain sees to carry out these actions before carrying out the remaining workflow.
-It is assumed that these events occur instantaneously despite these actions in a real life context may not being so.
-Figure \ref{fig:events} shows an illustrative example for how a simulation may utilise events to directly alter the state of the simulation to simulate particular scenarios.\\ \\
+ECO-LEAF also introduces more accessible approaches that allow actions to occur during the execution of the simulation.
+Events are seen to allow for changes in the model state at predefined moments in time.
+Events can be used in two approaches: act as singular atomic actions that occur at a particular moment during the simulation or can be actions that occur periodically every $\mathbf{k\varDelta t}$.
+For instance, events may be utilised to manage when applications are running and terminated in the simulation or could introduce or remove parts of any layer of the model to simulate real-life situations, such as compute nodes going down.
+As discussed in Section \ref{subsec:distributing-entities}, the power domain must carry out these actions before carrying out the remaining workflow.
+It is assumed that these events occur instantaneously despite these actions not being so in a real-life context.
+Figure \ref{fig:events} shows an illustrative example of how a simulation may utilise events to directly alter the state of the simulation to simulate particular scenarios.\\ \\
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{images/events.pdf}
+    \includegraphics[width=0.9\textwidth]{images/events.pdf}
     ~
     \caption{Diagram depicting an illustrative representation of how each layer in the ECO-LEAF architecture can be changed.}
     \label{fig:events}
 \end{figure}
-From what is shown we can see that events are bound to power domains rather than the model as a whole.
-The events in power domain 1 show how the power layer of the model can be changed, here we see a battery that is present in power domain 1 being regularly recharged.
-The events in power domain 2 depict how the application layer of the model can be changed, here we see the running of an application for $\mathbf{i - 1}$ units of time.
-Finally, the event in power domain 3 shows how the infrastructure layer can be changed, here we see how a node n can be introduced to the infrastructure in power domain n.
+What is shown we can see that events are bound to power domains rather than the model as a whole.
+The events in power domain 1 show how the model's power layer can be changed; here, we see a battery being regularly recharged.
+The events in power domain 2 depict how the application layer of the model can be changed; here, we see the running of an application for $\mathbf{i - 1}$ units of time.
+Finally, the event in power domain 3 shows how the infrastructure layer can be changed; here, we see how a node n can be introduced to the infrastructure in power domain n.
 
 \section{Displaying Results}\label{sec:displaying results}
-To provide a visual aid to analysing results, ECO-LEAF also sees to visualise the results generated from the simulation.
-It aims to achieve this by implementing a means for the user to specify what graphs they would want to see after the model finishes the simulation.
-The graphs will all appear in the same figure and would contain the necessary details to help the user understand the contents of the graphs.
-Because the simulation would deal with time moving forward, the graphs will be time series and have time on the x-axis to show how certain measurements such as carbon released for an entity or power source vary as time moves forward in the simulation.
-In addition to this, by having a file handling system in place also, the tool allows the user to specify what results are written to file and where they should be written to.
-This could also mean that the raw data being logged by the power domain as mentioned in Section \ref{subsec:power-domain-recording-measurements} can also be written out as well.
-By having the data saved to file, the user would be able to retrieve the results when they want to and can access them after the simulation has finished allowing for future analysis if needed.
+ECO-LEAF also visualises the results generated from the simulation to provide a visual aid for analysing results.
+It aims to achieve this by enabling the user to specify what graphs they want to see after the model finishes the simulation.
+The graphs will all appear in the same figure and contain the necessary details to help the user understand their contents.
+Because the simulation will deal with time moving forward, the graphs will be plotted as a time series with time on the x-axis to show how specific measurements, such as carbon released for an entity or power source, vary as time moves forward in the simulation.
+In addition, the tool has a file-handling system that allows the user to specify what results are written to a file and where they should be written.
+This could also mean that the raw data being logged by the power domain, as mentioned in Section \ref{subsec:power-domain-recording-measurements}, can be written out to file.
+By saving the data to a file, the user can retrieve the results when they want and access them after the simulation has finished, allowing for future analysis if needed.
 %==================================================================================================================================
 \chapter{Implementation}\label{chp:imp}
 
@@ -693,7 +695,7 @@ By having the data saved to file, the user would be able to retrieve the results
 The first task required at the start of development was to determine what programming language ECO-LEAF would use.
 As ECO-LEAF is a framework that requires users to work in this language to model their environments, the language must be chosen carefully.
 While the requirements of the project to adopt a particular language were never specified, as the project saw to continue the work made by \cite{leaf2021}, realistically, the language would either be Java (\textit{used for prototyping early versions of LEAF}) or Python (\textit{the current platform which sees active development}).
-Ultimately, the language that was chosen in the end was Python; the reason for this can be seen in why LEAF transitioned to Python in the first instance: ``the cleaner interface, improved usability, and bigger third party library support \citep{leaf-java-git}''.\\ \\
+Ultimately, the language that was chosen in the end was Python; the reason for this can be seen in why LEAF transitioned to Python in the first instance: ``The cleaner interface, improved usability, and bigger third-party library support \citep{leaf-java-git}''.\\ \\
 As ECO-LEAF utilises the current implementation of LEAF, a core development philosophy was to ensure that through good programming practises, as discussed by \citep{looseCoupling}, existing simulations and scenarios could be performed on the new model with no requirements to provide any power source or power domains.
 When work started on extending LEAF to introduce power sources and carbon awareness, considerations needed to be made on how these interactions could occur without enforcing these dependencies.
 As a result, this led to conceptualising the power domain as a mediator that allows these interactions to occur while retaining a loose coupling with the infrastructure class.
@@ -710,7 +712,7 @@ Figure \ref{fig:archtecture} shows in reality how the architecture of the model 
 As we can see, similar to how the orchestrator class mediates the relationships between the application and infrastructure layer, ECO-LEAF allows interactions to occur between the power source and infrastructure layer through power domains.
 
 \section{Fundamentals of ECO-LEAF}
-The following subsections go onto discuss the fundamental concepts used in developing ECO-LEAF, these cover the ideas and techniques that are common throughout the framework and act as to how the simulation can take place.
+The following subsections go on to discuss the fundamental concepts used in developing ECO-LEAF, cover the ideas and techniques that are common throughout the framework and act as to how the simulation can take place.
 
 \subsection{Discrete Event Simulations}\label{imp:subsec:des}
 As briefly mentioned in Section \ref{subsec:power-domain-workflow} LEAF and subsequently ECO-LEAF forward time through DESs.
@@ -778,7 +780,7 @@ To help illustrate this idea, Table \ref{tab:data-dic} visualises the first ten 
 Table \ref{tab:time-explanation} describes how this data describes the first 10 minutes of this power source's availability.
 \begin{table}[h]
     \rowcolors{2}{}{gray!3}
-    \caption{Table depicting the data held in file}
+    \caption{Table depicting the data held in the file.}
     \label{tab:data-dic}
     \centering
     \begin{tabular}{@{}ccc@{}}
@@ -842,7 +844,7 @@ this could potentially model external factors such as power cuts.
 The power domain's following core utility function is the ability to create and remove associations between infrastructure entities and the power domain.
 The power domain achieves this by calling add\_entity() and remove\_entity(), respectively.
 Similar to those for the power sources, add\_entity() and remove\_entity() safely add and remove infrastructure entities to the power domains list structure powered\_infrastructure.
-This feature could be useful by considering the proposed events system, where the dynamic mobility of entities within the network allows them to move from one power domain to another. For instance, a mobile phone being charged at one site and then another.
+This feature could be useful by considering the proposed events system, where the dynamic mobility of entities within the network allows them to move from one power domain to another. For instance, a mobile phone is being charged at one site and then another.
 
 The final core feature of the power domain is the function used to calculate the amount of carbon produced.
 As a core goal of the project was to introduce this ability, it was critical to provide this feature somewhere accessible to most classes.
@@ -853,7 +855,7 @@ Listing \ref{lst:calc-carbon} shows that the class function takes as arguments t
         return float(power_used) * (10 ** -3) * float(carbon_intensity)
 \end{lstlisting}
 
-Finally, the power domain also provides various small class functions to carry out common tasks, for instance convert\_to\_time\_string() and get\_current\_time().
+Finally, the power domain also provides various small class functions to carry out common tasks, for instance, convert\_to\_time\_string() and get\_current\_time().
 
 \subsubsection{Workflow}\label{imp:subsec:workflow}
 As discussed in Section \ref{subsec:power-domain-workflow}, the workflow of the power domain is where the main interactions between the Power and Infrastructure layers occur.
@@ -866,7 +868,7 @@ In addition, the power domain takes advantage of the ordering of its power\_sour
 The first for loop iterates through power\_sources in order to define each power source's available power and carbon intensity at that moment in the simulation.
 This is necessary before the next for loop, as the distribution process in the following stage considers the power and carbon intensity of other power sources. Therefore, these must be updated before the following stages occur.
 
-Once all the power sources have their values updated, each power source determines the infrastructure entities it will power for the current time step and logs its measurements.
+Once all the power sources have their values updated, each power source determines the infrastructure entities it will power for the current time step and log its measurements.
 We can take measurements at this stage because ECO-LEAF iterates through power sources in the order of most desirable as explained in \ref{subsec:distributing-entities}.
 Because of this, once a dynamic power source receives its allocated entities from the power domain, these entities will remain there until time moves forward.
 For static power sources, rather than receive entities through the distribution method, evaluate those with a constant relationship.
@@ -917,7 +919,7 @@ These values can later be used when analysing results.
 Power sources are implemented in ECO-LEAF using an abstract class to define the class instances' universal attributes and methods.
 By using abstract classes, the user can focus on defining the logic unique to a particular power source without having to consider implementing the functionality already defined in the abstract class.
 Because the power domain only considers a few abstract methods, the effort required to develop custom implementations of power sources is minimal.
-As discussed in Section \ref{sec:power-sources}, power sources are classified through two distinct features: their type and whether they are a static or dynamic power source.
+As discussed in Section \ref{sec:power-sources}, power sources are classified through two distinct features: their type and whether they are static or dynamic power sources.
 The power type of a power source is implemented through an enumerator to describe the three potential types that exist: RENEWABLE, MIXED and BATTERY.
 If the user wishes for a power source to maintain a constant relationship with a collection of entities, then the static argument must be set to True in the constructor along with providing the entities they wish to have an association.\\
 ECO-LEAF initialises power sources by defining a concrete instance of the PowerSource class.
@@ -937,16 +939,16 @@ The user achieves this through the arguments they provide during the initialisat
     \item \textbf{env}, the reference to the Environment() class used to simulate the model.
     \item \textbf{name}, the name of the power source, like the power domain, must be kept unique as it is used to identify itself.
     \item \textbf{data\_set\_filename}, this is the file path for the data that fluctuates: either the carbon intensity or available power.
-    \item \textbf{power\_domain}, this is power domain instance. NB, this is required to acknowledge the time the simulation starts.
+    \item \textbf{power\_domain}, this is the power domain instance. NB, this is required to acknowledge the time the simulation starts.
     \item \textbf{priority} is the integer that describes preference when distributing entities where 0 is the most important.
     \item \textit{(Optional)} \textbf{static}, this is a boolean flag to signal to the power domain, not to distribute entities to this power source.
     \item \textit{(Optional)} \textbf{powered\_infrastructure}, these are the entities the user wants to assign to a power source statically.
 \end{itemize}
 The PowerSource class represents the available power at any given moment in time by using a floating point variable \textit{remaining\_power}.
-While \cite{leaf2021} uses a power model in the Application and Infrastructure layer to represent static and dynamic power consumption, ECO-LEAF only needs a single value.
+While \cite{leaf2021} use a power model in the Application and Infrastructure layer to represent static and dynamic power consumption, ECO-LEAF only needs a single value.
 To convert from a PowerModel reading of power to a single value, the power domain casts the type as a float to retrieve the required power.
 
-\subsubsection{Evaluating Entities within Static Power sources}\label{imp:subsec:static-entities}
+\subsubsection{Evaluating Entities within Static Power Sources}\label{imp:subsec:static-entities}
 While the PoweredInfrastructureDistributor class distributes entities to dynamic power sources, static power sources also need to determine what entities they will power at each moment in the simulation.
 Because of this, the power source provides a crucial method called \textbf{evaluate\_entities}.
 The purpose of this method, \textit{just like the powered\_infrastructure\_distributor\_method}, is to determine which entities are powered at the current state of the simulation for static power sources.
@@ -1002,7 +1004,7 @@ After this, the event is added to the event\_history list data structure to log 
 Finally, the old event is flagged and ready to be deleted once all other events have been run.
 
 \section{Results}\label{sec:displaying-results}
-TThe final aspect introduced into ECO-LEAF is the ability to store and display results.
+The final aspect introduced into ECO-LEAF is the ability to store and display results.
 Using the data logged from Section \ref{imp:subsec:logging-results} ECO-LEAF allows the data generated during the simulation to be saved to a file and visualised through graphs and animations.
 It achieves this by using the Python packages Plotly \citep{plotly-git}, Matplotlib \citep{Hunter:2007} and NetworkX \citep{networkx}.
 Once the simulation has finished executing, the user is free to analyse the data however they deem fit.
@@ -1074,13 +1076,14 @@ Figure \ref{fig:dev-example7-animation} shows an example instance of this animat
 \section{Experimental Setup}\label{eval:sec:scenarios}
 To determine whether the goals laid out for ECO-LEAF in Chapter \ref{chp:intro} were met, various scenarios have been developed under the context of a farm located in Northern Ireland that utilises precision agriculture.
 Northern Ireland was chosen due to its variability in short-term weather and accessibility to public records about energy generation statistics.
-Throughout the chapter, these scenarios will slowly introduce the features proposed in ECO-LEAF and aim to demonstrate the framework's capabilities.
+Throughout the chapter, the evaluation will cover particular scenarios that effectively demonstrate the features proposed in ECO-LEAF.
 Using the goals as a reference, scenarios will identify when and why a particular goal has been met.
-The scenarios were designed to slowly introduce fundamental concepts of ECO-LEAF before moving on to more advanced examples. The last aims to demonstrate how ECO-LEAF can be deployed to analyse the impact of utilising various power sources across a distributed site.
+The scenarios were designed to slowly introduce fundamental concepts of ECO-LEAF before moving on to more advanced examples.
+While not all scenarios could be fully evaluated, their diagrams and results will be attached as appendices.
 
 \subsection{Precision Agriculture}\label{eval:subsec:precision-agriculture}
 Precision agriculture, also known as smart farming, is a farming technique that uses technology and data processing to optimise the various aspects of production in agriculture.
-The practice intends to use data analytics to increase efficiency, sustainability, and productivity compared to traditional farming practises \citep{precison-agriculture}.
+The practice intends to use data analytics to increase efficiency, sustainability, and productivity compared to traditional farming practices \citep{precison-agriculture}.
 It achieves this by encompassing a range of techniques such as precision crop management, remote sensing, and automated machinery.
 By using autonomous equipment to capture and react to information about the current landscape, the site-specific needs of a farm can be met, allowing for equal or larger yields whilst reducing their consumption of resources during the process \citep{precison-agriculture}.
 The practice can be represented in three main stages: Data capture, Interpretation, and Application.
@@ -1089,7 +1092,7 @@ Interpretation involves aggregating and processing the raw data before determini
 Finally, Application occurs to carry out these actions; this can be an automated or manual process.
 
 As precision agriculture utilises large-area data capturing and analysis, a network infrastructure is required to provide communications between sensors and processing services.
-Because of this, fog computing networks are able to be utilised to improve the sustainability of the practise \citep{fog_smart_farming}.
+Because of this, fog computing networks are able to be utilised to improve the sustainability of the practice \citep{fog_smart_farming}.
 
 \subsection{Defining Models}\label{eval:subsec:modelling}
 As the goal behind the scenarios is to demonstrate the functionality of ECO-LEAF, for the sake of consistency and unless specified otherwise, applications, infrastructure, and power sources will retain the same parameters used to model individual components throughout the evaluation.
@@ -1097,8 +1100,9 @@ As the goal behind the scenarios is to demonstrate the functionality of ECO-LEAF
 Applications represent the first two stages of precision agriculture: Data Capture and Interpretation.
 They describe streams of data being captured by sensors, which then travel to fog nodes for pre-processing before finally being handled by the cloud.
 Application tasks are modelled with pseudo-arbitrary values that consider the purpose of the hardware they run on.
+
 As LEAF allows for the CU of devices to be defined in any context, rather than use MIPS as discussed in Section \ref{leaf}, CU will be considered a generic value for computing load.
-This can occur as the accuracy of these values are irrelevant in the context of evaluating the aims of the project.
+This can occur as the accuracy of these values is irrelevant in the context of evaluating the aims of the project.
 As such, a task's required CU will represent the ratio of CU needed from the device to carry out the task.
 Source tasks are modelled to consume 9 CU (90\% of a sensor's computational load). As the sensor's primary goal is to take continuous measurements, the task can therefore consume most of the sensor's resources.
 Processing tasks are modelled to consume 50 CU (12.5\% of a fog node's computational load). This is because fog nodes are designed to receive data from multiple sensors.
@@ -1107,20 +1111,23 @@ Instead, this value is based on the processing task's CU. 150 CU was chosen to f
 
 \subsubsection{Infrastructure}
 Network topologies in the scenarios can consider four types of devices: Sensors, Drones, Microprocessors, and Servers.
+For the sake of simplicity, links are provided with no power model, to keep the focus on interactions with nodes, and can either represent a wireless WAN connection with a bandwidth of 30Mb/s or a wired connection with a bandwidth of 50Mb/s.
+
 A sensor describes the stationary devices that capture measurements about the farmland.
 The power model for sensors is based upon the requirements for the 6345CSOV Leaf and Soil Moisture/Temperature Station provided by \cite{prodataWeatherSystems}.
 The CU for a sensor is defined as 10 CU.
 In this context, drones are considered to be mobile end devices. While they will not be used until the final scenario, their model descriptions will be provided here.
 The drone power model is based upon the Matrice 300 RTK aircraft supplied by \cite{drone_spec}.
 As drones capture visual information about the farmland, their CU is set to 30 to reflect this.
+
 Microprocessors describe the fog nodes for the simulation, the fog node aims to alleviate computational demand from the server by preprocessing the data before arriving there.
 The microprocessor power model is based upon a Raspberry Pi 2 B with external USB 3.0 SSD \citep{pidramble}.
 Utilising such a power model, in comparison to what may be used in other scenarios, is necessary because the data being captured does not require computationally powerful hardware to preprocess the applications.
 Microprocessors use a CU of 400.
+
 Finally, servers describe the cloud computing devices of a fog network. Their goal is to aggregate and process the data captured in the simulation.
 As servers will be processing vast amounts of data, their power models will not consider a max power requirement and instead consume energy based on their current CU, using a rate to convert this to power.
 This value will be set to 20mW/CU because the value itself is irrelevant as long as it is used consistently throughout the evaluation.
-
 \subsubsection{Power Sources}
 Finally, solar, wind, battery, and national grid power sources are used throughout the scenarios.
 For solar and wind power, as the context considers a theoretical farm located in Northern Ireland, their power models retrieve historical datasets from \cite{eirgrid}.
@@ -1130,57 +1137,63 @@ When modelling grid power, we assume that power generation is infinite and CI fl
 This is modelled using the historical data set provided by the Carbon Intensity API \citep{carbon_intensity_api}.
 Finally, for battery power, only the available capacity of the device needs to be considered.
 As the context of the battery varies from scenario to scenario, the value will be discussed when appropriate.
+\clearpage
 
-\section{Scenarios 1 - A Singular Static Power Source}\label{eval:subsec:scenario1}
-Scenario 1 provides the simplest use case of ECO-LEAF and describes a static grid power source with 3 nodes.
-For context, the scenario explores a 9 minute event where soil moisture readings are being captured in real time and pre-processed before being transmitted to a remote server.
-The goal of this scenario is to demonstrate that entities within the infrastructure are allocated power and  produce carbon emissions as a result of being associated to a power source.
-As we can see, Figure \ref{fig:example1_diagram} demonstrates how the power, infrastructure and application layers interact.
-
+\section{Scenario 1 - A Singular Static Power Source}\label{eval:subsec:scenario1}
+Scenario 1 provides the simplest use case of ECO-LEAF and defines a static grid power source with a sensor, microprocessor, and server connected together.
+A single application runs on top of this, with the simulation lasting 10 minutes.
+The goals explicitly demonstrated here are 1.1, 1.2, 2.1, and 2.2.
+The aim is to show that entities within the infrastructure are allocated power and produce carbon emissions due to consuming this energy.
+Figure \ref{fig:example1_diagram} in the appendices illustrates how the power, infrastructure and application layers interact.
+\subsection{Scenario 1 Results and Analysis}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.4\textwidth]{images/examples/example_1/example1_diagram.pdf}
+    \includegraphics[width=\textwidth]{images/examples/example_1/energy_usage_1}
     ~
-    \caption{Illustration depicting scenario 1.}
-    \label{fig:example1_diagram}
+    \caption{Graphs showing energy usage throughout the simulation of scenario 1. For the full results please refer to Appendix \ref{apen:subsec:scen1}.}
+    \label{fig:example1_results_energy}
 \end{figure}
+Looking at Figure \ref{fig:example1_results_energy}, we can see that despite the basic nature of the scenario, Graphs 1.1 and 1.2 indicate that the correct amount of energy is being consumed from the power source.
+This can be seen as, at any given moment, the energy consumption for entities in Graph 1.1, when summed, equals the corresponding energy provided by the grid power source in Graph 1.2.
+The same relationship can also be seen in the carbon released for Graphs 1.3 and 1.4 in the appendices.
+This can be explained with the equation for carbon released defined in Section \ref{subsec:carbon-released}.
+As power and carbon emissions produced are proportional to one another, the carbon released is a scalar value of power consumed.
+Because of these results, goals 1.1, 1.2, 2.1, and 2.2 have all been met, as power sources can supply energy to network infrastructure and, as a consequence, produce carbon emissions.
 
-\textit{For results please refer to Appendix \ref{apen:subsec:scen1}}.\\
-
-\subsection{Scenario 1 Analysis}
-Looking at the results we can see that despite the basic nature of the scenario, Figures \ref{fig:example1-1} and \ref{fig:example1-2} indicate that the correct amount of power is being consumed from the power source.
-This can be seen as when at any given moment in time, the entities in Figure \ref{fig:example1-1} when summed equal the corresponding point in Figure \ref{fig:example1-2}.
-When inspecting the amount of carbon released the same behaviour can also be seen there too, as \ref{fig:example1-0} and \ref{fig:example1-3} show the same relationship between the carbon released for individual entities and the grid power source.
-This makes sense as when examining the equation for carbon intensity as defined in Section \ref{subsec:carbon-released}, we can see that both power and carbon released are proportional to one another.
-
-\section{Scenarios 2 - Multiple Dynamic Power Sources}\label{eval:subsec:scenario2}
+\section{Scenario 3 - A Custom Infrastructure Distributor}\label{eval:subsec:scenario3}
+Scenario 3 is designed to showcase the infrastructure's capability to assign nodes to different power sources, thereby fulfilling goals 1.3, 1.5, and 2.3.
+In the simulation, solar, wind, and grid energy sources are utilised, with power sources being prioritised in the same order.
+The simulation runs between the time 7pm and 8pm.
+In addition to the normal allocation process, the custom distribution method also assigns nodes with no max power requirement to power sources with infinite power availability.
+To see these changes, while the scenario's topology remains the same, the server's power model is modified to no longer consider a maximum power requirement.
+As such, the simulation results should show that despite grid energy being the least desirable, the server only receives power from this source while the sensor and microprocessor dynamically change power sources as the environment's state evolves.
+Figure \ref{fig:example3_diagram} illustrates an overview of the scenario.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/examples/example_2/example2_diagram.pdf}
-    ~
-    \caption{Illustration depicting scenario 2.}
-    \label{fig:example2_diagram}
-\end{figure}
-
-\section{Scenarios 3 - A Custom Infrastructure Distributor}\label{eval:subsec:scenario3}
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/examples/example_3/example3_diagram.pdf}
-    ~
+    \includegraphics[width=0.8\textwidth]{images/examples/example_3/example3_diagram.pdf}
     \caption{Illustration depicting scenario 3.}
     \label{fig:example3_diagram}
 \end{figure}
 
-\section{Scenarios 4 - An Off-Peak Battery Power Source}\label{eval:subsec:scenario4}
-\begin{figure}[h]
+\subsection{Scenario 3 Results and Analysis}
+Figure \ref{fig:example2_switch} displays the connections between various power sources and the infrastructure at two different times - 19:00:00 and 19:30:00.
+This figure was created by capturing individual frames from the animation tool provided by ECO-LEAF.
+At 19:00:00, we can see that the distribution method successfully supplied power to all entities in the infrastructure.
+As expected, all devices were running on solar power except for the server, which was connected to the grid.
+At exactly 7:30 pm, the distributor method correctly switched renewables and dynamically distributed power from the wind power source as the solar supply could no longer provide enough energy.
+However, as the links do not consume energy we still see associations between them and the solar power source.
+This can also be seen in Figure \ref{apen:scen3} as Graph 3.2 depicts the energy provided by power sources throughout the simulation.
+As expected, the desired characteristics can be seen: Grid power provided a consistent amount of energy (indicating that it always provided power to the server), solar power provided power up until 19:30:00 (as it could no longer generate power from the sun), and finally wind power (as the second most preferable power source) started to provide power once solar could no longer do so.
+Because of this, ECO-LEAF achieves goals 1.3, 1.5, and 2.3.
+Specifically, we see the solar power source fluctuate in power availability as a consequence of time, the power domain dynamically distributing infrastructure to other power sources, and finally, we see the ability to adjust the carbon emissions produced by defining the static CI of solar and wind power.
+\begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth]{images/examples/example_4/example4_diagram.pdf}
-    ~
-    \caption{Illustration depicting scenario 4.}
-    \label{fig:example4_diagram}
+    \includegraphics[width=0.9\textwidth]{images/examples/example_3/switch}
+    \caption{Graphs showing associations between infrastructure and power sources at the start of the simulation and 30 minutes through. For the full results please refer to Appendix \ref{fig:example3}.}
+    \label{fig:example2_switch}
 \end{figure}
 
-\section{Scenarios 5 - A Carbon Aware Application Orchestrator}\label{eval:subsec:scenario 5}
+\section{Scenario 5 - A Carbon Aware Application Orchestrator}\label{eval:subsec:scenario 5}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/examples/example_5/example5_diagram.pdf}
@@ -1188,8 +1201,10 @@ This makes sense as when examining the equation for carbon intensity as defined 
     \caption{Illustration depicting scenario 5.}
     \label{fig:example5_diagram}
 \end{figure}
+5)	2.4
 
-\section{Scenarios 6 - Cyclic Infrastructure Pausing}\label{eval:subsec:scenario 6}
+
+\section{Scenario 6 - Cyclic Infrastructure Pausing}\label{eval:subsec:scenario 6}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/examples/example_6/example6_diagram.pdf}
@@ -1197,8 +1212,10 @@ This makes sense as when examining the equation for carbon intensity as defined 
     \caption{Illustration depicting scenario 6.}
     \label{fig:example6_diagram}
 \end{figure}
+6)	1.4
 
-\section{Scenarios 7 - Precision Agriculture}\label{eval:subsec:scenario 7}
+
+\section{Scenario 7 - Precision Agriculture}\label{eval:subsec:scenario 7}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{images/examples/example_7/example7_diagram.pdf}
@@ -1336,68 +1353,99 @@ This makes sense as when examining the equation for carbon intensity as defined 
     }
 }
 \end{lstlisting}
-
 \clearpage
 \section{Results for Scenarios}\label{apen:subsec:scen1}
+\subsection{Scenario 1}\label{apen:scen1}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/examples/example_1/example1_diagram.pdf}
+    ~
+    \caption{Diagram depicting scenario 1.}
+    \label{fig:example1_diagram}
+\end{figure}
+\clearpage
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_1/figure}
     ~
-    \caption{Graph showing the results for example scenario 1.}
+    \caption{Graph showing the full results for Scenario 1.}
     \label{fig:example1}
 \end{figure}
 
 \clearpage
+\subsection{Scenario 2}\label{apen:scen2}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth,angle=270]{images/examples/example_2/example2_diagram.pdf}
+    ~
+    \caption{Diagram depicting scenario 2.}
+    \label{fig:example2_diagram}
+\end{figure}
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_2/figure}
     ~
-    \caption{Graph showing the results for example scenario 2.}
+    \caption{Graph showing the full results for Scenario 2.}
     \label{fig:example2}
 \end{figure}
 
 \clearpage
+\subsection{Scenario 3}\label{apen:scen3}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{images/examples/example_3/figure}
+    \includegraphics[width=0.91\textwidth]{images/examples/example_3/figure}
     ~
-    \caption{Graph showing the results for example scenario 3.}
+    \caption{Graph showing the full results for Scenario 3.}
     \label{fig:example3}
 \end{figure}
 
 \clearpage
+\subsection{Scenario 4}\label{apen:scen4}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth,angle=270]{images/examples/example_4/example4_diagram.pdf}
+    ~
+    \caption{Diagram depicting scenario 4.}
+    \label{fig:example4_diagram}
+\end{figure}
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_4/figure}
     ~
-    \caption{Graph showing the results for example scenario 4.}
+    \caption{Graph showing the full results for Scenario 4.}
     \label{fig:example4}
 \end{figure}
 
 \clearpage
+\subsection{Scenario 5}\label{apen:scen5}
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_5/figure}
     ~
-    \caption{Graph showing the results for example scenario 5.}
+    \caption{Graph showing the full results for Scenario 5.}
     \label{fig:example5}
 \end{figure}
 
 \clearpage
+\subsection{Scenario 6}\label{apen:scen6}
+
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_6/figure}
     ~
-    \caption{Graph showing the results for example scenario 6.}
+    \caption{Graph showing the full results for Scenario 6.}
     \label{fig:example6}
 \end{figure}
 
 \clearpage
+\subsection{Scenario 7}\label{apen:scen7}
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_7/plot0}
     ~
-    \caption{Graph showing the results for example scenario 7 plot 1.}
+    \caption{Graph showing the full results for Scenario 7 Plot 1.}
     \label{fig:example7_plot1}
 \end{figure}
 
@@ -1407,7 +1455,7 @@ This makes sense as when examining the equation for carbon intensity as defined 
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_7/plot1}
     ~
-    \caption{Graph showing the results for example scenario 7 plot 2.}
+    \caption{Graph showing the full results for Scenario 7 Plot 2.}
     \label{fig:example7_plo2}
 \end{figure}
 
@@ -1416,7 +1464,7 @@ This makes sense as when examining the equation for carbon intensity as defined 
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_7/plot2}
     ~
-    \caption{Graph showing the results for example scenario 7 plot 3.}
+    \caption{Graph showing the full results for Scenario 7 Plot 3.}
     \label{fig:example7_plot3}
 \end{figure}
 
@@ -1425,7 +1473,7 @@ This makes sense as when examining the equation for carbon intensity as defined 
     \centering
     \includegraphics[width=\textwidth]{images/examples/example_7/plot3}
     ~
-    \caption{Graph showing the results for example scenario 7 plot 4.}
+    \caption{Graph showing the full results for Scenario 7 Plot 4.}
     \label{fig:example7_plot4}
 \end{figure}
 
