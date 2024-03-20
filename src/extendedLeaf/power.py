@@ -687,6 +687,7 @@ class PowerDomain:
         current_power_source_dictionary["Total Carbon Released"] = current_power_source_carbon_released
         current_power_source_dictionary["Power Available"] = current_power_source.get_current_power()
 
+
         return current_power_source_dictionary
 
     def update_logs(self):

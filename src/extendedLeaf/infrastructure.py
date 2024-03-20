@@ -97,7 +97,7 @@ class Node(PowerAware):
     def pause(self):
         if self.paused:
             raise ValueError(f"Error, node already paused")
-        self.recover_task_power = self.measure_power()
+        self.recover_task_power = self.power_model.update_sensitive_measure(1)
         self.paused = True
         for current_task in self.tasks:
             application = current_task.application
@@ -212,7 +212,7 @@ class Link(PowerAware):
     def pause(self):
         if self.paused:
             raise ValueError(f"Error, link already paused")
-        self.recover_task_power = self.measure_power()
+        self.recover_task_power =  self.power_model.update_sensitive_measure(1)
         self.paused = True
         for current_data_flow in self.data_flows:
             if current_data_flow.paused is False:

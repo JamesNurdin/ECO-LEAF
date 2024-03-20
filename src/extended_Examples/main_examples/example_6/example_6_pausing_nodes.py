@@ -84,17 +84,17 @@ def main():
     Log Output:
         INFO	Placing Application(tasks=3):
         INFO	- SourceTask(id=0, cu=0.135) on Node('Sensor_0', cu=0/10.40723309678577).
-        INFO	- ProcessingTask(id=1, cu=50) on Node('Microprocessor_19', cu=0/413.73667893270886).
+        INFO	- ProcessingTask(id=1, cu=50) on Node('Microprocessor_45', cu=0/413.4351017695709).
         INFO	- SinkTask(id=2, cu=150) on Node('Server', cu=0/inf).
-        INFO	- DataFlow(bit_rate=1000) on [Link('Sensor_0' -> 'Microprocessor_19', bandwidth=0/43199872.458395794)].
-        INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor_19' -> 'Server', bandwidth=0/30199540.800222687)].
+        INFO	- DataFlow(bit_rate=1000) on [Link('Sensor_0' -> 'Microprocessor_45', bandwidth=0/55698945.73270142)].
+        INFO	- DataFlow(bit_rate=300) on [Link('Microprocessor_45' -> 'Server', bandwidth=0/29893092.583964024)].
+        INFO	Placing Application(tasks=3):
         ...
 
-        DEBUG	597: infrastructure_meter: PowerMeasurement(dynamic=126.85W, static=300.35W)
-        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=126.85W, static=300.35W)
-        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=126.85W, static=300.35W)
-        INFO	Total infrastructure power usage: 233890.81363972806 Ws
-        INFO	Total carbon emitted: 395.8367950031961 gCo2
+        DEBUG	598: infrastructure_meter: PowerMeasurement(dynamic=195.51W, static=380.32W)
+        DEBUG	599: infrastructure_meter: PowerMeasurement(dynamic=195.51W, static=380.32W)
+        INFO	Total infrastructure power usage: 302325.10891564295 Ws
+        INFO	Total carbon emitted: 501.64921496653466 gCo2
     """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -139,7 +139,7 @@ def main():
 
     env.process(infrastructure_pm.run(env))
 
-    env.run(until=600)  # run the simulation for 10 hours (until the battery is fully drained)
+    env.run(until=600)  # run the simulation for 10 hours
 
     logger.info(f"Total infrastructure power usage: {float(PowerMeasurement.sum(infrastructure_pm.measurements))} Ws")
     logger.info(f"Total carbon emitted: {power_domain.return_total_carbon_emissions()} gCo2")
@@ -180,7 +180,7 @@ def main():
     main_fig = FigurePlotter.aggregate_subplots(figs,title="Results for Example 6.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
     main_fig.show()
-    main_fig = FigurePlotter.aggregate_subplots([fig3,fig6], title="Results for Example 6.")
+    main_fig = FigurePlotter.aggregate_subplots([fig2,fig6], title="Results for Example 6.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=2,filename="example_6_cutoff")
 
 class CustomOrchestrator(Orchestrator):

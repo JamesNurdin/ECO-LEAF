@@ -225,9 +225,7 @@ textfont=it,tableposition=above]{caption}
           \chapter*{Education Use Consent}
 
           I hereby grant my permission for this project to be stored, distributed and shown to other
-          University of Glasgow students and staff for educational purposes. 
-          \textbf{Please note that you are under no obligation to sign 
-          this declaration, but doing so would help future students.}
+          University of Glasgow students and staff for educational purposes.
 
           \begin{tabular}{@{}llll}
                 &                     &            &                     \\

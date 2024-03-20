@@ -148,11 +148,19 @@ class Farm:
     def __init__(self, env: simpy.Environment):
         self.env = env
         self.infrastructure = Infrastructure()
+        self.main_power_domain = PowerDomain(self.env, name="farm_cloud_power_domain", start_time_str=START_TIME,
+                                        update_interval=1)
         self.cloud = Cloud()
-        self.infrastructure.add_node(self.cloud)
-        self.plots: [Plot] = self._create_farm_plots(START_TIME)
+        self.main_grid = GridPower(self.env, name=f"Main_GridPower",
+                  power_domain=self.main_power_domain, priority=5,
+                  static=True,powered_infrastructure=[self.cloud])
 
+        self.main_power_domain.add_power_source(self.main_grid)
+        self.infrastructure.add_node(self.cloud)
+
+        self.plots: [Plot] = self._create_farm_plots(START_TIME)
     def run(self, env):
+        env.process(self.main_power_domain.run(env))
         for plot in self.plots:
             env.process(plot.power_domain.run(env))
 

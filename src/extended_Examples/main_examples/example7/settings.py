@@ -2,21 +2,8 @@ import numpy as np
 
 from src.extendedLeaf.power import WindPower, GridPower, SolarPower
 
-RNG = np.random.default_rng(seed=0)  # Random Number Generator
-
-"""The following two parameters were altered in the different experiments"""
-FOG_DCS = 0
-FOG_IDLE_SHUTDOWN = False
-
-MEASURE_INFRASTRUCTURE = True
-MEASURE_APPLICATIONS = True
-
 """Simulation duration and intervals in simulated seconds"""
-SIMULATION_TIME = 360
-CARBON_AWARE = True
 UPDATE_MOBILITY_INTERVAL = 3
-POWER_MEASUREMENT_INTERVAL = 1
-UPDATE_WIFI_CONNECTIONS_INTERVAL = 60
 
 START_TIME = "11:00:00"
 
