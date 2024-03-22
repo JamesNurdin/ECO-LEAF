@@ -2,11 +2,11 @@ import networkx as nx
 import matplotlib
 import simpy
 
-from src.extended_Examples.main_examples.example7.infrastructure import *
+from src.extended_Examples.main_examples.example_7.infrastructure import *
 from src.extendedLeaf.mobility import Location
-from src.extended_Examples.main_examples.example7.orchestrator import FarmOrchestrator
+from src.extended_Examples.main_examples.example_7.orchestrator import FarmOrchestrator
 from src.extendedLeaf.power import PowerDomain, PowerSource
-from src.extended_Examples.main_examples.example7.settings import *
+from src.extended_Examples.main_examples.example_7.settings import *
 from src.extendedLeaf.infrastructure import Infrastructure
 
 matplotlib.use('TkAgg')

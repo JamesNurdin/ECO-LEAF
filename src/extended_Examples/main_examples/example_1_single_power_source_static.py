@@ -118,11 +118,11 @@ def main():
                                                             title="(1.2) Time Series of Energy Provided from Grid Power.")
     fig3 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       axis_label="Carbon Released (gC02eq)",
                                                        title="(1.3) Time Series of Carbon Released for Infrastructure.")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[grid],
-                                                            axis_label="Carbon Released (gC02eq/kWh)",
+                                                            axis_label="Carbon Released (gC02eq)",
                                                             title="(1.4) Time Series of Carbon Released for Grid Power.")
 
     figs = [fig1, fig2, fig3, fig4]
@@ -131,10 +131,11 @@ def main():
         file_handler.write_figure_to_file(main_fig, 1, filename=f"example_1-{i}")
     main_fig = figure_plotter.aggregate_subplots(figs,title="Results for Example 1.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs))
+    main_fig.show()
+
     figs = [fig1, fig2]
     main_fig = figure_plotter.aggregate_subplots(figs, title="Energy Usage for Example 1.")
     file_handler.write_figure_to_file(figure=main_fig, number_of_figs=len(figs), filename=f"energy_usage_1")
-    main_fig.show()
 
 
 class ExampleOrchestrator(Orchestrator):

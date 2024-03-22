@@ -2,9 +2,9 @@ import simpy
 
 from src.extendedLeaf.events import EventDomain, Event
 from src.extendedLeaf.file_handler import FileHandler, FigurePlotter
-from src.extended_Examples.main_examples.example7.farm import Farm
-from src.extended_Examples.main_examples.example7.mobility import MobilityManager
-from src.extended_Examples.main_examples.example7.settings import START_TIME
+from src.extended_Examples.main_examples.example_7.farm import Farm
+from src.extended_Examples.main_examples.example_7.mobility import MobilityManager
+from src.extended_Examples.main_examples.example_7.settings import START_TIME
 
 
 def main():
@@ -50,11 +50,11 @@ def main():
                                                                 title=f"(7.{i+1}.3) Time Series of Energy Provided by Power Sources.")
         fig3 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                            entities=plot.all_entities,
-                                                           axis_label="Carbon Released (gC02eq/kWh)",
+                                                           axis_label="Carbon Released (gC02eq)",
                                                            title=f"(7.{i+1}.4) Time Series of Carbon Released for Infrastructure.")
         fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                                 power_sources=plot.power_sources,
-                                                                axis_label="Carbon Released (gC02eq/kWh)",
+                                                                axis_label="Carbon Released (gC02eq)",
                                                                 title=f"(7.{i+1}.5) Time Series of Carbon Released for Power Sources.")
         fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                                 power_sources=plot.power_sources,
@@ -62,7 +62,7 @@ def main():
                                                                 title=f"(7.{i+1}.2) Time Series of Power Available for Power Sources.")
         fig6 = figure_plotter.subplot_time_series_power_sources("Total Carbon Released",
                                                                 power_sources=plot.power_sources,
-                                                                axis_label="(gC02/kWh)",
+                                                                axis_label="(gC02eq)",
                                                                 title_attribute=f"Total Carbon Released",
                                                                 title=f"(7.0.{i+1}) Timeseries for Total Carbon Released for Power Sources.")
 

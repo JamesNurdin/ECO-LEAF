@@ -68,7 +68,7 @@ def main():
         DEBUG	599: application_1_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         DEBUG	599: application_2_meter: PowerMeasurement(dynamic=0.00W, static=0.00W)
         INFO	Total infrastructure power usage: 20296.043750000008 Ws
-        INFO	Total carbon emitted: 56.97169677666652 gCo2
+        INFO	Total carbon emitted: 56.33289374999988 gCo2
          """
     env = simpy.Environment()  # creating SimPy simulation environment
     infrastructure = Infrastructure()
@@ -187,11 +187,11 @@ def main():
                                                             title="(5.2) Time Series of Energy Provided by Power Sources.")
     fig4 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       axis_label="Carbon Released (gC02eq)",
                                                        title="(5.3) Time Series of Carbon Released for Infrastructure.")
     fig5 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid_power, battery_power],
-                                                            axis_label="Carbon Released (gC02eq/kWh)",
+                                                            axis_label="Carbon Released (gC02eq)",
                                                             title="(5.4) Time Series of Carbon Released for Power Sources.")
     fig7 = figure_plotter.subplot_time_series_entities("Power Used",
                                                          entities=[solar_microprocessor],

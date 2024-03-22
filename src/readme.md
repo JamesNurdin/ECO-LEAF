@@ -22,7 +22,7 @@ Using a listed version of python, navigate to the `src` directory of the project
 Once inside the directory, either by using a new or existing python environment, issue the command: `pip install extended_LEAF-1.0.tar.gz` to install the dependencies onto the python environment.
 
 ## Running examples
-If an IDE is being used i.e. PyCharm:
+If an IDE is being used, i.e. PyCharm:
 * Simply right-click the example that is desired to be run and click `run`.
 * Alternatively, enter the python console and issue the command `execfile('<Name_of_example_file.py>')`
 

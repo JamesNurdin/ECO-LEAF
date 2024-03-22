@@ -1,5 +1,5 @@
 from src.extendedLeaf.application import Application, ProcessingTask, SourceTask, SinkTask
-from src.extended_Examples.main_examples.example7.settings import *
+from src.extended_Examples.main_examples.example_7.settings import *
 
 
 class SensorApplication(Application):

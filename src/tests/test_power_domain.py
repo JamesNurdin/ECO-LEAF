@@ -79,13 +79,15 @@ class TestPowerDomain(unittest.TestCase):
         mock_entity_1 = MagicMock(name='mock_entity_1_name')
         mock_entity_2 = MagicMock(name='mock_entity_2_name')
         mock_current_power_source.powered_infrastructure = [mock_entity_1, mock_entity_2]
+        mock_current_power_source.get_current_power.return_value = 10
         mock_entity_1.power_model.update_sensitive_measure.return_value = 50.0
         mock_current_power_source.get_current_carbon_intensity.return_value = 0.5
         mock_entity_2.power_model.update_sensitive_measure.return_value = 75.0
         expected_dict = {
             mock_entity_1.name: {'Power Used': 50.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.025},
             mock_entity_2.name: {'Power Used': 75.0, 'Carbon Intensity': 0.5, 'Carbon Released': 0.0375},
-            "Total Carbon Released": 0.0375+0.025
+            "Total Carbon Released": 0.0375+0.025,
+            "Power Available": 10
         }
 
         result_dict = self.power_domain.record_power_source_carbon_released(mock_current_power_source)

@@ -1,6 +1,6 @@
 from src.extendedLeaf.mobility import Location
-from src.extended_Examples.main_examples.example7.application import SensorApplication, DroneApplication
-from src.extended_Examples.main_examples.example7.settings import *
+from src.extended_Examples.main_examples.example_7.application import SensorApplication, DroneApplication
+from src.extended_Examples.main_examples.example_7.settings import *
 from src.extendedLeaf.infrastructure import Link, Node
 from src.extendedLeaf.power import PowerModelLink, PowerModelNode, BatteryPower
 

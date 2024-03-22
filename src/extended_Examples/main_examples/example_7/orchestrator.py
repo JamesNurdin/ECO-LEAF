@@ -2,8 +2,8 @@ import networkx as nx
 import numpy as np
 
 from src.extendedLeaf.application import Application, ProcessingTask
-from src.extended_Examples.main_examples.example7.infrastructure import Cloud
-from src.extended_Examples.main_examples.example7.settings import FOG_UTILIZATION_THRESHOLD
+from src.extended_Examples.main_examples.example_7.infrastructure import Cloud
+from src.extended_Examples.main_examples.example_7.settings import FOG_UTILIZATION_THRESHOLD
 from src.extendedLeaf.infrastructure import Infrastructure, Node
 from src.extendedLeaf.orchestrator import Orchestrator
 

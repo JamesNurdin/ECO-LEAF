@@ -142,11 +142,11 @@ def main():
                                                             title="(4.3) Time Series of Energy Provided by Power Sources.")
     fig3 = figure_plotter.subplot_time_series_entities("Carbon Released",
                                                        entities=entities,
-                                                       axis_label="Carbon Released (gC02eq/kWh)",
+                                                       axis_label="Carbon Released (gC02eq)",
                                                        title="(4.4) Time Series of Carbon Released for Infrastructure.")
     fig4 = figure_plotter.subplot_time_series_power_sources("Carbon Released",
                                                             power_sources=[solar_power, grid, battery_power],
-                                                            axis_label="Carbon Released (gC02eq/kWh)",
+                                                            axis_label="Carbon Released (gC02eq)",
                                                             title="(4.5) Time Series of Carbon Released for Power Sources.")
     fig5 = figure_plotter.subplot_time_series_power_sources("Power Available",
                                                             power_sources=[battery_power],

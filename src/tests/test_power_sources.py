@@ -360,11 +360,11 @@ class TestBatteryPower(unittest.TestCase):
         # Create a mock power domain for testing
         other_mock_power_domain = MagicMock()
         other_mock_power_domain.start_time_string = "10:00:00"
-        other_power_source = SolarPower(MagicMock(), "Test Solar Power Source", "test_data.csv",
+        other_power_source = GridPower(MagicMock(), "Test Grid Power Source", "test_data.csv",
                                         other_mock_power_domain, priority=1)
         other_power_source.update_power_available()
 
-        self.power_source.remaining_power = 10
+        self.power_source.remaining_power = 5
         self.power_source.recharge_battery(other_power_source)
         self.assertEqual(self.power_source.get_current_power(), self.power_source.get_total_power())
 

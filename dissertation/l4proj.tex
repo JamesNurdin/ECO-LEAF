@@ -106,24 +106,25 @@
 %    - i'm also missing a bit more of a problem: this is already quite focused on abilities and framework features
 
 \section{Motivation}\label{intro:subsec:motivation}
+\citep{en12010184}
 Over the past decade, the information and communication technology (ICT) industry has drastically increased its share of global energy consumption and, consequently, its emission of greenhouse gasses.
 A recent study approximates that the ICT industry emits around 2.1-3.9 \% of global greenhouse gas emissions \citep{current_energy_consumption}.
-With the ever-increasing energy requirements from power intensive services like cloud computing, the ICT industry is expected to consume even more of global greenhouse gas emissions in the future \citep{co2Challenges}.
-Consequently, as the industry continues to demand larger energy requirements, it imposes a greater environmental threat to meet this demand.
+With the ever-increasing energy requirements from power-intensive services like cloud computing, the ICT industry is expected to consume even more of global greenhouse gas emissions in the future \citep{co2Challenges}.
+Consequently, as the industry continues to demand larger energy requirements, it imposes a more significant environmental threat to meet this demand.
 In an attempt to circumvent this, the discipline of sustainable computing has become a vital area of study within computer science to reduce the industry's impact on the environment.
 
-One proposed solution currently in efforts to help decentralise this energy demand is a distributed computation process called edge/fog computing.
+One proposed solution currently in efforts to help decentralise this energy demand is a distributed computation platform called edge/fog computing.
 Rather than carrying out centralised processing at the centre of a network, the technique sees to locally execute processes at the edge on less power-intensive devices before being transported to the intended destination.
-To facilitate research and industrial applications of the technique, a variety of software tools currently exist to model these particular environments by considering interactions of network infrastructure and the running of applications inside a simulation space.
+To facilitate research and industrial applications of the platform, various software tools currently exist to model these particular environments by considering interactions of network infrastructure and the running of applications inside a simulation space.
 In order to effectively model their environments, many tools take into account a range of considerations that are unique to edge/fog computing.
 These considerations might reflect the granularity and reliability of communications within the network \citep{FogNetSim}, the representation of network infrastructure \citep{ENIGMA}, and even the optimisation of a network's performance \citep{EdgeCloudSim}.
-However, only a few available tools currently place an emphasis on how power consumption can be modelled.
+However, only a few available tools currently emphasise how power consumption can be modelled.
 One such tool, LEAF (Large Energy-Aware Fog computing environments) \citep{leaf2021}, was previously developed to provide analytical power modelling inside an edge/fog computing simulation.
 
-Despite the variety of edge/fog computing simulation tools that do incorporate power modelling into their environments, many of these tools, are yet to model how power can be provided to network infrastructure and estimate the carbon footprint produced as a result.
-The proposed solution, Energy sources And Carbon emission Offerings in Large Energy-Aware Fog computing environments (ECO-LEAF), seeks to introduce the ability to model various battery, grid and on-site renewable power sources to be provide energy to network infrastructure.
+Despite the variety of edge/fog computing simulation tools that incorporate power modelling into their environments, many of these tools have yet to model how power can be provided to network infrastructure and estimate the carbon footprint produced as a result.
+The proposed solution, Energy sources And Carbon emission Offerings in Large Energy-Aware Fog computing environments (ECO-LEAF), seeks to introduce the ability to model various battery, grid, and on-site renewable power sources to provide energy to network infrastructure.
 In particular, ECO-LEAF also aims to consider how these power sources can vary in energy availability and carbon intensity at various times and locations.
-Finally, using these models, ECO-LEAF aims to provide estimations for carbon footprints for infrastructure within the network.
+Finally, using these models, ECO-LEAF aims to estimate carbon footprints for infrastructure within the network.
 By introducing these tools, ECO-LEAF aims to provide further research and industrial opportunities to utilise fog computing by being able to take into consideration the carbon produced as a result of running the environment.
 
 %   - estimation of carbon emissions is one aim, but being able to assess "how exploiting opportunities can reduce the carbon footprint" is another, yet that isn't presented in much detail
@@ -266,7 +267,7 @@ For instance, \cite{academic_ci} provide a framework to measure the CI of artifi
     \centering
     \includegraphics[width=0.80\textwidth]{images/CarbonIntensityScotland}
     ~
-    \caption{Graph showing the carbon intensity for Scotland's national grid for the 8th of August 2020.}
+    \caption{Graph showing the carbon intensity for Scotland's national grid for the 8th of August 2020. Retrieved from the \cite{carbon_intensity_api}}
     \label{fig:carbonIntensityScotland}
 \end{figure}
 
@@ -699,7 +700,7 @@ The first task required at the start of development was to determine what progra
 As ECO-LEAF is a framework that requires users to work in this language to model their environments, the language must be chosen carefully.
 While the requirements of the project to adopt a particular language were never specified, as the project saw to continue the work made by \cite{leaf2021}, realistically, the language would either be Java (\textit{used for prototyping early versions of LEAF}) or Python (\textit{the current platform which sees active development}).
 Ultimately, the language that was chosen in the end was Python; the reason for this can be seen in why LEAF transitioned to Python in the first instance: ``The cleaner interface, improved usability, and bigger third-party library support \citep{leaf-java-git}''.\\ \\
-As ECO-LEAF utilises the current implementation of LEAF, a core development philosophy was to ensure that through good programming practises, as discussed by \citep{looseCoupling}, existing simulations and scenarios could be performed on the new model with no requirements to provide any power source or power domains.
+As ECO-LEAF utilises the current implementation of LEAF, a core development philosophy was to ensure that through good programming practises, as discussed by \citep{looseCoupling}, existing simulations and scenarios could be performed on the new model with as few requirements to provide any power source or power domains.
 When work started on extending LEAF to introduce power sources and carbon awareness, considerations needed to be made on how these interactions could occur without enforcing these dependencies.
 As a result, this led to conceptualising the power domain as a mediator that allows these interactions to occur while retaining a loose coupling with the infrastructure class.
 Figure \ref{fig:archtecture} shows in reality how the architecture of the model was implemented.
@@ -719,7 +720,7 @@ The following subsections go on to discuss the fundamental concepts used in deve
 
 \subsection{Discrete Event Simulations}\label{imp:subsec:des}
 As briefly mentioned in Section \ref{subsec:power-domain-workflow} LEAF and subsequently ECO-LEAF forward time through DESs.
-ECO-LEAF incorporates this through the use of the Python SimPy package \cite{simpy}.
+ECO-LEAF incorporates this through the use of the Python SimPy package \citep{simpy}.
 Looking at Listing \ref{lst:simpy} we can provide an example to show how the SimPy package can create a simulation instance and execute code periodically:
 \begin{lstlisting}[language=python, numbers=left, caption={Example use of the SimPy environment}, label=lst:simpy]
     def driver_Method():

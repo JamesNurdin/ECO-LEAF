@@ -48,27 +48,27 @@
 * *1.5 Hours* Continued on with exploring the LEAF architecture and finished working on my own example using the two provided ones for help, in particular created two linked nodes so far with power monitors between them, plan to create a custom application that uses these nodes as a source and sink.
 * *1 Hour* changed the model to reflect a more advanced infrastructure and application, also introduced error catchment when pulling national grid carbon intensities
 ### 2nd October 2023
-* *1 Hour* Started on the presentation for Lauritz to show progress of this week's work, also showing him my understanding of the LEAF API, in preparation I also went over the LEAF paper and API
+* *1 Hour* Started on the presentation for Lauritz to show progress of this week's work, also showing him my understanding of the LEAF API; in preparation I also went over the LEAF paper and API
 * *0.5 Hours* Planned a quick timeline to how the following weeks should proceed as
 ### 3rd October 2023
 * *1.5 Hours* Finished the PowerPoint presentation in preparation for the meeting tomorrow, sent it to Lauritz to review beforehand along with the custom example that was worked on.
 ### 4th October 2023
-* *1 Hour* Met with Lauritz and presented the PowerPoint demonstrating the work done, discussed the work to get done by next meeting and concluded that the PowerPoints aren't needed and shouldn't be prioritised but can be used during meetings to help workflow. In addition to this recorded the minutes and updated the respective moodle page.
+* *1 Hour* Met with Lauritz and presented the PowerPoint demonstrating the work done, discussed the work to get done by the next meeting and concluded that the PowerPoints aren't needed and shouldn't be prioritised but can be used during meetings to help workflow. In addition to this, recorded the minutes and updated the respective Moodle page.
 ### 7th October 2023
-* *3 Hours* Researched three valid data sets for the three main power sources that will be used to reference potential power models in the project, the three are the UK power grid, Ireland's offshore wind generation and a various sites of London with solar energy readings.  
+* *3 Hours* Researched three valid data sets for the three main power sources that will be used to reference potential power models in the project, the three are the UK power grid, Ireland's offshore wind generation and various sites in London with solar energy readings.  
 ### 8th October 2023
-* *2 Hours* Initial research and exploring into the background for the accurate example; idea will be a local content distribution network, in particular the idea works around "users" sending data to these cache sites throughout the day with peaks occurring towards the evening
+* *2 Hours* Initial research and exploring into the background for an accurate example; an idea will be a local content distribution network. In particular, the idea works around "users" sending data to these cache sites throughout the day with peaks occurring towards the evening
 
 ## Week 4
 ### 9th October 2023
-* *2 Hours* Started planning on a potential working example by determining the infrastructure of the network, in particular it will have various caches that will allow for data to be stored into locally, there will be a probability associated if these caches can store data if it fails to do so (indicating that the cache is full) it will move to the next until finally storing the data to the cloud
-* *4.5 Hours* Worked on creating the infrastructure for the example, plan is for tomorrow to finish off the application and placement strategy for the tasks. It should work by randomly assigning an application to a work station and then a submission should be sent from the workstation to a cache which "determines" if the data can be stored, if not then the request should be furthered to the cloud where the result should then be returned to the user.
+* *2 Hours* Started planning on a potential working example by determining the infrastructure of the network. In particular, it will have various caches that will allow for data to be stored into locally, there will be a probability associated if these caches can store data if it fails to do so (indicating that the cache is full) it will move to the next until finally storing the data to the cloud
+* *4.5 Hours* Worked on creating the infrastructure for the main example. Plan is for tomorrow to finish off the application and placement strategy for the tasks. It should work by randomly assigning an application to a work station and then a submission should be sent from the workstation to a cache which "determines" if the data can be stored, if not then the request should be furthered to the cloud where the result should then be returned to the user.
 ### 10th October 2023
 * *5 Hours* Had to spend most of the day trying to get the application which I created today to work with the infrastructure from yesterday, had an issue with connecting the app to the infrastructure, after a closer inspection the issue came from the Orchestrator class being needed to place the app onto the infrastructure. Finally, got it working with some tweaks.
 ### 11th October 2023
-* *1 Hour* Had the weekly meeting with Lauritz and planned on what to do before the next meeting, this week I am going to be going over some more datasets and again refining the example so that this time the context is a little less exact and more justifiable, in addition to this I will also be working on starting the extended version of LEAF. 
+* *1 Hour* Had the weekly meeting with Lauritz and planned on what to do before the next meeting. This week I am going to be going over some more datasets and again refining the example so that this time the context is a little less exact and more justifiable, in addition to this I will also be working on starting the extended version of LEAF. 
 ### 14th October 2023
-* *2 Hours* Went through the provided paper on federated learning and started planning the rework to the example
+* *2 Hours* Went through the provided paper on federated learning and started planning the rework of the example
 ### 15th October 2023
 * *2.5 Hours* Started work on the latest example in which there are two main classes of user infrastructure nodes, based on the FedZero paper provided by Lauritz they are single and multi users (silos) where multi-users have a power consumption and processing power of multiple users, before working on more I also retrieved some data from solcast to check that I was able to and was able to download 5 years of solar data for Glasgow, this is not what I will use just more rather a test 
 
@@ -237,12 +237,12 @@ Holiday break
 
 ## Week 17
 ### 9th January
-* *2.5 Hours* Introduced a new example to demonstrate the pausing features of the framework, in addition to this fixed an issue with the pausing feature where the unpause method was being called repeatedly so have a check which saves the state, in addition included a new figure for the power meter.
+* *2.5 Hours* Introduced a new example to demonstrate the pausing features of the framework. In addition to this, fixed an issue with the pausing feature where the unpause() method was being called repeatedly so have a check which saves the state, in addition included a new figure for the power meter.
 * *2 Hours * On inspecting the figure it still appeared that power measurements were still recording subsequent readings as normal and not treating them as 0, the issue is due to the fact that the power meter for an application calls the task.measure() call, instead of trying again to work around it, I have introduced a new attribute for tasks keeping track of the application and then when a task is paused we can just traverse through entities and pause them.
 ### 11th January
 * *2 Hours* Also introduced the ability for links to be paused and subsequent data flows associated.
 ### 12th January
-* *2.5 Hours* Created a new small example called carbon aware orchestrator, the focus is the distribution of applications on optimal nodes, to do this a few changes needed to be made, in particular the orchestrator class now requires the power domain and the power meters are now able to measure readings while not placed on infrastructure to keep an accurate timeline. 
+* *2.5 Hours* Created a new small example called carbon aware orchestrator. The focus is the distribution of applications on optimal nodes. To do this, a few changes needed to be made, in particular the orchestrator class now requires the power domain and the power meters are now able to measure readings while not placed on infrastructure to keep an accurate timeline. 
 ### 14th January
 * *4 Hours* Continued work on the example by introducing the drone class along with generating a flight path and the ability to return back to the recharge station when under a threshold of power.
 
@@ -251,7 +251,7 @@ Holiday break
 * *2.5 Hours* Introduced a new example demonstrating the ability to create a custom static powered infrastructure distributor for power sources. The intention might be for this is to allow users to change the focus for potentially allowing unpowered entities the ability to run if power is limited in a round-robin mentality. Also, re-worked how entities in the dynamic approach are handled after identifying a bug where they are now initially paused. 
 * *1.5 Hours* Explored introducing a new approach to handling the node data when being captured akin to the power meter but the infrastructure requires the data to be easily accessible so was scrapped, also removed some unnecessary methods found
 ### 17th January
-* *1 Hour* Reworked the events system into its own class allowing for events to be created in a clearer manner, also introduced the ability to repeat events after a certain amount of time 
+* *1 Hour* Reworked the events system into its own class, allowing for events to be created in a clearer manner, also introduced the ability to repeat events after a certain amount of time 
 * *3 Hours* Continued work on introducing new ideas as discussed where the goal for the next meeting is to produce and brainstorm new example ideas, finished with the small ones and introduced the idea of heuristics where nodes can have preferred power sources based on properties of either i.e. uncapped power nodes must be assigned to the grid.
 ### 19th January
 * *2.5 Hours* Fixed mistake in event counters, moved the updating of power source to start of the discrete event and fixed an issue with the plotting of figures when a new day starts.
@@ -259,7 +259,7 @@ Holiday break
 ### 20th January
 * *1 Hour* Introduced the code for the second medium example along with the necessary documentation and explanation for it.
 ### 21st January
-* *1.5 Hours* Continued work with document along with finishing the diagrams
+* *1.5 Hours* Continued work with the document along with finishing the diagrams
 
 ## Week 19
 ### 23rd January
@@ -284,26 +284,26 @@ Holiday break
 ### 1st February
 * *4 Hours* Made big revisions to the values used in the examples by researching more appropriate values and implemented them, along with finishing example 5.
 ### 3rd February
-* *5 Hours* Worked on main example and identified that a slight rework to static power domains will be needed where power sources should be seen as static and not the domain itself
+* *5 Hours* Worked on the main example and identified that a slight rework for static power domains will be needed where power sources should be seen as static and not the domain itself
 
 ## Week 21
 ### 5th February 
 * *1.5 Hour* Identified the issue with the power domain and removed the static nature from that and moved it to the power sources, here power sources declare whether they are static or not, the same logic occurs.
 ### 6th February
 * *3.5 Hours* Encountered an issue with the main example where the power consumption for the drone traversing the plot was not being recorded, introduced a more streamline way for the user to integrate power consumption, also identified an issue where the power domain run method was being called twice clearing results also
-* *1 Hour* Applied the application to the drone, had an issue were I could not see a change in the power consumption after realising that the compute units for the source task where negligible and made no difference to the final value so changed them.
+* *1 Hour* Applied the application to the drone. Had an issue where I could not see a change in power consumption after realising that the compute units for the source task where negligible and made no difference to the final value so changed them.
 ### 7th February
 * *0.5 Hours* Meeting with Lauritz.
 ### 8th February
 * *4.5 Hours* Finished working on the logic to the final example, by: correcting issues with the number of sensors, adding the logic to the applications and the placement of them, restructuring of the file, introducing a carbon aware orchestrator.
 ### 10th February
-* *1 Hour* Initial outline and plan for the dissertation has been produced, in particular key ideas and aspects I intend to include, in addition to this I have also set up a custom compiler to allow for citations to be entered by the user.
+* *1 Hour* Initial outline and plan for the dissertation has been produced, in particular key ideas and aspects I intend to include. In addition to this, I have also set up a custom compiler to allow for citations to be entered by the user.
 ### 11th February
 * *2 Hours* Reworked how total available power is held for power sources in particular, moved the power_log dictionary to the parent class of power source and record all sources "remaining power" attribute, this dictionary is then used to plot available power instead of the data read from file to allow for a more accurate value.
 
 ## Week 22
 ### 13th February
-* *6 Hours* After looking through the code trying to ensure that the calculations were sound, I figured out the conversion between units was incorrect. As a result of this many hours were spent trying to resolve the issue without overhauling the power, the solution is to consider power consumed in Wh, as a result some chnages were made to carry out this.
+* *6 Hours* After looking through the code trying to ensure that the calculations were sound, I figured out the conversion between units was incorrect. As a result of this, many hours were spent trying to resolve the issue without overhauling the power, the solution is to consider power consumed in Wh, as a result some chnages were made to carry out this.
 ### 14th February
 * *4 Hours* Worked on the Design aspect of the dissertation.
 ### 16th February
@@ -311,11 +311,11 @@ Holiday break
 ### 17th February
 * *2 Hours* Carried on with the design and started on work for the power source section.
 ### 18th February
-* * 1 Hour* Finished the static section and moved onto the dynamic section of the power source.
+* *1 Hour* Finished the static section and moved onto the dynamic section of the power source.
 
 ## Week 23
 ### 19th February
-* *4 Hours* Worked on events section of the design and included a graphic of the event schedule.
+* *4 Hours* Worked on the events section of the design and included a graphic of the event schedule.
 ### 20th February
 * *6 Hours* Finished off the design section of the document and moved onto implementation.
 ### 22nd February
@@ -325,9 +325,9 @@ Holiday break
 
 ## Week 24
 ### 26th February
-*5 Hours* Continued work on the implementation side of the project and the focus on the power domains and started on the power sources.
+* *5 Hours* Continued work on the implementation side of the project and the focus on the power domains and started on the power sources.
 ### 27th February
-* 3 hours* Focused on the code aspect for the power domain for the writeup of the implementation.
+* *3 hours* Focused on the code aspect for the power domain for the writeup of the implementation.
 ### 28th February
 * *5 hours* Worked on the implementation again, this time focusing on the power sources and other key features.
 ### 2nd March
@@ -335,21 +335,32 @@ Holiday break
 
 ## Week 25
 ### 4th March
-*4 Hours* Worked on the deployment side of the project and getting the dependencies ready for the file.
+* *4 Hours* Worked on the deployment side of the project and getting the dependencies ready for the file.
 ### 5th Match
-* 3 Hours* Worked on converting the json files into cvs files in order to be extracted to another plotting service.
+* *3 Hours* Worked on converting the json files into cvs files in order to be extracted to another plotting service.
 ### 7th March
 * *5 Hours* Created the graphs and moved them over to the appendices.
 ### 9th March
-* *3 Hours* Finished the implementation.
+* *3 Hours* Finished the implementation in order to get ready to work on the introduction.
 ### 10th March 
 * *5 Hours* Worked on the introduction.
 
 ## Week 26
 
 ### 11th March
-* *8 Hours* Finshed, the introduction and reworked the sections given feedback by Lauritz. Also added to the background section.
+* *7 Hours* Finshed, the introduction and reworked the sections given feedback by Lauritz. Also added to the background section.
 ### 13th March
-* *6 Hours* Following the meeting with Lauritz, I have reworked the figures and rewrote the introduction 
+* *5 Hours* Following the meeting with Lauritz, I have reworked the figures and rewrote the introduction 
 ### 14th March
-* 8 Hours* Continued work on the background and related works.
+* *7 Hours* Continued work on the background and related works.
+### 15th March
+* *6 Hours* Finished the related works.
+### 16th March
+### 17th March
+### 18th March 
+### 19th March
+### 20th March
+### 21st March
+###
+###
+###

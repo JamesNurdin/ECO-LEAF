@@ -1,7 +1,7 @@
 import simpy
 
 from src.extendedLeaf.power import PowerDomain
-from src.extended_Examples.main_examples.example7.settings import *
+from src.extended_Examples.main_examples.example_7.settings import *
 
 
 class MobilityManager:

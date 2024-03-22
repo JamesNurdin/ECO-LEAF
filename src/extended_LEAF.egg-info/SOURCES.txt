@@ -1,3 +1,4 @@
+LICENSE
 setup.py
 extended_LEAF.egg-info/PKG-INFO
 extended_LEAF.egg-info/SOURCES.txt
