@@ -17,6 +17,8 @@ The Project source code is seperated into a few core directories.
 * Packages: listed in `requirements.txt` alongside pip for installation
 * Tested on Windows 10
 
+### GitLab
+* The gitlab link to the full repository used for the project can be found [HERE](https://stgit.dcs.gla.ac.uk/2570809n/project-carbon-emissions-estimation-in-edge-cloud-computing-simulations)
 ### Build steps
 Using a listed version of python, navigate to the `src` directory of the project.
 Once inside the directory, either by using a new or existing python environment, issue the command: `pip install extended_LEAF-1.0.tar.gz` to install the dependencies onto the python environment.
