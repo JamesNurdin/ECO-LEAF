@@ -1,10 +1,9 @@
 # Extended LEAF
 * James Andrew Nurdin
-* 2570809n
 * Supervisor: Lauritz Thamsen
 
 # What Is Extended LEAF?
-Extended LEAF is a simulation tool able to model network environments in order to estimate carbon footprints and power consumption from entities within the network.
+Extended LEAF is a simulation tool able to model fog/edge network environments in order to estimate carbon footprints and power consumption from entities within the network considering network infrastructure and running application processes.
 
 In addition to this Extended LEAF also sees to introduce visualisation features to allow the user to analyse results.
 
